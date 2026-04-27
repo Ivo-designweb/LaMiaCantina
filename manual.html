@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Manuale — La Mia Cantina</title>
+<style>
+  :root{
+    --bg:#F4EDE2;--surface:#FFFAF4;--border:#CDBFA8;
+    --gold:#8B5A1A;--text:#1E0E06;--text-dim:#6A4A2A;--text-faint:#B09070;
+    --red:#8B1A2E;
+  }
+  @media(prefers-color-scheme:dark){
+    :root{
+      --bg:#0A0608;--surface:#160B0E;--border:#3A1820;
+      --gold:#C4933A;--text:#EDE0D0;--text-dim:#8A6A5A;--text-faint:#4A2A32;
+    }
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--text);font-family:'Georgia',serif;line-height:1.7}
+  body{padding:22px 18px 50px;max-width:600px;margin:0 auto}
+
+  h1{font-family:'Palatino Linotype','Book Antiqua',Palatino,serif;font-size:26px;color:var(--gold);
+     border-bottom:2px solid var(--gold);padding-bottom:10px;margin-bottom:20px;letter-spacing:1px}
+  h2{font-family:'Palatino Linotype','Book Antiqua',Palatino,serif;font-size:19px;color:var(--gold);
+     margin-top:30px;margin-bottom:10px;padding-left:10px;
+     border-left:3px solid var(--gold)}
+  h3{font-family:Georgia,serif;font-size:15px;color:var(--text-dim);
+     margin-top:18px;margin-bottom:6px;text-transform:uppercase;letter-spacing:1.5px}
+
+  p{margin-bottom:12px;font-size:14px;color:var(--text)}
+  b,strong{color:var(--gold);font-weight:bold}
+  em,i{font-style:italic;color:var(--text-dim)}
+  code{font-family:'Courier New',monospace;background:var(--surface);border:1px solid var(--border);
+       border-radius:4px;padding:1px 6px;font-size:13px;color:var(--red)}
+
+  .tip{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--gold);
+       border-radius:8px;padding:12px 14px;margin:14px 0;font-size:13px}
+  .tip .tip-label{font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--gold);margin-bottom:4px}
+
+  .steps{list-style:none;counter-reset:steps;padding-left:0;margin-bottom:14px}
+  .steps li{counter-increment:steps;padding:7px 0 7px 36px;border-bottom:1px solid var(--border);
+             font-size:14px;position:relative}
+  .steps li:last-child{border-bottom:none}
+  .steps li::before{content:counter(steps);position:absolute;left:0;top:7px;
+                    width:24px;height:24px;border-radius:50%;
+                    background:var(--gold);color:#fff;font-size:12px;font-weight:bold;
+                    display:flex;align-items:center;justify-content:center;font-family:sans-serif}
+
+  .badge{display:inline-block;padding:2px 8px;border-radius:12px;font-size:11px;font-weight:bold;
+         margin:0 3px;vertical-align:middle}
+  .badge.green{background:rgba(42,106,58,.15);color:#2A6A3A;border:1px solid #2A6A3A}
+  .badge.red{background:rgba(139,26,46,.12);color:var(--red);border:1px solid var(--red)}
+  .badge.gold{background:rgba(139,90,26,.12);color:var(--gold);border:1px solid var(--gold)}
+
+  .img-placeholder{width:100%;height:120px;background:var(--surface);border:1px dashed var(--border);
+                   border-radius:10px;display:flex;align-items:center;justify-content:center;
+                   font-size:13px;color:var(--text-faint);margin:14px 0}
+
+  table{width:100%;border-collapse:collapse;font-size:13px;margin:14px 0}
+  th{background:var(--surface);padding:8px 10px;text-align:left;color:var(--gold);
+     border-bottom:2px solid var(--border);font-family:sans-serif;font-size:11px;
+     text-transform:uppercase;letter-spacing:1px}
+  td{padding:8px 10px;border-bottom:1px solid var(--border);color:var(--text)}
+  tr:last-child td{border-bottom:none}
+
+  .section-divider{border:none;border-top:1px solid var(--border);margin:28px 0}
+  .version-note{text-align:right;font-size:11px;color:var(--text-faint);margin-top:30px;font-style:italic}
+</style>
+</head>
+<body>
+
+<h1>🍷 La Mia Cantina — Manuale Operativo <span style="font-size:12px;font-weight:normal;color:var(--text-faint);letter-spacing:1px;vertical-align:middle;margin-left:8px">v4.1</span></h1>
+
+<p><em>Questo manuale descrive tutte le funzionalità dell'app. Completarlo con le proprie note operative.</em></p>
+
+<div class="tip">
+  <div class="tip-label">💡 Nota</div>
+  <strong>La Mia Cantina</strong> è una Progressive Web App (PWA) che funziona interamente nel browser, senza installazione. Tutti i dati sono salvati localmente nel dispositivo tramite <code>IndexedDB</code>.
+</div>
+
+<hr class="section-divider">
+
+<h2>1. Gestione Archivio Vini</h2>
+
+<h3>Aggiungere un vino</h3>
+<ol class="steps">
+  <li>Premere il pulsante <strong>+</strong> in basso a destra nella schermata home</li>
+  <li>Compilare almeno i campi obbligatori: <strong>Cantina</strong> e <strong>Nome del Vino</strong></li>
+  <li>Opzionale: aggiungere foto dalla fotocamera o dalla galleria</li>
+  <li>Premere <strong>Aggiungi all'Archivio</strong></li>
+</ol>
+
+<h3>Campi disponibili</h3>
+<table>
+  <tr><th>Campo</th><th>Descrizione</th></tr>
+  <tr><td><strong>Cantina</strong> *</td><td>Nome del produttore — obbligatorio</td></tr>
+  <tr><td><strong>Nome Vino</strong> *</td><td>Nome commerciale del vino — obbligatorio</td></tr>
+  <tr><td>Annata</td><td>Anno di produzione (4 cifre)</td></tr>
+  <tr><td>Tipologia</td><td>Rosso, Bianco, Rosé, Spumante, ecc.</td></tr>
+  <tr><td>Vitigno</td><td>Uvaggio o varietà principale</td></tr>
+  <tr><td>Gradi Alcolici</td><td>Percentuale vol. (es. 13.5)</td></tr>
+  <tr><td>Formato</td><td>Bottiglia, Magnum, Altro</td></tr>
+  <tr><td>N° Bottiglie</td><td>Quantità disponibile in cantina</td></tr>
+  <tr><td>Prezzo</td><td>Prezzo di acquisto in €</td></tr>
+  <tr><td>Punteggio</td><td>Valutazione personale da 0 a 5 stelle (con decimali)</td></tr>
+  <tr><td>Posizione / Scaffale</td><td>Collocazione fisica in cantina</td></tr>
+  <tr><td>Data Limite</td><td>Scadenza consigliata per il consumo</td></tr>
+  <tr><td>Acquistato Presso</td><td>Nome del negozio o fornitore</td></tr>
+  <tr><td>Note</td><td>Degustazione, abbinamenti, annotazioni personali</td></tr>
+</table>
+
+<div class="tip">
+  <div class="tip-label">⭐ Punteggio Stelle</div>
+  Le stelle cambiano colore in base al voto: <span class="badge gold">★★★ Giallo</span> fino a 3,0 — <span class="badge" style="background:rgba(212,112,10,.12);color:#D4700A;border:1px solid #D4700A">★★★★ Arancione</span> da 3,1 a 4,5 — <span class="badge green">★★★★★ Verde</span> sopra 4,5.
+</div>
+
+<hr class="section-divider">
+
+<h2>2. Movimenti di Cantina</h2>
+
+<p>Ogni variazione di quantità viene registrata automaticamente nel <strong>registro movimenti</strong>. I movimenti si consultano dal pulsante <em>Movimenti</em> nella barra in basso.</p>
+
+<h3>Tipi di movimento</h3>
+<p>
+  <span class="badge green">⬆ Carico</span> Acquisto o aggiunta di bottiglie — registra negozio, prezzo e note.<br>
+  <span class="badge red">⬇ Scarico</span> Consumo o rimozione di bottiglie — registra solo la nota.
+</p>
+
+<h3>Scarico rapido</h3>
+<p>Direttamente nella lista home ogni card con bottiglie disponibili mostra il pulsante <strong>— Scarica</strong>. Premi per togliere 1 bottiglia con una nota opzionale.</p>
+
+<hr class="section-divider">
+
+<h2>3. Vista Posizione</h2>
+
+<p>La <strong>Vista Posizione</strong> (pulsante nella barra in basso) mostra i vini raggruppati per <em>Posizione → Scaffale</em>, con totali per ogni sezione.</p>
+
+<p>Per spostare un vino in un'altra posizione: <strong>trascina la riga</strong> sullo scaffale di destinazione. Su telefono usa il touch drag, su desktop usa il mouse.</p>
+
+<hr class="section-divider">
+
+<h2>4. Ricerca</h2>
+
+<p>La barra di ricerca si attiva automaticamente quando ci sono più di 2 vini. Cerca su tutti i campi: nome, cantina, annata, tipologia, posizione, scaffale, note.</p>
+
+<p>Durante la ricerca attiva ogni card mostra anche la <strong>posizione e lo scaffale</strong>. La Vista Posizione mostra solo i vini filtrati con un banner dorato che indica il filtro attivo.</p>
+
+<hr class="section-divider">
+
+<h2>5. OCR — Lettura Etichetta</h2>
+
+<p>Dopo aver caricato una foto bottiglia nel form, appare il pulsante <strong>Leggi dati dalla foto (OCR)</strong>.</p>
+<ol class="steps">
+  <li>Carica la foto dell'etichetta (fotocamera o galleria)</li>
+  <li>Premi <em>Leggi dati dalla foto</em></li>
+  <li>L'app invia l'immagine al servizio <strong>OCR.space</strong></li>
+  <li>I campi riconosciuti vengono proposti — premi <strong>✓</strong> per applicarli singolarmente o <strong>✓ Applica tutti</strong></li>
+</ol>
+
+<div class="tip">
+  <div class="tip-label">🔑 Chiave API</div>
+  La chiave demo funziona subito (500 richieste/giorno). Per uso intensivo registra una chiave gratuita su <code>ocr.space</code> e inseriscila in <strong>Servizi → Parametri → OCR</strong>.
+</div>
+
+<hr class="section-divider">
+
+<h2>6. Backup e Ripristino</h2>
+
+<p>Tutti i comandi si trovano in <strong>Servizi (⚙) → Backup / Restore</strong>.</p>
+
+<table>
+  <tr><th>Funzione</th><th>Cosa produce / legge</th></tr>
+  <tr><td>Esporta in cartella</td><td><code>cantina_vini_DATA.csv</code> + <code>cantina_movimenti_DATA.csv</code> + <code>{id}.jpg</code> per ogni foto</td></tr>
+  <tr><td>Ripristina da cartella</td><td>Legge i file sopra — scelta granulare: vini, movimenti, foto</td></tr>
+  <tr><td>Esporta JSON</td><td>Backup completo in un unico file (include foto in base64)</td></tr>
+  <tr><td>Importa JSON</td><td>Ripristino completo da file JSON</td></tr>
+  <tr><td>Esporta CSV + foto</td><td>Foglio Excel con foto incorporate in base64</td></tr>
+</table>
+
+<div class="tip">
+  <div class="tip-label">📁 Cartella Backup</div>
+  Imposta la cartella di destinazione in <strong>Parametri → Cartella backup</strong>. La scelta viene ricordata per i backup successivi. Default: <code>Download</code>.
+</div>
+
+<hr class="section-divider">
+
+<div class="img-placeholder">[ Spazio riservato per screenshot o immagine illustrativa ]</div>
+
+<hr class="section-divider">
+
+<p class="version-note">Manuale La Mia Cantina · Versione 4.3 · Sviluppo Ivo e AI</p>
+
+</body>
+</html>

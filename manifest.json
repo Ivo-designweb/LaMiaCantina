@@ -1,0 +1,27 @@
+{
+  "name": "La Mia Cantina",
+  "short_name": "La Cantina",
+  "description": "Archivio personale dei vini acquistati",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0A0608",
+  "theme_color": "#0A0608",
+  "lang": "it",
+  "icons": [
+    {
+      "src": "./icon192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "./icon512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["lifestyle", "utilities"],
+  "screenshots": []
+}

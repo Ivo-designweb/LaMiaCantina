@@ -1,0 +1,2621 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#F4EDE2" id="theme-meta">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="La Mia Cantina">
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="./icon192.png">
+<title>La Mia Cantina</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Lora:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --bg:#F4EDE2;--surface:#FDFAF5;--surface2:#EDE4D6;--border:#CDBFA8;
+  --gold:#8B5A1A;--gold-dim:#B8824A;--gold-bg:rgba(139,90,26,.09);
+  --text:#1E0E06;--text-dim:#6A4A2A;--text-faint:#B09070;
+  --red:#8B1A2E;--red2:#A82838;--red-bg:rgba(139,26,46,.09);
+  --green:#2A6A3A;--green-bg:rgba(42,106,58,.12);
+  --header-bg:linear-gradient(180deg,#EDE0CC,#F4EDE2);
+  --card-bg:linear-gradient(135deg,#FFFAF4,#F5EDE0);
+  --shadow:0 2px 10px rgba(100,60,20,.1);--shadow-fab:0 4px 18px rgba(139,26,46,.3);
+  --cal-filter:none;
+}
+[data-theme="dark"]{
+  --bg:#0A0608;--surface:#160B0E;--surface2:#1E0F13;--border:#3A1820;
+  --gold:#C4933A;--gold-dim:#7A5520;--gold-bg:rgba(196,147,58,.09);
+  --text:#EDE0D0;--text-dim:#8A6A5A;--text-faint:#4A2A32;
+  --red:#8B1A2E;--red2:#A82838;--red-bg:rgba(139,26,46,.12);
+  --green:#2A6A3A;--green-bg:rgba(42,106,58,.15);
+  --header-bg:linear-gradient(180deg,#1C0A10,#0A0608);
+  --card-bg:linear-gradient(135deg,#1E0F13,#160B0E);
+  --shadow:0 2px 12px rgba(0,0,0,.5);--shadow-fab:0 4px 20px rgba(139,26,46,.5);
+  --cal-filter:invert(.5);
+}
+html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Lora',Georgia,serif;overflow:hidden;transition:background .3s,color .3s}
+body{display:flex;flex-direction:column;max-width:500px;margin:0 auto;height:100dvh}
+.view{display:none;flex-direction:column;flex:1;overflow:hidden}
+.view.active{display:flex}
+.header{background:var(--header-bg);border-bottom:1px solid var(--border);padding:13px 16px 0;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;flex-shrink:0}
+.header-title{font-family:'Playfair Display',serif;font-size:19px;color:var(--gold);letter-spacing:2px;text-transform:uppercase}
+.header-sub{font-size:11px;color:var(--text-dim);letter-spacing:.5px;margin-top:2px}
+.btn-back{background:none;border:none;cursor:pointer;padding:6px;display:flex;align-items:center;gap:5px;font-family:inherit;font-size:13px;color:var(--text-dim)}
+.btn-icon{background:none;border:none;cursor:pointer;padding:6px;color:var(--text-dim);display:flex;align-items:center}
+.list-body{flex:1;overflow-y:auto;padding:12px 13px max(100px,calc(80px + env(safe-area-inset-bottom)))}
+.search-bar{display:flex;align-items:center;gap:9px;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:9px 13px;margin-bottom:11px}
+.search-bar input{flex:1;background:none;border:none;outline:none;color:var(--text);font-family:inherit;font-size:15px}
+.search-bar input::placeholder{color:var(--text-faint)}
+.btn-clear{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:17px;line-height:1}
+.stats-strip{display:flex;gap:7px;margin-bottom:11px;flex-wrap:wrap}
+.stat-chip{background:var(--surface);border:1px solid var(--border);border-radius:20px;padding:5px 11px;font-size:11px;color:var(--text-dim)}
+.stat-chip b{color:var(--gold)}
+.card{background:var(--card-bg);border:1px solid var(--border);border-radius:13px;overflow:hidden;display:flex;cursor:pointer;margin-bottom:10px;box-shadow:var(--shadow);transition:transform .15s;min-height:88px;position:relative}
+.card:active{transform:scale(.98)}
+.card-img{width:78px;min-width:78px;object-fit:cover;display:block;background:var(--surface)}
+.card-img-ph{width:78px;min-width:78px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:27px;color:var(--text-faint);flex-shrink:0}
+.card-body{flex:1;padding:10px 11px 28px;display:flex;flex-direction:column;justify-content:center;gap:4px;overflow:hidden}
+.card-cantina{font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:1.8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.card-name{font-family:'Playfair Display',serif;font-size:15.5px;color:var(--text);line-height:1.25;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card-meta{display:flex;gap:7px;font-size:12px;color:var(--text-dim);flex-wrap:wrap}
+.card-meta .price{color:var(--gold)}
+.card-badge{font-size:11px;font-weight:700;border-radius:7px;padding:2px 7px}
+.card-badge.qty{background:var(--gold-bg);color:var(--gold)}
+.card-badge.qty.zero{background:var(--red-bg);color:var(--red)}
+.card-badge.fmt{background:var(--surface2);color:var(--text-dim);border:1px solid var(--border)}
+.card-right-panel{position:absolute;bottom:7px;right:9px;display:flex;flex-direction:column;align-items:flex-end;gap:4px;z-index:2}
+.card-loc-label{font-size:12px;font-weight:700;color:var(--text-dim);text-align:right;max-width:115px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;line-height:1.2}
+.card-scarica{background:var(--red);color:#fff;border:none;border-radius:18px;padding:4px 11px 4px 9px;font-size:12px;cursor:pointer;display:flex;align-items:center;gap:3px;font-family:inherit}
+.card-scarica:active{opacity:.75}
+.card-pos{font-size:10px;color:var(--text-faint);display:flex;align-items:center;gap:4px;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.card-pos svg{flex-shrink:0}
+.toolbar{display:flex;gap:7px;padding:0 13px max(13px,env(safe-area-inset-bottom));flex-shrink:0}
+.btn-tool{flex:1;padding:9px 5px;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text-dim);font-family:inherit;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;transition:background .15s}
+.btn-tool:active,.btn-tool.active{background:var(--surface2)}
+.btn-tool.active{border-color:var(--gold);color:var(--gold)}
+.fab{position:fixed;bottom:max(22px,calc(16px + env(safe-area-inset-bottom)));right:calc(50% - 228px);width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,var(--red),var(--red2));border:none;color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-fab);cursor:pointer;z-index:40;transition:transform .15s}
+.fab:active{transform:scale(.92)}
+@media(max-width:500px){.fab{right:16px}}
+.form-body{flex:1;overflow-y:auto;padding:16px 16px max(100px,calc(80px + env(safe-area-inset-bottom)))}
+.field-label{display:block;font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px}
+.field-input{width:100%;background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:11px 13px;color:var(--text);font-size:15px;font-family:inherit;outline:none;transition:border-color .2s;-webkit-appearance:none}
+.field-input:focus{border-color:var(--gold-dim)}
+.field-input::placeholder{color:var(--text-faint)}
+.field-input[type=date]::-webkit-calendar-picker-indicator{filter:var(--cal-filter);cursor:pointer}
+textarea.field-input{resize:vertical;min-height:74px}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:11px}
+.field-group{margin-bottom:14px}
+.photo-drop{background:var(--surface);border:2px dashed var(--border);border-radius:13px;overflow:hidden;cursor:pointer;position:relative;min-height:145px;display:flex;align-items:center;justify-content:center}
+.photo-drop img{width:100%;max-height:200px;object-fit:cover;display:block}
+.photo-placeholder{text-align:center;padding:20px;color:var(--text-faint);pointer-events:none}
+.photo-placeholder .icon{font-size:32px;margin-bottom:8px}
+.photo-placeholder p{font-size:13px}
+.photo-remove{position:absolute;top:8px;right:8px;background:rgba(0,0,0,.6);border:1px solid var(--border);color:#fff;border-radius:18px;padding:3px 9px;font-size:12px;cursor:pointer;z-index:2}
+.toggle-row{display:flex;gap:7px}
+.toggle-btn{flex:1;padding:10px 6px;border-radius:10px;border:1px solid var(--border);background:var(--surface);color:var(--text-dim);font-family:inherit;font-size:13px;cursor:pointer;text-align:center;transition:all .15s}
+.toggle-btn.active{border-color:var(--gold);background:var(--gold-bg);color:var(--gold);font-weight:600}
+.toggle-btn.active.red{border-color:var(--red);background:var(--red-bg);color:var(--red)}
+.toggle-btn.active.green{border-color:var(--green);background:var(--green-bg);color:var(--green)}
+.btn-primary{width:100%;padding:14px;background:linear-gradient(135deg,var(--red),var(--red2));border:none;border-radius:12px;color:#FDF8F2;font-size:15px;font-family:'Playfair Display',serif;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:5px;transition:opacity .2s}
+.btn-primary:active{opacity:.85}
+.detail-body{flex:1;overflow-y:auto;padding:0 0 max(100px,calc(80px + env(safe-area-inset-bottom)))}
+.detail-hero{width:100%;height:220px;object-fit:cover;display:block}
+.detail-hero-ph{height:150px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:64px}
+.detail-content{padding:16px}
+.detail-cantina{font-size:11px;color:var(--gold);text-transform:uppercase;letter-spacing:2.5px;margin-bottom:3px}
+.detail-name{font-family:'Playfair Display',serif;font-size:24px;color:var(--text);line-height:1.15;margin-bottom:10px}
+.qty-bar{display:flex;align-items:center;gap:10px;padding:11px 13px;background:var(--surface);border:1px solid var(--border);border-radius:12px;margin-bottom:12px}
+.qty-label{flex:1;font-size:13px;color:var(--text-dim)}
+.qty-val{font-size:22px;font-weight:700;color:var(--gold);min-width:32px;text-align:center}
+.qty-val.zero{color:var(--red)}
+.btn-qty{width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.btn-qty.minus{border-color:var(--red);color:var(--red)}
+.btn-qty.plus{border-color:var(--gold);color:var(--gold)}
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}
+.detail-cell{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:11px 13px}
+.detail-cell.full{grid-column:span 2}
+.detail-cell-label{font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px}
+.detail-cell-value{font-size:15px;color:var(--text);font-weight:600}
+.detail-notes{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:13px;margin-top:9px}
+.detail-notes p{font-size:14px;color:var(--text-dim);line-height:1.6;font-style:italic}
+.btn-edit{width:100%;padding:12px;background:transparent;border:1px solid var(--gold-dim);border-radius:11px;color:var(--gold);font-size:14px;font-family:inherit;cursor:pointer;margin-top:11px;display:flex;align-items:center;justify-content:center;gap:7px}
+.btn-danger{width:100%;padding:12px;background:transparent;border:1px solid #C06A72;border-radius:11px;color:#C06A72;font-size:14px;font-family:inherit;cursor:pointer;margin-top:9px;display:flex;align-items:center;justify-content:center;gap:7px}
+.pos-body{flex:1;overflow-y:auto;padding:13px 13px max(80px,calc(60px + env(safe-area-inset-bottom)))}
+.pos-section{margin-bottom:20px}
+.pos-location-header{display:flex;align-items:center;gap:9px;margin-bottom:9px}
+.pos-location-title{font-family:'Playfair Display',serif;font-size:16px;color:var(--gold)}
+.pos-location-badge{background:var(--red);color:#fff;border-radius:20px;padding:2px 9px;font-size:11px}
+.pos-shelf{background:var(--surface);border:1px solid var(--border);border-radius:11px;overflow:hidden;margin-bottom:9px}
+.pos-shelf-header{background:var(--surface2);padding:7px 13px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+.pos-shelf-name{font-size:11px;color:var(--text-dim);text-transform:uppercase;letter-spacing:1.8px}
+.pos-shelf-count{font-size:11px;color:var(--gold);font-weight:600}
+.pos-row{display:flex;align-items:center;padding:8px 12px;border-bottom:1px solid var(--border);gap:9px;cursor:pointer;transition:background .12s}
+.pos-row:last-child{border-bottom:none}
+.pos-row:active{background:var(--surface2)}
+.pos-row-thumb{width:34px;height:34px;border-radius:6px;object-fit:cover;flex-shrink:0;border:1px solid var(--border)}
+.pos-row-thumb-ph{width:34px;height:34px;border-radius:6px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.pos-row-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.pos-row-name{flex:1;font-size:13px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pos-row-meta{display:flex;gap:6px;align-items:center;flex-shrink:0}
+.pos-row-cantina{font-size:11px;color:var(--text-dim)}
+.pos-row-tag{font-size:10px;color:var(--gold);background:var(--gold-bg);border-radius:7px;padding:1px 5px}
+.pos-row-qty{font-size:11px;font-weight:700;color:var(--text);background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:1px 6px}
+.pos-unassigned{border:1px dashed var(--border);border-radius:11px;padding:11px 13px;margin-bottom:9px}
+.pos-unassigned-label{font-size:11px;color:var(--text-faint);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:7px}
+
+/* ── ZONE VIEW ── */
+.zone-body{flex:1;overflow-y:auto;padding:13px 13px max(80px,calc(60px + env(safe-area-inset-bottom)))}
+.zone-section{margin-bottom:18px;border-radius:12px;overflow:hidden;border:1px solid var(--border);transition:outline .15s,background .15s}
+.zone-header{display:flex;align-items:center;gap:9px;padding:9px 13px;background:var(--surface2);border-bottom:1px solid var(--border)}
+.zone-title{font-family:'Playfair Display',serif;font-size:15px;color:var(--gold);flex:1}
+.zone-badge{background:var(--red);color:#fff;border-radius:20px;padding:2px 9px;font-size:11px;white-space:nowrap}
+.zone-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;padding:10px 10px 6px;cursor:grab}
+.zone-scroll::-webkit-scrollbar{height:3px}
+.zone-scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+.zone-cards{display:flex;gap:9px;width:max-content;min-width:100%}
+.zone-card{width:152px;flex-shrink:0;background:var(--card-bg);border:1px solid var(--border);border-radius:10px;overflow:hidden;cursor:pointer;transition:transform .12s;position:relative}
+.zone-card:active{transform:scale(.96)}
+.zone-card-img{width:100%;height:82px;object-fit:cover;display:block}
+.zone-card-img-ph{width:100%;height:82px;background:var(--surface2);display:flex;align-items:center;justify-content:center;font-size:28px;color:var(--text-faint)}
+.zone-card-body{padding:6px 8px 8px}
+.zone-card-cantina{font-size:10px;color:var(--gold);text-transform:uppercase;letter-spacing:1.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.zone-card-name{font-family:'Playfair Display',serif;font-size:12.5px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin:2px 0 3px}
+.zone-card-meta{font-size:10px;color:var(--text-dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.zone-card-pos{font-size:10px;color:var(--text-faint);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:3px}
+.zone-card-qty{margin-top:4px}
+
+/* ── ZONE TABLE ── righe verticali, dati in orizzontale con scroll */
+.zone-table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;cursor:grab;background:var(--surface)}
+.zone-table-scroll::-webkit-scrollbar{height:3px}
+.zone-table-scroll::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+.zone-trow{display:flex;align-items:center;min-width:max-content;border-bottom:1px solid var(--border);cursor:pointer;transition:background .12s}
+.zone-trow:last-child{border-bottom:none}
+.zone-trow:active{background:var(--surface2)}
+.zone-trow-img{width:38px;height:38px;border-radius:6px;object-fit:cover;flex-shrink:0;border:1px solid var(--border);margin:5px 0 5px 8px}
+.zone-trow-img-ph{width:38px;height:38px;border-radius:6px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;margin:5px 0 5px 8px}
+.zone-tcell{padding:5px 10px;white-space:nowrap;border-right:1px solid var(--border)}
+.zone-tcell:last-child{border-right:none;padding-right:14px}
+.zone-tc-cantina{min-width:105px;font-size:10px;color:var(--gold);text-transform:uppercase;letter-spacing:1.4px}
+.zone-tc-nome{min-width:155px;font-family:'Playfair Display',serif;font-size:13px;color:var(--text)}
+.zone-tc-anno{width:52px;font-size:11px;color:var(--text-dim);text-align:center}
+.zone-tc-tipo{min-width:68px;font-size:11px;color:var(--text-dim)}
+.zone-tc-pos{min-width:115px;font-size:11px;color:var(--text-faint)}
+.zone-tc-qty{min-width:54px;text-align:center}
+.zone-tc-stars{min-width:56px;text-align:center;font-size:10px}
+.zone-unassigned>.zone-header>.zone-title{color:var(--text-dim)}
+.zone-dnd-hint{display:none;padding:7px 12px;font-size:12px;color:var(--gold);text-align:center;border-top:1px dashed var(--border)}
+.zone-section.zone-dnd-over{outline:2px dashed var(--gold);outline-offset:-3px;background:var(--gold-bg)}
+.zone-section.zone-dnd-over .zone-dnd-hint{display:block}
+
+
+/* ── DRAG & DROP ── */
+.pos-row[draggable="true"]{cursor:grab}
+.pos-row[draggable="true"]:active{cursor:grabbing}
+.pos-row.dnd-dragging{opacity:.35;background:var(--surface2)}
+.pos-shelf.dnd-over,.pos-unassigned.dnd-over{outline:2px dashed var(--gold);outline-offset:-3px;background:var(--gold-bg)}
+.dnd-drop-hint{display:none;padding:7px 12px;font-size:12px;color:var(--gold);text-align:center;border-top:1px dashed var(--border)}
+.pos-shelf.dnd-over .dnd-drop-hint{display:block}
+.moves-body{flex:1;overflow-y:auto;padding:12px 13px max(80px,calc(60px + env(safe-area-inset-bottom)))}
+.move-filter{display:flex;gap:6px;margin-bottom:11px}
+.move-card{background:var(--card-bg);border:1px solid var(--border);border-radius:12px;padding:11px 13px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;gap:11px;box-shadow:var(--shadow)}
+.move-card:active{opacity:.85}
+.move-icon{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
+.move-icon.carico{background:var(--green-bg)}
+.move-icon.scarico{background:var(--red-bg)}
+.move-info{flex:1;overflow:hidden}
+.move-wine{font-size:13px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:'Playfair Display',serif}
+.move-detail{font-size:11px;color:var(--text-dim);margin-top:2px}
+.move-qty{font-size:16px;font-weight:700;flex-shrink:0}
+.move-qty.carico{color:var(--green)}
+.move-qty.scarico{color:var(--red)}
+.drawer-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:150}
+.drawer-overlay.open{display:block}
+.drawer{position:fixed;top:0;right:-310px;width:290px;height:100dvh;background:var(--surface);border-left:1px solid var(--border);z-index:160;transition:right .26s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;overflow:hidden}
+.drawer.open{right:0}
+.drawer-header{padding:18px 16px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;background:var(--header-bg)}
+.drawer-title{font-family:'Playfair Display',serif;font-size:17px;color:var(--gold);letter-spacing:1px}
+.drawer-close{background:none;border:none;color:var(--text-dim);font-size:21px;cursor:pointer}
+.drawer-body{flex:1;overflow-y:auto;padding:14px;display:flex;flex-direction:column;gap:7px}
+.drawer-section-label{font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:2px;padding:9px 0 3px;border-top:1px solid var(--border);margin-top:3px}
+.drawer-section-label:first-child{border-top:none;margin-top:0;padding-top:0}
+.drawer-btn{width:100%;padding:11px 13px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;color:var(--text-dim);font-family:inherit;font-size:13px;cursor:pointer;display:flex;align-items:center;gap:11px;text-align:left;transition:opacity .15s}
+.drawer-btn:active{opacity:.75}
+.drawer-btn.gold{border-color:var(--gold-dim);color:var(--gold)}
+.drawer-btn .lbl{flex:1}
+.drawer-btn .sub{font-size:10px;color:var(--text-faint);margin-top:2px;display:block}
+.drawer-version{padding:11px 14px;border-top:1px solid var(--border);font-size:11px;color:var(--text-faint);display:flex;justify-content:space-between;flex-shrink:0}
+.theme-row{display:flex;gap:6px}
+.theme-btn{flex:1;padding:8px 4px;border-radius:9px;border:2px solid var(--border);background:var(--surface);color:var(--text-dim);font-family:inherit;font-size:12px;cursor:pointer;text-align:center}
+.theme-btn.active{border-color:var(--gold);color:var(--gold)}
+.toast{position:fixed;bottom:86px;left:50%;transform:translateX(-50%) translateY(10px);background:#1C3A1C;border:1px solid #3A6A3A;color:#8ACA8A;padding:9px 20px;border-radius:22px;font-size:13px;opacity:0;transition:opacity .3s,transform .3s;pointer-events:none;z-index:100;white-space:nowrap;max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.err{background:#3A1C1C;border-color:#6A3A3A;color:#CA8A8A}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;align-items:flex-end;justify-content:center}
+.modal-overlay.open{display:flex}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:18px 18px 0 0;padding:24px 18px 36px;width:100%;max-width:500px}
+.modal h3{font-family:'Playfair Display',serif;font-size:19px;color:var(--gold);margin-bottom:7px}
+.modal p{font-size:13px;color:var(--text-dim);line-height:1.6;margin-bottom:16px}
+.modal-btns{display:flex;flex-direction:column;gap:8px}
+.btn-modal{padding:12px;border-radius:10px;font-family:inherit;font-size:15px;cursor:pointer;text-align:center;border:none}
+.btn-modal.primary{background:linear-gradient(135deg,var(--red),var(--red2));color:#fff}
+.btn-modal.secondary{background:var(--surface2);border:1px solid var(--border);color:var(--text-dim)}
+.update-banner{display:none;position:fixed;top:0;left:0;right:0;max-width:500px;margin:0 auto;background:#1C3A1C;border-bottom:1px solid #3A6A3A;color:#8ACA8A;padding:9px 14px;z-index:300;font-size:13px;gap:9px;align-items:center}
+.update-banner.show{display:flex}
+.update-banner span{flex:1}
+.btn-update{background:#3A7A3A;border:1px solid #5A9A5A;color:#C8EAC8;border-radius:7px;padding:4px 11px;font-size:12px;cursor:pointer;font-family:inherit}
+.empty{text-align:center;padding:52px 26px;color:var(--text-faint)}
+.empty .icon{font-size:50px;margin-bottom:13px}
+.empty h3{font-size:17px;color:var(--text-dim);margin-bottom:7px;font-weight:normal}
+.empty p{font-size:13px}
+::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+
+/* ── STAR RATING ── */
+.star-input{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:10px 13px}
+.star-input input[type=range]{flex:1;accent-color:var(--gold);height:4px;cursor:pointer}
+.star-display{display:flex;align-items:center;gap:2px;flex-shrink:0}
+.star-display .s{font-size:16px;line-height:1}
+.star-val{font-size:13px;color:var(--gold);font-weight:700;min-width:28px;text-align:right}
+/* mini stars in card */
+.card-stars{font-size:10px;letter-spacing:-1px;color:var(--gold);margin-top:1px}
+/* detail stars */
+.detail-stars{font-size:20px;letter-spacing:1px;color:var(--gold)}
+.detail-stars-val{font-size:12px;color:var(--text-dim);margin-left:4px}
+.zoom-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:500;align-items:center;justify-content:center;touch-action:none}
+.zoom-overlay.open{display:flex}
+.zoom-overlay-close{position:absolute;top:16px;right:16px;background:rgba(255,255,255,.15);border:none;color:#fff;width:38px;height:38px;border-radius:50%;font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:2}
+.zoom-overlay-hint{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);color:rgba(255,255,255,.45);font-size:12px;pointer-events:none;letter-spacing:.5px}
+#zoom-img-wrap{overflow:hidden;width:100%;height:100%;display:flex;align-items:center;justify-content:center;cursor:grab;user-select:none}
+#zoom-img-wrap:active{cursor:grabbing}
+#zoom-img{max-width:100%;max-height:100%;transform-origin:center center;transition:transform .05s linear;will-change:transform;display:block}
+
+/* ── VIVINO BUTTON ── */
+.btn-vivino{width:100%;padding:12px;background:transparent;border:1px solid #9B2335;border-radius:11px;color:#9B2335;font-size:14px;font-family:inherit;cursor:pointer;margin-top:9px;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .15s}
+.btn-vivino:active{background:rgba(155,35,53,.08)}
+[data-theme="dark"] .btn-vivino{border-color:#C24055;color:#C24055}
+
+/* ── OCR BUTTON ── */
+.btn-ocr{width:100%;padding:11px;background:var(--gold-bg);border:1px solid var(--gold-dim);border-radius:11px;color:var(--gold);font-size:13px;font-family:inherit;cursor:pointer;margin-top:7px;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .2s}
+.btn-ocr:active{opacity:.75}
+.btn-ocr:disabled{opacity:.45;cursor:not-allowed}
+
+/* ── PHOTO BUTTONS ROW ── */
+.photo-btn-row{display:flex;gap:8px;margin-top:8px}
+.photo-btn-row button,.photo-btn-row label{flex:1;padding:9px 6px;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text-dim);font-family:inherit;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;transition:background .15s;text-align:center}
+.photo-btn-row button:active,.photo-btn-row label:active{background:var(--surface2)}
+
+/* ── OCR SPINNER ── */
+.ocr-status{display:none;text-align:center;padding:10px;font-size:12px;color:var(--text-dim)}
+.ocr-status.show{display:block}
+.ocr-result{display:none;background:var(--green-bg);border:1px solid var(--green);border-radius:11px;padding:12px;margin-top:8px;font-size:13px;color:var(--text)}
+.ocr-result.show{display:block}
+
+/* ── HEADER LOGO ── */
+.header-logo{width:70px;height:70px;border-radius:10px;object-fit:cover;opacity:1;flex-shrink:0;transition:opacity .2s;position:relative;z-index:1}
+.header-logo:hover{opacity:.8}
+
+/* ── MANUAL OVERLAY ── */
+.manual-overlay{display:none;position:fixed;inset:0;background:var(--bg);z-index:300;flex-direction:column}
+.manual-overlay.open{display:flex}
+.manual-header{background:var(--header-bg);border-bottom:1px solid var(--border);padding:13px 16px 11px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.manual-body{flex:1;overflow-y:auto;padding:0}
+.manual-body iframe{width:100%;height:100%;border:none;background:var(--bg)}
+</style>
+</head>
+<body data-theme="light">
+<div id="update-banner" class="update-banner">
+  <span>Nuova versione disponibile</span>
+  <button class="btn-update" onclick="applyUpdate()">Aggiorna</button>
+  <button style="background:none;border:none;color:#5A8A5A;cursor:pointer;font-size:17px" onclick="this.parentElement.classList.remove('show')">x</button>
+</div>
+
+<!-- LIST -->
+<div id="view-list" class="view active">
+  <div class="header">
+    <div>
+      <div class="header-title">La Mia Cantina</div>
+      <div id="header-sub" class="header-sub">0 vini</div>
+    </div>
+    <div style="display:flex;align-items:center;gap:6px">
+      <img src="./icon512.png" class="header-logo" alt="cantina" onclick="openManual()" style="cursor:pointer">
+      <button class="btn-icon" onclick="openDrawer()">
+        <svg width="21" height="21" fill="none" stroke="var(--gold)" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="list-body">
+    <div class="search-bar" id="search-bar" style="display:none">
+      <svg width="15" height="15" fill="none" stroke="var(--text-faint)" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="search" id="search-input" placeholder="Cerca cantina, vino, annata..." oninput="renderList()">
+      <button class="btn-clear" id="search-clear" onclick="clearSearch()" style="display:none">x</button>
+    </div>
+    <div id="wine-list"></div>
+  </div>
+  <div class="toolbar">
+    <button class="btn-tool" onclick="showTipo()">Vista per Tipo</button>
+    <button class="btn-tool" onclick="showZone()">Vista per Zona</button>
+    <button class="btn-tool" onclick="showPosition()">Vista Posizione</button>
+    <button class="btn-tool" onclick="showMoves()">Movimenti</button>
+  </div>
+  <button class="fab" onclick="showAdd()">
+    <svg width="22" height="22" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+  </button>
+</div>
+
+<!-- ADD/EDIT WINE -->
+<div id="view-add" class="view">
+  <div class="header">
+    <button class="btn-back" onclick="goBack()"><svg width="19" height="19" fill="none" stroke="var(--gold)" stroke-width="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Indietro</button>
+    <div id="form-title" style="font-family:'Playfair Display',serif;font-size:15px;color:var(--gold)">Nuovo Vino</div>
+    <div style="width:70px"></div>
+  </div>
+  <div class="form-body">
+    <div class="field-group">
+      <label class="field-label">Foto Bottiglia</label>
+      <div class="photo-drop" id="photo-drop-area" onclick="document.getElementById('photo-input').click()">
+        <div class="photo-placeholder" id="photo-placeholder">
+          <div class="icon">📷</div><p>Tocca per scattare</p>
+        </div>
+        <img id="photo-preview" src="" alt="" style="display:none">
+        <button class="photo-remove" id="photo-remove" style="display:none" onclick="removePhoto(event)">✕ Rimuovi</button>
+      </div>
+      <!-- Camera = capture, Gallery = no capture -->
+      <input type="file" id="photo-input"         accept="image/*" capture="environment" style="display:none" onchange="handlePhoto(event)">
+      <input type="file" id="photo-input-gallery" accept="image/*"                       style="display:none" onchange="handlePhoto(event)">
+      <div class="photo-btn-row">
+        <button onclick="document.getElementById('photo-input').click()">
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          Fotocamera
+        </button>
+        <label>
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          Scegli da Galleria
+          <input type="file" id="photo-gallery-hidden" accept="image/*" style="display:none" onchange="handlePhoto(event)">
+        </label>
+      </div>
+      <!-- OCR section -->
+      <div id="ocr-area" style="display:none">
+        <button class="btn-ocr" id="ocr-btn" onclick="runOCR()">
+          <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          Leggi dati dalla foto (OCR)
+        </button>
+        <div class="ocr-status" id="ocr-status">⏳ Analisi in corso…</div>
+        <div class="ocr-result" id="ocr-result"></div>
+      </div>
+    </div>
+    <div class="field-group"><label class="field-label">Cantina *</label><input class="field-input" id="f-cantina" type="text" placeholder="es. Antinori..."></div>
+    <div class="field-group"><label class="field-label">Nome del Vino *</label><input class="field-input" id="f-nome" type="text" placeholder="es. Tignanello..."></div>
+    <div class="row2" style="margin-bottom:14px">
+      <div>
+        <label class="field-label">Nazione</label>
+        <select class="field-input" id="f-nazione" onchange="onNazioneChange()"><option value="">— Nazione —</option></select>
+      </div>
+      <div>
+        <label class="field-label">Regione</label>
+        <select class="field-input" id="f-regione"><option value="">— Regione —</option></select>
+      </div>
+    </div>
+    <div class="row2" style="margin-bottom:14px">
+      <div><label class="field-label">Annata</label><input class="field-input" id="f-anno" type="number" placeholder="2021" min="1900" max="2099"></div>
+      <div><label class="field-label">Tipologia</label><select class="field-input" id="f-tipo"><option value="">--</option><option>Rosso</option><option>Bianco</option><option>Rose</option><option>Spumante</option><option>Passito</option><option>Grappa</option><option>Altro</option></select></div>
+    </div>
+    <div class="field-group">
+      <label class="field-label">Gradi Alcolici (%)</label>
+      <input class="field-input" id="f-gradi" type="number" placeholder="es. 13.5" min="0" max="100" step="0.1">
+    </div>
+    <div class="field-group">
+      <label class="field-label">Formato</label>
+      <div class="toggle-row" id="formato-row">
+        <button type="button" class="toggle-btn active" data-val="Bottiglia" onclick="selectFormato(this)">Bottiglia</button>
+        <button type="button" class="toggle-btn" data-val="Magnum" onclick="selectFormato(this)">Magnum</button>
+        <button type="button" class="toggle-btn" data-val="Altro" onclick="selectFormato(this)">Altro</button>
+      </div>
+    </div>
+    <div class="row2" style="margin-bottom:14px">
+      <div><label class="field-label">N. Bottiglie</label><input class="field-input" id="f-quantita" type="number" placeholder="1" min="0" step="1" value="1"></div>
+      <div><label class="field-label">Prezzo (euro)</label><input class="field-input" id="f-prezzo" type="number" placeholder="0.00" min="0" step="0.01"></div>
+    </div>
+    <div class="row2" style="margin-bottom:14px">
+      <div><label class="field-label">Data Acquisto</label><input class="field-input" id="f-date" type="date"></div>
+      <div><label class="field-label">Data Limite</label><input class="field-input" id="f-datalimite" type="date"></div>
+    </div>
+    <div class="row2" style="margin-bottom:14px">
+      <div><label class="field-label">Posizione</label><input class="field-input" id="f-posizione" type="text" placeholder="es. Cantina..."></div>
+      <div><label class="field-label">Scaffale</label><input class="field-input" id="f-scaffale" type="text" placeholder="es. A1..."></div>
+    </div>
+    <div class="field-group"><label class="field-label">Acquistato Presso</label><input class="field-input" id="f-acquistato" type="text" placeholder="es. Enoteca..."></div>
+    <div class="field-group"><label class="field-label">Vitigno / Uvaggio</label><input class="field-input" id="f-vitigno" type="text" placeholder="es. Sangiovese, Cabernet..."></div>
+    <div class="field-group">
+      <label class="field-label">Punteggio personale</label>
+      <div class="star-input">
+        <div class="star-display" id="star-preview">☆☆☆☆☆</div>
+        <input type="range" id="f-rating" min="0" max="5" step="0.5" value="0" oninput="updateStarPreview()">
+        <div class="star-val" id="star-val-label">—</div>
+      </div>
+    </div>
+    <div class="field-group"><label class="field-label">Note</label><textarea class="field-input" id="f-note" placeholder="Degustazione, abbinamento..."></textarea></div>
+    <button class="btn-primary" id="btn-save" onclick="saveWine()">Aggiungi</button>
+    <div style="height:18px"></div>
+  </div>
+</div>
+
+<!-- DETAIL -->
+<div id="view-detail" class="view">
+  <div class="header">
+    <button class="btn-back" onclick="goBack()"><svg width="19" height="19" fill="none" stroke="var(--gold)" stroke-width="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Indietro</button>
+    <div style="font-family:'Playfair Display',serif;font-size:15px;color:var(--gold)">Dettaglio</div>
+    <div style="width:70px"></div>
+  </div>
+  <div class="detail-body" id="detail-body"></div>
+</div>
+
+<!-- POSITION -->
+<div id="view-position" class="view">
+  <div class="header">
+    <button class="btn-back" onclick="goBack()"><svg width="19" height="19" fill="none" stroke="var(--gold)" stroke-width="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Indietro</button>
+    <div style="font-family:'Playfair Display',serif;font-size:15px;color:var(--gold)">Vista Posizione</div>
+    <div style="width:70px"></div>
+  </div>
+  <div class="pos-body" id="pos-body"></div>
+</div>
+
+<!-- ZONE VIEW -->
+<div id="view-zone" class="view">
+  <div class="header">
+    <button class="btn-back" onclick="goBack()"><svg width="19" height="19" fill="none" stroke="var(--gold)" stroke-width="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Indietro</button>
+    <div style="font-family:'Playfair Display',serif;font-size:15px;color:var(--gold)">Vista per Zona</div>
+    <div style="width:70px"></div>
+  </div>
+  <div class="zone-body" id="zone-body"></div>
+</div>
+
+<!-- TIPO VIEW -->
+<div id="view-tipo" class="view">
+  <div class="header">
+    <button class="btn-back" onclick="goBack()"><svg width="19" height="19" fill="none" stroke="var(--gold)" stroke-width="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Indietro</button>
+    <div style="font-family:'Playfair Display',serif;font-size:15px;color:var(--gold)">Vista per Tipo</div>
+    <div style="width:70px"></div>
+  </div>
+  <div class="zone-body" id="tipo-body"></div>
+</div>
+
+
+<!-- MOVEMENTS -->
+<div id="view-moves" class="view">
+  <div class="header">
+    <button class="btn-back" onclick="goBack()"><svg width="19" height="19" fill="none" stroke="var(--gold)" stroke-width="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Indietro</button>
+    <div style="font-family:'Playfair Display',serif;font-size:15px;color:var(--gold)">Movimenti</div>
+    <div style="width:70px"></div>
+  </div>
+  <div class="moves-body">
+    <div class="move-filter">
+      <button class="btn-tool active" id="mf-all" onclick="setMoveFilter('all')">Tutti</button>
+      <button class="btn-tool" id="mf-carico" onclick="setMoveFilter('carico')">Carichi</button>
+      <button class="btn-tool" id="mf-scarico" onclick="setMoveFilter('scarico')">Scarichi</button>
+    </div>
+    <div id="moves-list"></div>
+  </div>
+  <button class="fab" onclick="showMoveEdit(null)"><svg width="22" height="22" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></button>
+</div>
+
+<!-- MOVEMENT EDIT -->
+<div id="view-movedit" class="view">
+  <div class="header">
+    <button class="btn-back" onclick="goBack()"><svg width="19" height="19" fill="none" stroke="var(--gold)" stroke-width="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Indietro</button>
+    <div id="movedit-title" style="font-family:'Playfair Display',serif;font-size:15px;color:var(--gold)">Nuovo Movimento</div>
+    <div style="width:70px"></div>
+  </div>
+  <div class="form-body">
+    <div class="field-group">
+      <label class="field-label">Tipo</label>
+      <div class="toggle-row">
+        <button type="button" class="toggle-btn active green" id="mt-carico" onclick="selectMoveTipo('carico')">+ Carico</button>
+        <button type="button" class="toggle-btn" id="mt-scarico" onclick="selectMoveTipo('scarico')">- Scarico</button>
+      </div>
+    </div>
+    <div class="field-group"><label class="field-label">Vino</label><select class="field-input" id="m-wine"></select></div>
+    <div class="row2" style="margin-bottom:14px">
+      <div><label class="field-label">Data</label><input class="field-input" id="m-date" type="date"></div>
+      <div><label class="field-label">Quantita</label><input class="field-input" id="m-qty" type="number" placeholder="1" min="1" step="1" value="1"></div>
+    </div>
+    <div id="m-carico-fields">
+      <div class="field-group"><label class="field-label">Negozio / Fornitore</label><input class="field-input" id="m-negozio" type="text" placeholder="es. Enoteca..."></div>
+      <div class="field-group"><label class="field-label">Prezzo Totale (euro)</label><input class="field-input" id="m-prezzo" type="number" placeholder="0.00" min="0" step="0.01"></div>
+    </div>
+    <div class="field-group"><label class="field-label">Note libere</label><textarea class="field-input" id="m-note" placeholder="Occasione, dettagli..." style="min-height:60px"></textarea></div>
+    <button class="btn-primary" id="m-save-btn" onclick="saveMove()">Salva Movimento</button>
+    <button class="btn-danger" id="m-delete-btn" style="display:none" onclick="deleteMove()">Elimina Movimento</button>
+    <div style="height:18px"></div>
+  </div>
+</div>
+
+<!-- DRAWER -->
+<div id="drawer-overlay" class="drawer-overlay" onclick="closeDrawer()"></div>
+<div id="drawer" class="drawer">
+  <div class="drawer-header">
+    <div class="drawer-title">⚙ Servizi</div>
+    <button class="drawer-close" onclick="closeDrawer()">✕</button>
+  </div>
+  <div class="drawer-body">
+
+    <!-- 1. BACKUP / RESTORE -->
+    <div class="drawer-section-label">1 · Backup / Restore</div>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:6px">
+      <div style="font-size:11px;color:var(--text-faint);margin-bottom:6px">Cartella backup</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span id="backup-folder-name" style="flex:1;font-size:13px;color:var(--gold);overflow:hidden;text-overflow:ellipsis;white-space:nowrap">📁 Download</span>
+        <button onclick="pickBackupFolder()" style="background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text-dim);font-size:12px;padding:5px 10px;cursor:pointer;font-family:inherit;white-space:nowrap">Cambia…</button>
+      </div>
+    </div>
+    <button class="drawer-btn gold" onclick="exportToFolder();closeDrawer()">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+      <div class="lbl">Esporta in cartella<span class="sub">CSV vini + movimenti + foto {id}.jpg</span></div>
+    </button>
+    <button class="drawer-btn" onclick="importFromFolder();closeDrawer()">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><polyline points="12 12 12 18"/><polyline points="9 15 12 18 15 15"/></svg>
+      <div class="lbl">Ripristina da cartella<span class="sub">CSV + movimenti + foto</span></div>
+    </button>
+    <button class="drawer-btn gold" onclick="exportJSON();closeDrawer()">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+      <div class="lbl">Esporta JSON<span class="sub">Backup completo con foto e movimenti</span></div>
+    </button>
+    <button class="drawer-btn gold" onclick="exportCSV();closeDrawer()">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/></svg>
+      <div class="lbl">Esporta CSV + foto<span class="sub">Excel con foto base64 + movimenti</span></div>
+    </button>
+    <label class="drawer-btn" style="cursor:pointer">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+      <div class="lbl">Importa JSON<span class="sub">Ripristina backup completo</span></div>
+      <input type="file" accept=".json" style="display:none" onchange="importJSON(event);closeDrawer()">
+    </label>
+    <label class="drawer-btn" style="cursor:pointer">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+      <div class="lbl">Importa CSV<span class="sub">Da Excel / Fogli Google</span></div>
+      <input type="file" accept=".csv,text/csv" style="display:none" onchange="importCSV(event);closeDrawer()">
+    </label>
+
+    <!-- 2. MANUTENZIONE DATI -->
+    <div class="drawer-section-label">2 · Manutenzione Dati</div>
+    <button class="drawer-btn" onclick="showTerritoriManager();closeDrawer()">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+      <div class="lbl">Elenco Territori<span class="sub">Gestisci nazioni e regioni</span></div>
+    </button>
+    <button class="drawer-btn" onclick="ricostruisciSaldi();closeDrawer()">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4.99"/></svg>
+      <div class="lbl">Ricostruisci Saldi<span class="sub">Ricalcola quantità da movimenti</span></div>
+    </button>
+
+    <!-- 3. PARAMETRI -->
+    <div class="drawer-section-label">3 · Parametri</div>
+    <div class="drawer-section-label" style="border-top:none;margin-top:0;padding-top:0;padding-bottom:2px;font-size:9px;letter-spacing:1px">Tema</div>
+    <div class="theme-row" style="margin-bottom:6px">
+      <button class="theme-btn active" id="theme-light" onclick="setTheme('light')">☀ Chiaro</button>
+      <button class="theme-btn" id="theme-dark" onclick="setTheme('dark')">🌙 Scuro</button>
+    </div>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px">
+      <div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:7px">OCR — Chiave API ocr.space</div>
+      <div style="font-size:11px;color:var(--text-faint);margin-bottom:7px;line-height:1.5">Lascia vuoto per la chiave demo (500 req/giorno). Chiave gratuita: <b style="color:var(--text-dim)">ocr.space</b></div>
+      <input id="ocr-key-input" class="field-input" type="text" placeholder="es. K12345678 (opzionale)" style="font-size:13px;padding:9px 11px" oninput="saveOCRKey()">
+      <div id="ocr-key-status" style="font-size:11px;color:var(--text-faint);margin-top:5px"></div>
+    </div>
+
+    <!-- 4. INFO -->
+    <div class="drawer-section-label">4 · Info</div>
+    <button class="drawer-btn" onclick="showUpdateInfo();closeDrawer()">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <div class="lbl">Come aggiornare<span class="sub">Senza perdere i dati</span></div>
+    </button>
+    <button class="drawer-btn" onclick="openManual();closeDrawer()">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+      <div class="lbl">Manuale operativo<span class="sub">Guida all'uso dell'app</span></div>
+    </button>
+    <button class="drawer-btn" onclick="window.open('mailto:ivotaffarel@gmail.com','_blank');closeDrawer()">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+      <div class="lbl">Contatta lo sviluppatore<span class="sub">ivotaffarel@gmail.com</span></div>
+    </button>
+
+  </div>
+  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label">v4.3</span></div>
+</div>
+
+<!-- MANUAL OVERLAY -->
+<div id="manual-overlay" class="manual-overlay">
+  <div class="manual-header">
+    <div style="font-family:'Playfair Display',serif;font-size:17px;color:var(--gold)">📖 Manuale Operativo</div>
+    <button class="btn-icon" onclick="closeManual()" style="color:var(--text-dim);font-size:20px;background:none;border:none;cursor:pointer">✕</button>
+  </div>
+  <div class="manual-body">
+    <iframe id="manual-frame" src="./manual.html" title="Manuale"></iframe>
+  </div>
+</div>
+
+<!-- TERRITORI MANAGER OVERLAY -->
+<div id="territori-overlay" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:300;flex-direction:column">
+  <div class="manual-header">
+    <div style="font-family:'Playfair Display',serif;font-size:17px;color:var(--gold)">🌍 Elenco Territori</div>
+    <button class="btn-icon" onclick="closeTerritoriManager()" style="color:var(--text-dim);font-size:20px;background:none;border:none;cursor:pointer">✕</button>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:14px 14px 80px">
+    <!-- Aggiungi nazione -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:12px;margin-bottom:14px">
+      <div style="font-size:11px;color:var(--text-faint);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px">Aggiungi Nazione</div>
+      <div style="display:flex;gap:8px">
+        <input id="new-nazione-input" class="field-input" type="text" placeholder="es. Italia, Francia..." style="flex:1;padding:9px 11px;font-size:14px">
+        <button onclick="addNazione()" style="background:var(--gold);border:none;border-radius:10px;color:#fff;padding:9px 14px;font-size:13px;cursor:pointer;font-family:inherit;white-space:nowrap">+ Aggiungi</button>
+      </div>
+    </div>
+    <!-- Lista nazioni e regioni -->
+    <div id="territori-list"></div>
+  </div>
+</div>
+
+<!-- ZOOM LIGHTBOX -->
+<div id="zoom-overlay" class="zoom-overlay" onclick="closeZoom(event)">
+  <button class="zoom-overlay-close" onclick="closeZoom()">✕</button>
+  <div id="zoom-img-wrap">
+    <img id="zoom-img" src="" alt="">
+  </div>
+  <div class="zoom-overlay-hint">Pizzica per zoomare · Trascina per spostare</div>
+</div>
+
+<div id="toast" class="toast"></div>
+<div id="modal" class="modal-overlay"><div class="modal"><h3 id="modal-title"></h3><p id="modal-msg"></p><div class="modal-btns" id="modal-btns"></div></div></div>
+
+<script>
+const STORE_KEY='cantina_vini_v1';   /* mantenuto per compatibilità migrazione */
+const MOVE_KEY='cantina_movimenti_v1';
+const THEME_KEY='cantina_tema_v1';
+let wines=[],movements=[],currentPhotoB64=null,editingId=null,editingMoveId=null;
+let moveFilter='all',currentMoveTipo='carico',currentFormato='Bottiglia',toastTimer=null;
+/* ── Nav state ── */
+let _currentView='list',_detailFrom='list',_detailId=null;
+
+
+/* ══════════════════════════════════════════════════════════════════
+   STORAGE LAYER — IndexedDB
+   Database: CantinaPWA  v1
+   Object stores:
+     • wines      — keyPath: id
+     • movements  — keyPath: id
+     • settings   — keyPath: key  (tema, chiave OCR, ecc.)
+   API pubblica (asincrona):
+     dbLoad()   → carica wines[] e movements[] in memoria
+     save()     → salva wines[] su IDB
+     saveMoves()→ salva movements[] su IDB
+     dbSetting(key, value?) → leggi/scrivi impostazione
+   Migrazione automatica da localStorage al primo avvio.
+══════════════════════════════════════════════════════════════════ */
+const DB_NAME    = 'CantinaPWA';
+const DB_VERSION = 1;
+let _db = null;
+
+function dbOpen(){
+  if(_db) return Promise.resolve(_db);
+  return new Promise((res,rej)=>{
+    const req = indexedDB.open(DB_NAME, DB_VERSION);
+    req.onupgradeneeded = e=>{
+      const db = e.target.result;
+      if(!db.objectStoreNames.contains('wines'))     db.createObjectStore('wines',{keyPath:'id'});
+      if(!db.objectStoreNames.contains('movements')) db.createObjectStore('movements',{keyPath:'id'});
+      if(!db.objectStoreNames.contains('settings'))  db.createObjectStore('settings',{keyPath:'key'});
+    };
+    req.onsuccess = e=>{ _db=e.target.result; res(_db); };
+    req.onerror   = e=>rej(e.target.error);
+  });
+}
+
+/* Lettura completa di uno store → array */
+function dbGetAll(storeName){
+  return dbOpen().then(db=>new Promise((res,rej)=>{
+    const tx  = db.transaction(storeName,'readonly');
+    const req = tx.objectStore(storeName).getAll();
+    req.onsuccess = ()=>res(req.result||[]);
+    req.onerror   = e=>rej(e.target.error);
+  }));
+}
+
+/* Scrittura di un intero array (clear + putAll) */
+function dbPutAll(storeName, items){
+  return dbOpen().then(db=>new Promise((res,rej)=>{
+    const tx    = db.transaction(storeName,'readwrite');
+    const store = tx.objectStore(storeName);
+    store.clear();
+    items.forEach(item=>store.put(item));
+    tx.oncomplete = ()=>res();
+    tx.onerror    = e=>rej(e.target.error);
+  }));
+}
+
+/* Leggi/scrivi singola impostazione */
+function dbSetting(key, value){
+  return dbOpen().then(db=>new Promise((res,rej)=>{
+    const mode = value!==undefined ? 'readwrite' : 'readonly';
+    const tx   = db.transaction('settings', mode);
+    const store= tx.objectStore('settings');
+    if(value!==undefined){
+      store.put({key, value});
+      tx.oncomplete=()=>res(value);
+      tx.onerror=e=>rej(e.target.error);
+    } else {
+      const req=store.get(key);
+      req.onsuccess=()=>res(req.result?.value);
+      req.onerror=e=>rej(e.target.error);
+    }
+  }));
+}
+
+/* ── Migrazione da localStorage (solo al primo avvio) ── */
+async function migrateFromLocalStorage(){
+  try{
+    const lsWines = localStorage.getItem(STORE_KEY);
+    const lsMoves = localStorage.getItem(MOVE_KEY);
+    const lsTheme = localStorage.getItem(THEME_KEY);
+    const lsOCR   = localStorage.getItem('cantina_ocr_key_v1');
+    let migrated  = false;
+
+    if(lsWines){
+      const w=JSON.parse(lsWines);
+      if(w.length>0){ await dbPutAll('wines',w); migrated=true; }
+    }
+    if(lsMoves){
+      const m=JSON.parse(lsMoves);
+      if(m.length>0){ await dbPutAll('movements',m); migrated=true; }
+    }
+    if(lsTheme)  await dbSetting(THEME_KEY, lsTheme);
+    if(lsOCR)    await dbSetting('cantina_ocr_key_v1', lsOCR);
+
+    if(migrated){
+      /* Rimuovi da localStorage dopo migrazione riuscita */
+      localStorage.removeItem(STORE_KEY);
+      localStorage.removeItem(MOVE_KEY);
+      localStorage.removeItem(THEME_KEY);
+      localStorage.removeItem('cantina_ocr_key_v1');
+      console.info('[Cantina] Migrazione da localStorage → IndexedDB completata.');
+    }
+  } catch(e){ console.warn('[Cantina] Migrazione fallita (non bloccante):',e); }
+}
+
+/* ── Caricamento iniziale ── */
+async function dbLoad(){
+  await migrateFromLocalStorage();
+  wines     = await dbGetAll('wines');
+  movements = await dbGetAll('movements');
+  await loadTerritorio();
+}
+
+/* ── Salvataggio (sostituisce le vecchie save() sincrone) ── */
+function save(){
+  dbPutAll('wines', wines).catch(e=>console.error('[Cantina] save wines:',e));
+}
+function saveMoves(){
+  dbPutAll('movements', movements).catch(e=>console.error('[Cantina] save movements:',e));
+}
+
+/* ── Helpers OCR key — ora su IDB invece di localStorage ── */
+function getOCRKey(){
+  /* Per compatibilità sincrona restituisce da cache o default */
+  return window._ocrKeyCache || localStorage.getItem('cantina_ocr_key_v1') || 'helloworld';
+}
+function saveOCRKey(){
+  const v=document.getElementById('ocr-key-input')?.value?.trim()||'';
+  window._ocrKeyCache=v||'helloworld';
+  if(v){ dbSetting('cantina_ocr_key_v1',v); document.getElementById('ocr-key-status').textContent='✓ Chiave salvata'; }
+  else { dbSetting('cantina_ocr_key_v1',null); document.getElementById('ocr-key-status').textContent='Chiave rimossa — verrà usata la demo'; }
+}
+function loadOCRKeyField(){
+  dbSetting('cantina_ocr_key_v1').then(v=>{
+    window._ocrKeyCache=v||'helloworld';
+    const inp=document.getElementById('ocr-key-input');
+    if(inp) inp.value=v||'';
+  });
+}
+
+/* ── Tema — ora su IDB ── */
+function loadTheme(){
+  dbSetting(THEME_KEY).then(t=>applyTheme(t||'light'));
+}
+function setTheme(t){
+  dbSetting(THEME_KEY,t);
+  applyTheme(t);closeDrawer();
+}
+
+function genId(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7);}
+
+function applyTheme(t){
+  document.body.setAttribute('data-theme',t);
+  document.getElementById('theme-meta').setAttribute('content',t==='dark'?'#0A0608':'#F4EDE2');
+  document.getElementById('theme-light').classList.toggle('active',t==='light');
+  document.getElementById('theme-dark').classList.toggle('active',t==='dark');
+}
+
+async function compressPhoto(file){
+  return new Promise(res=>{
+    const img=new Image(),url=URL.createObjectURL(file);
+    img.onload=()=>{
+      /* MAX 1400px lato lungo, qualità 0.88 — buona risoluzione per zoom */
+      const MAX=1400,r=Math.min(MAX/img.width,MAX/img.height);
+      const w=r<1?Math.round(img.width*r):img.width,h=r<1?Math.round(img.height*r):img.height;
+      const c=document.createElement('canvas');c.width=w;c.height=h;
+      c.getContext('2d').drawImage(img,0,0,w,h);URL.revokeObjectURL(url);
+      res(c.toDataURL('image/jpeg',0.88));
+    };
+    img.onerror=()=>{URL.revokeObjectURL(url);res(null);};
+    img.src=url;
+  });
+}
+async function handlePhoto(e){
+  const file=e.target.files?.[0];if(!file)return;
+  const b64=await compressPhoto(file);if(!b64)return;
+  currentPhotoB64=b64;
+  document.getElementById('photo-preview').src=b64;
+  document.getElementById('photo-preview').style.display='block';
+  document.getElementById('photo-placeholder').style.display='none';
+  document.getElementById('photo-remove').style.display='block';
+  /* Show OCR button, reset result */
+  document.getElementById('ocr-area').style.display='block';
+  document.getElementById('ocr-status').classList.remove('show');
+  document.getElementById('ocr-result').classList.remove('show');
+  document.getElementById('ocr-result').innerHTML='';
+  document.getElementById('ocr-btn').disabled=false;
+}
+function removePhoto(e){
+  e.stopPropagation();currentPhotoB64=null;
+  document.getElementById('photo-preview').style.display='none';
+  document.getElementById('photo-preview').src='';
+  document.getElementById('photo-placeholder').style.display='block';
+  document.getElementById('photo-remove').style.display='none';
+  document.getElementById('photo-input').value='';
+  document.getElementById('ocr-area').style.display='none';
+}
+
+function showView(name){
+  document.querySelectorAll('.view').forEach(v=>{v.classList.remove('active');v.style.display='';});
+  document.getElementById('view-'+name).classList.add('active');
+  _currentView=name;
+}
+function showList(){showView('list');renderList();}
+function showPosition(){renderPosition();showView('position');}
+function showMoves(){renderMoves();showView('moves');}
+
+function selectFormato(btn){
+  currentFormato=btn.dataset.val;
+  document.querySelectorAll('#formato-row .toggle-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+function showAdd(wineId=null){
+  editingId=wineId;
+  const w=wineId?wines.find(x=>x.id===wineId):null;
+  document.getElementById('f-cantina').value=w?.cantina||'';
+  document.getElementById('f-nome').value=w?.nome||'';
+  document.getElementById('f-anno').value=w?.anno||'';
+  document.getElementById('f-tipo').value=w?.tipologia||'';
+  document.getElementById('f-quantita').value=w?.quantita??1;
+  document.getElementById('f-prezzo').value=w?.prezzo||'';
+  document.getElementById('f-date').value=w?.date||new Date().toISOString().split('T')[0];
+  document.getElementById('f-datalimite').value=w?.datalimite||'';
+  document.getElementById('f-posizione').value=w?.posizione||'';
+  document.getElementById('f-scaffale').value=w?.scaffale||'';
+  document.getElementById('f-acquistato').value=w?.acquistato||'';
+  document.getElementById('f-gradi').value=w?.gradi||'';
+  document.getElementById('f-vitigno').value=w?.vitigno||'';
+  populateNazioneSelect(w?.nazione||'', w?.regione||'');
+  const rating=w?.rating??0;
+  document.getElementById('f-rating').value=rating;
+  updateStarPreview();
+  document.getElementById('f-note').value=w?.note||'';
+  currentFormato=w?.formato||'Bottiglia';
+  document.querySelectorAll('#formato-row .toggle-btn').forEach(b=>b.classList.toggle('active',b.dataset.val===currentFormato));
+  currentPhotoB64=w?.foto||null;
+  if(currentPhotoB64){document.getElementById('photo-preview').src=currentPhotoB64;document.getElementById('photo-preview').style.display='block';document.getElementById('photo-placeholder').style.display='none';document.getElementById('photo-remove').style.display='block';}
+  else{document.getElementById('photo-preview').style.display='none';document.getElementById('photo-preview').src='';document.getElementById('photo-placeholder').style.display='block';document.getElementById('photo-remove').style.display='none';}
+  document.getElementById('photo-input').value='';
+  /* OCR area: show only if there's already a photo */
+  document.getElementById('ocr-area').style.display=currentPhotoB64?'block':'none';
+  document.getElementById('ocr-status').classList.remove('show');
+  document.getElementById('ocr-result').classList.remove('show');
+  document.getElementById('ocr-result').innerHTML='';
+  document.getElementById('form-title').textContent=w?'Modifica Vino':'Nuovo Vino';
+  document.getElementById('btn-save').textContent=w?'Salva Modifiche':'Aggiungi all\'Archivio';
+  showView('add');
+}
+
+function saveWine(){
+  const cantina=document.getElementById('f-cantina').value.trim();
+  const nome=document.getElementById('f-nome').value.trim();
+  if(!cantina||!nome){showToast('Cantina e Nome obbligatori',true);return;}
+  const qty=parseInt(document.getElementById('f-quantita').value)||0;
+  const fields={cantina,nome,anno:document.getElementById('f-anno').value.trim(),tipologia:document.getElementById('f-tipo').value,gradi:document.getElementById('f-gradi').value.trim(),vitigno:document.getElementById('f-vitigno').value.trim(),nazione:document.getElementById('f-nazione').value,regione:document.getElementById('f-regione').value,formato:currentFormato,quantita:qty,prezzo:document.getElementById('f-prezzo').value.trim(),date:document.getElementById('f-date').value,datalimite:document.getElementById('f-datalimite').value,posizione:document.getElementById('f-posizione').value.trim(),scaffale:document.getElementById('f-scaffale').value.trim(),acquistato:document.getElementById('f-acquistato').value.trim(),rating:parseFloat(document.getElementById('f-rating').value)||0,note:document.getElementById('f-note').value.trim(),foto:currentPhotoB64};
+  if(editingId){
+    const oldW=wines.find(w=>w.id===editingId);
+    const oldQty=oldW?.quantita||0;
+    wines=wines.map(w=>w.id===editingId?{...w,...fields}:w);
+    if(qty!==oldQty){const d=qty-oldQty;logMovement(editingId,fields.nome,fields.cantina,d>0?'carico':'scarico',Math.abs(d),fields.date,'','','Rettifica manuale');}
+    save();showToast('Modifiche salvate');showDetail(editingId,true);
+  }else{
+    const id=genId();wines.unshift({id,...fields});
+    if(qty>0)logMovement(id,fields.nome,fields.cantina,'carico',qty,fields.date,fields.acquistato,fields.prezzo,'Carico iniziale');
+    save();showToast('Vino aggiunto');showList();
+  }
+  editingId=null;
+}
+
+function fmtDate(d){if(!d)return '';const[y,m,g]=d.split('-');return g+'/'+m+'/'+y;}
+function fmtEuro(v){if(!v&&v!==0)return '';return 'EUR '+parseFloat(v).toFixed(2).replace('.',',');}
+function esc(s){return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');}
+function isExpiring(d){if(!d)return 'var(--text)';const diff=(new Date(d)-new Date())/864e5;return diff<0?'var(--red)':diff<180?'var(--gold)':'var(--text)';}
+
+/* ── STAR RATING HELPERS ── */
+function starColor(rating){
+  const r=parseFloat(rating)||0;
+  if(r>4.5)return '#2A8A3A';   /* verde */
+  if(r>3.0)return '#D4700A';   /* arancione */
+  return '#C4933A';              /* giallo-oro ≤3 */
+}
+function starsHTML(rating,size){
+  const r=parseFloat(rating)||0;if(r===0)return '';
+  const fontSize=size==='mini'?'10px':'20px';
+  const color=starColor(r);
+  let s='';
+  for(let i=1;i<=5;i++){
+    if(r>=i)s+='★';
+    else if(r>=i-0.5)s+='⯨';
+    else s+='☆';
+  }
+  return '<span style="font-size:'+fontSize+';color:'+color+';letter-spacing:'+(size==='mini'?'-1':'1')+'px">'+s+'</span>';
+}
+function updateStarPreview(){
+  const v=parseFloat(document.getElementById('f-rating').value)||0;
+  const color=starColor(v);
+  document.getElementById('star-val-label').textContent=v===0?'—':v.toFixed(1)+'★';
+  document.getElementById('star-val-label').style.color=v===0?'var(--text-faint)':color;
+  let s='';
+  for(let i=1;i<=5;i++){if(v>=i)s+='★';else if(v>=i-0.5)s+='⯨';else s+='☆';}
+  document.getElementById('star-preview').textContent=s;
+  document.getElementById('star-preview').style.color=v===0?'var(--text-faint)':color;
+}
+
+function getSearchQuery(){ return (document.getElementById('search-input')?.value||'').toLowerCase().trim(); }
+function getFilteredWines(){
+  const q=getSearchQuery();
+  return q ? wines.filter(w=>[w.cantina,w.nome,w.anno,w.tipologia,w.acquistato,w.posizione,w.scaffale,w.nazione,w.regione,w.note].some(v=>v?.toString().toLowerCase().includes(q))) : wines;
+}
+
+function renderList(){
+  const q=getSearchQuery();
+  const clear=document.getElementById('search-clear');
+  if(clear)clear.style.display=q?'block':'none';
+  const filtered=getFilteredWines();
+  const totBot=wines.reduce((s,w)=>s+(parseInt(w.quantita)||0),0);
+  const totEuro=wines.reduce((s,w)=>s+(parseFloat(w.prezzo)||0),0);
+  var invStr=totEuro>0?' · '+fmtEuro(totEuro):''; document.getElementById('header-sub').textContent=wines.length+' etichette · '+totBot+' bot.'+invStr;
+  document.getElementById('search-bar').style.display=wines.length>2?'flex':'none';
+  const container=document.getElementById('wine-list');
+  if(filtered.length===0){container.innerHTML='<div class="empty"><div class="icon">x</div><h3>'+(q?'Nessun risultato':'Cantina vuota')+'</h3><p>'+(q?'Prova altra parola chiave':'Aggiungi il tuo primo vino')+'</p></div>';return;}
+  container.innerHTML=filtered.map(w=>{
+    const qty=parseInt(w.quantita)||0;
+    const miniStars=starsHTML(w.rating,'mini');
+    /* Posizione/scaffale: visibile solo durante ricerca attiva */
+    const posRow=(q&&(w.posizione||w.scaffale))?
+      '<div class="card-pos"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>'+
+      (w.posizione?esc(w.posizione):'')+(w.posizione&&w.scaffale?' / ':'')+
+      (w.scaffale?esc(w.scaffale):'')+
+      '</div>':'';
+    const locStr=(w.posizione||w.scaffale)?esc(w.posizione||'')+(w.posizione&&w.scaffale?' / ':'')+esc(w.scaffale||''):'';
+    const rightPanel='<div class="card-right-panel">'+(locStr?'<div class="card-loc-label">'+locStr+'</div>':'')+(qty>0?'<button class="card-scarica" onclick="quickScarica(event,\''+w.id+'\')">- Scarica</button>':'')+'</div>';
+    return '<div class="card" onclick="showDetail(\''+w.id+'\')">'+(w.foto?'<img class="card-img" src="'+w.foto+'" alt="">':'<div class="card-img-ph">🍷</div>')+'<div class="card-body"><div class="card-cantina">'+esc(w.cantina)+'</div><div class="card-name">'+esc(w.nome)+'</div><div class="card-meta">'+(w.anno?'<span>'+esc(w.anno)+'</span>':'')+(w.tipologia?'<span>'+esc(w.tipologia)+'</span>':'')+(w.prezzo?'<span class="price">'+fmtEuro(w.prezzo)+'</span>':'')+'</div>'+(miniStars?'<div style="margin-top:2px">'+miniStars+'</div>':'')+posRow+'<div style="display:flex;gap:5px;margin-top:3px"><span class="card-badge qty'+(qty===0?' zero':'')+'">'+qty+' bot.</span>'+(w.formato&&w.formato!=='Bottiglia'?'<span class="card-badge fmt">'+esc(w.formato)+'</span>':'')+'</div></div>'+rightPanel+'</div>';
+  }).join('');
+}
+function clearSearch(){document.getElementById('search-input').value='';renderList();}
+
+function showDetail(id,fromSave=false){
+  if(!fromSave){_detailFrom=_currentView;}
+  _detailId=id;
+  const w=wines.find(x=>x.id===id);if(!w)return;
+  const qty=parseInt(w.quantita)||0;
+  /* Hero: clicca per aprire zoom lightbox */
+  const hero=w.foto
+    ?'<img class="detail-hero" src="'+w.foto+'" alt="" onclick="openZoom(\''+encodeURIComponent(w.foto)+'\')" style="cursor:zoom-in" title="Tocca per zoom">'
+    :'<div class="detail-hero-ph">🍷</div>';
+  /* Gradi */
+  const gradiCell=w.gradi?'<div class="detail-cell"><div class="detail-cell-label">Gradi Alcolici</div><div class="detail-cell-value">'+esc(w.gradi)+'% vol</div></div>':'';
+  /* Vitigno */
+  const vitignoCell=w.vitigno?'<div class="detail-cell full"><div class="detail-cell-label">Vitigno / Uvaggio</div><div class="detail-cell-value">'+esc(w.vitigno)+'</div></div>':'';
+  const territorioCell=(w.nazione||w.regione)?'<div class="detail-cell full"><div class="detail-cell-label">Territorio</div><div class="detail-cell-value">'+(w.nazione?esc(w.nazione):'')+(w.nazione&&w.regione?' · ':'')+esc(w.regione||'')+'</div></div>':'';
+  /* Stars */
+  const starsCell=(w.rating&&w.rating>0)?'<div class="detail-cell full"><div class="detail-cell-label">Punteggio personale</div><div class="detail-cell-value" style="display:flex;align-items:center;gap:6px">'+starsHTML(w.rating,'full')+'<span style="font-size:14px;color:var(--text-dim)">'+parseFloat(w.rating).toFixed(1)+'/5</span></div></div>':'';
+  document.getElementById('detail-body').innerHTML=hero+
+    '<div class="detail-content">'+
+    '<div class="detail-cantina">'+esc(w.cantina)+'</div>'+
+    '<div class="detail-name">'+esc(w.nome)+'</div>'+
+    '<div class="qty-bar"><button class="btn-qty minus" onclick="changeQty(\''+w.id+'\',-1)">−</button>'+
+    '<div class="qty-label">Bottiglie disponibili'+(w.formato&&w.formato!=='Bottiglia'?' ('+esc(w.formato)+')':'')+'</div>'+
+    '<div class="qty-val'+(qty===0?' zero':'')+'" id="dqty-'+w.id+'">'+qty+'</div>'+
+    '<button class="btn-qty plus" onclick="changeQty(\''+w.id+'\',+1)">+</button></div>'+
+    '<div class="detail-grid">'+
+    (w.anno?'<div class="detail-cell"><div class="detail-cell-label">Annata</div><div class="detail-cell-value">'+esc(w.anno)+'</div></div>':'')+
+    (w.tipologia?'<div class="detail-cell"><div class="detail-cell-label">Tipologia</div><div class="detail-cell-value">'+esc(w.tipologia)+'</div></div>':'')+
+    gradiCell+
+    (w.formato?'<div class="detail-cell"><div class="detail-cell-label">Formato</div><div class="detail-cell-value">'+esc(w.formato)+'</div></div>':'')+
+    (w.prezzo?'<div class="detail-cell"><div class="detail-cell-label">Prezzo</div><div class="detail-cell-value" style="color:var(--gold)">'+fmtEuro(w.prezzo)+'</div></div>':'')+
+    (w.date?'<div class="detail-cell"><div class="detail-cell-label">Data Acquisto</div><div class="detail-cell-value">'+fmtDate(w.date)+'</div></div>':'')+
+    (w.datalimite?'<div class="detail-cell"><div class="detail-cell-label">Data Limite</div><div class="detail-cell-value" style="color:'+isExpiring(w.datalimite)+'">'+fmtDate(w.datalimite)+'</div></div>':'')+
+    (w.posizione?'<div class="detail-cell"><div class="detail-cell-label">Posizione</div><div class="detail-cell-value">'+esc(w.posizione)+'</div></div>':'')+
+    (w.scaffale?'<div class="detail-cell"><div class="detail-cell-label">Scaffale</div><div class="detail-cell-value">'+esc(w.scaffale)+'</div></div>':'')+
+    (w.acquistato?'<div class="detail-cell full"><div class="detail-cell-label">Acquistato Presso</div><div class="detail-cell-value">'+esc(w.acquistato)+'</div></div>':'')+
+    vitignoCell+
+    territorioCell+
+    starsCell+
+    '</div>'+
+    (w.note?'<div class="detail-notes"><div class="detail-cell-label" style="margin-bottom:6px">Note</div><p>'+esc(w.note).replace(/\n/g,'<br>')+'</p></div>':'')+
+    '<button class="btn-vivino" onclick="openVivino(\''+w.id+'\')">'+
+      '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>'+
+      'Cerca su Vivino'+
+    '</button>'+
+    '<button class="btn-edit" onclick="showAdd(\''+w.id+'\')">Modifica scheda</button>'+
+    '<button class="btn-danger" onclick="confirmDelete(\''+w.id+'\')">Elimina vino</button>'+
+    '</div>';
+  showView('detail');
+}
+
+function changeQty(id,delta){
+  const w=wines.find(x=>x.id===id);if(!w)return;
+  const newQty=Math.max(0,(parseInt(w.quantita)||0)+delta);
+  w.quantita=newQty;save();
+  const el=document.getElementById('dqty-'+id);
+  if(el){el.textContent=newQty;el.className='qty-val'+(newQty===0?' zero':'');}
+  logMovement(id,w.nome,w.cantina,delta>0?'carico':'scarico',Math.abs(delta),new Date().toISOString().split('T')[0],'','',delta>0?'Carico manuale':'Scarico manuale');
+  showToast(delta>0?'+1 bottiglia aggiunta':'-1 bottiglia scaricata');
+}
+
+function quickScarica(event,id){
+  event.stopPropagation();
+  const w=wines.find(x=>x.id===id);if(!w)return;
+  const qty=parseInt(w.quantita)||0;
+  if(qty<=0){showToast('Quantita gia zero',true);return;}
+  const nid='qs-'+id;
+  showModal('Scarica 1 Bottiglia','<b style="color:var(--text)">'+esc(w.nome)+'</b><br>'+esc(w.cantina)+'<br>Disponibili: '+qty+' &rarr; '+(qty-1)+'<br><br><label style="font-size:11px;color:var(--text-dim);text-transform:uppercase">Note (opzionale)</label><br><input id="'+nid+'" class="field-input" type="text" placeholder="Occasione..." style="margin-top:6px;width:100%">',[
+    {label:'Conferma Scarico',cls:'primary',action:()=>{
+      const note=document.getElementById(nid)?.value?.trim()||'';
+      w.quantita=qty-1;save();
+      logMovement(id,w.nome,w.cantina,'scarico',1,new Date().toISOString().split('T')[0],'','',note||'Scarico rapido');
+      closeModal();renderList();showToast('Bottiglia scaricata');
+    }},
+    {label:'Annulla',cls:'secondary',action:closeModal}
+  ]);
+}
+
+function renderPosition(){
+  const filtered=getFilteredWines();
+  const q=getSearchQuery();
+  const grouped={},unpositioned=[];
+  filtered.forEach(w=>{
+    const pos=(w.posizione||'').trim(),sca=(w.scaffale||'').trim();
+    if(!pos&&!sca){unpositioned.push(w);return;}
+    const pk=pos||'(senza posizione)',sk=sca||'(senza scaffale)';
+    if(!grouped[pk])grouped[pk]={};
+    if(!grouped[pk][sk])grouped[pk][sk]=[];
+    grouped[pk][sk].push(w);
+  });
+  const container=document.getElementById('pos-body');
+  if(filtered.length===0){
+    container.innerHTML='<div class="empty"><div class="icon">🍾</div><h3>'+(q?'Nessun risultato':'Nessun vino')+'</h3></div>';
+    return;
+  }
+  let html='';
+  if(q) html+='<div style="background:var(--gold-bg);border:1px solid var(--gold-dim);border-radius:10px;padding:8px 13px;margin-bottom:12px;font-size:12px;color:var(--gold)">🔍 Filtro attivo: «'+esc(q)+'» · '+filtered.length+' vini</div>';
+  Object.keys(grouped).sort().forEach(pk=>{
+    const shelves=grouped[pk];
+    const tot=Object.values(shelves).reduce((s,a)=>s+a.length,0);
+    const totBot=Object.values(shelves).reduce((s,a)=>s+a.reduce((ss,w)=>ss+(parseInt(w.quantita)||0),0),0);
+    html+='<div class="pos-section"><div class="pos-location-header"><div class="pos-location-title">'+esc(pk)+'</div><div class="pos-location-badge">'+tot+' et. · '+totBot+' bot.</div></div>';
+    Object.keys(shelves).sort().forEach(sk=>{
+      const list=shelves[sk];
+      const shBot=list.reduce((s,w)=>s+(parseInt(w.quantita)||0),0);
+      html+='<div class="pos-shelf" data-pos="'+esc(pk)+'" data-shelf="'+esc(sk)+'">';
+      html+='<div class="pos-shelf-header"><div class="pos-shelf-name">'+esc(sk)+'</div><div class="pos-shelf-count">'+list.length+' et. · '+shBot+' bot.</div></div>';
+      list.forEach(w=>{
+        const ec=isExpiring(w.datalimite),qty=parseInt(w.quantita)||0;
+        const thumb=w.foto?'<img class="pos-row-thumb" src="'+w.foto+'" alt="">':'<div class="pos-row-thumb-ph">🍷</div>';
+        html+='<div class="pos-row" data-id="'+w.id+'" onclick="showDetail(\''+w.id+'\')">'+ thumb+'<div class="pos-row-dot" style="background:'+(ec==='var(--text)'?'var(--red)':ec)+'"></div><div class="pos-row-name">'+esc(w.nome)+'</div><div class="pos-row-meta"><span class="pos-row-cantina">'+esc(w.cantina)+'</span>'+(w.tipologia?'<span class="pos-row-tag">'+esc(w.tipologia)+'</span>':'')+'<span class="pos-row-qty">'+qty+'</span></div></div>';
+      });
+      html+='<div class="dnd-drop-hint">↓ Rilascia qui</div>';
+      html+='</div>';
+    });
+    html+='</div>';
+  });
+  if(unpositioned.length>0){
+    html+='<div class="pos-unassigned" data-pos="" data-shelf=""><div class="pos-unassigned-label">⚠ Senza posizione ('+unpositioned.length+')</div>';
+    unpositioned.forEach(w=>{
+      const qty=parseInt(w.quantita)||0;
+      const thumb=w.foto?'<img class="pos-row-thumb" src="'+w.foto+'" alt="">':'<div class="pos-row-thumb-ph">🍷</div>';
+      html+='<div class="pos-row" data-id="'+w.id+'" onclick="showDetail(\''+w.id+'\')">'+ thumb+'<div class="pos-row-dot" style="background:var(--text-faint)"></div><div class="pos-row-name">'+esc(w.nome)+'</div><div class="pos-row-meta"><span class="pos-row-cantina">'+esc(w.cantina)+'</span><span class="pos-row-qty">'+qty+'</span></div></div>';
+    });
+    html+='</div>';
+  }
+  container.innerHTML=html;
+  /* Drag orizzontale con il mouse sulle zone-table-scroll */
+  container.querySelectorAll('.zone-table-scroll').forEach(sc=>{
+    let dn=false,sx=0,sl=0;
+    sc.addEventListener('mousedown',e=>{
+      if(e.target.closest('[data-id]'))return;
+      dn=true;sc.style.cursor='grabbing';
+      sx=e.pageX-sc.offsetLeft;sl=sc.scrollLeft;
+    });
+    sc.addEventListener('mouseleave',()=>{dn=false;sc.style.cursor='grab';});
+    sc.addEventListener('mouseup',()=>{dn=false;sc.style.cursor='grab';});
+    sc.addEventListener('mousemove',e=>{
+      if(!dn)return;e.preventDefault();
+      sc.scrollLeft=sl-(e.pageX-sc.offsetLeft-sx);
+    });
+  });
+
+}
+
+function logMovement(wineId,wineNome,wineCantina,tipo,quantita,data,negozio,prezzo,note){
+  movements.unshift({id:genId(),wineId,wineNome,wineCantina,tipo,quantita:parseInt(quantita)||1,data,negozio:negozio||'',prezzo:prezzo||'',note:note||''});
+  saveMoves();
+}
+
+function setMoveFilter(f){
+  moveFilter=f;
+  ['all','carico','scarico'].forEach(x=>document.getElementById('mf-'+x).classList.toggle('active',x===f));
+  renderMoves();
+}
+
+function renderMoves(){
+  const list=moveFilter==='all'?movements:movements.filter(m=>m.tipo===moveFilter);
+  const container=document.getElementById('moves-list');
+  if(list.length===0){container.innerHTML='<div class="empty"><div class="icon">x</div><h3>Nessun movimento</h3><p>I movimenti si registrano automaticamente</p></div>';return;}
+  container.innerHTML=list.map(m=>'<div class="move-card" onclick="showMoveEdit(\''+m.id+'\')"><div class="move-icon '+m.tipo+'">'+(m.tipo==='carico'?'+':'-')+'</div><div class="move-info"><div class="move-wine">'+esc(m.wineNome)+' <small style="color:var(--text-dim);font-size:11px">'+esc(m.wineCantina)+'</small></div><div class="move-detail">'+fmtDate(m.data)+(m.negozio?' - '+esc(m.negozio):'')+(m.prezzo?' - '+fmtEuro(m.prezzo):'')+(m.note?' - '+esc(m.note):'')+'</div></div><div class="move-qty '+m.tipo+'">'+(m.tipo==='carico'?'+':'-')+m.quantita+'</div></div>').join('');
+}
+
+function selectMoveTipo(t){
+  currentMoveTipo=t;
+  document.getElementById('mt-carico').className='toggle-btn'+(t==='carico'?' active green':'');
+  document.getElementById('mt-scarico').className='toggle-btn'+(t==='scarico'?' active red':'');
+  document.getElementById('m-carico-fields').style.display=t==='carico'?'block':'none';
+}
+
+function showMoveEdit(moveId){
+  editingMoveId=moveId;
+  const m=moveId?movements.find(x=>x.id===moveId):null;
+  const sel=document.getElementById('m-wine');
+  sel.innerHTML=wines.map(w=>'<option value="'+w.id+'" data-name="'+esc(w.nome)+'" data-cantina="'+esc(w.cantina)+'">'+esc(w.nome)+' - '+esc(w.cantina)+'</option>').join('');
+  if(m?.wineId)sel.value=m.wineId;
+  const tipo=m?.tipo||'carico';
+  currentMoveTipo=tipo;selectMoveTipo(tipo);
+  document.getElementById('m-date').value=m?.data||new Date().toISOString().split('T')[0];
+  document.getElementById('m-qty').value=m?.quantita||1;
+  document.getElementById('m-negozio').value=m?.negozio||'';
+  document.getElementById('m-prezzo').value=m?.prezzo||'';
+  document.getElementById('m-note').value=m?.note||'';
+  document.getElementById('movedit-title').textContent=m?'Modifica Movimento':'Nuovo Movimento';
+  document.getElementById('m-save-btn').textContent=m?'Aggiorna':'Salva Movimento';
+  document.getElementById('m-delete-btn').style.display=m?'flex':'none';
+  showView('movedit');
+}
+
+function saveMove(){
+  const selEl=document.getElementById('m-wine');
+  const opt=selEl.options[selEl.selectedIndex];
+  const qty=parseInt(document.getElementById('m-qty').value)||1;
+  const data={id:editingMoveId||genId(),wineId:selEl.value,wineNome:opt?.dataset.name||'',wineCantina:opt?.dataset.cantina||'',tipo:currentMoveTipo,data:document.getElementById('m-date').value,quantita:qty,negozio:currentMoveTipo==='carico'?document.getElementById('m-negozio').value.trim():'',prezzo:currentMoveTipo==='carico'?document.getElementById('m-prezzo').value.trim():'',note:document.getElementById('m-note').value.trim()};
+  /* ── Update wine balance ── */
+  const wine=wines.find(w=>w.id===data.wineId);
+  if(wine){
+    if(editingMoveId){
+      /* Reverse old movement */
+      const old=movements.find(m=>m.id===editingMoveId);
+      if(old){const rev=old.tipo==='carico'?-old.quantita:old.quantita;wine.quantita=Math.max(0,(parseInt(wine.quantita)||0)+rev);}
+    }
+    const delta=data.tipo==='carico'?data.quantita:-data.quantita;
+    wine.quantita=Math.max(0,(parseInt(wine.quantita)||0)+delta);
+    save();
+  }
+  if(editingMoveId)movements=movements.map(m=>m.id===editingMoveId?data:m);
+  else movements.unshift(data);
+  saveMoves();showToast('Movimento salvato');showMoves();editingMoveId=null;
+}
+
+function deleteMove(){
+  if(!editingMoveId)return;
+  /* Reverse movement on wine balance */
+  const m=movements.find(x=>x.id===editingMoveId);
+  if(m){
+    const wine=wines.find(w=>w.id===m.wineId);
+    if(wine){const rev=m.tipo==='carico'?-m.quantita:m.quantita;wine.quantita=Math.max(0,(parseInt(wine.quantita)||0)+rev);save();}
+  }
+  movements=movements.filter(m=>m.id!==editingMoveId);
+  saveMoves();showToast('Movimento eliminato');showMoves();editingMoveId=null;
+}
+
+/* ══════════ RICOSTRUISCI SALDI ══════════ */
+function ricostruisciSaldi(){
+  showModal('Ricostruisci Saldi',
+    'Questa operazione azzera le quantita di ogni vino e le ricalcola da zero applicando tutti i movimenti in ordine cronologico. Procedere?',
+    [{label:'Ricostruisci',cls:'primary',action:()=>{
+      wines.forEach(w=>{w.quantita=0;});
+      const sorted=[...movements].sort((a,b)=>(a.data||'').localeCompare(b.data||''));
+      sorted.forEach(m=>{
+        const wine=wines.find(w=>w.id===m.wineId);
+        if(wine){const delta=m.tipo==='carico'?m.quantita:-m.quantita;wine.quantita=Math.max(0,(wine.quantita||0)+delta);}
+      });
+      save();renderList();closeModal();
+      showToast('Saldi ricostruiti da '+movements.length+' movimenti');
+    }},
+    {label:'Annulla',cls:'secondary',action:closeModal}]
+  );
+}
+
+/* DnD → vedi sistema unificato long-press in fondo */
+
+/* ══════════ RICERCA VINO ONLINE ══════════ */
+function openVivino(wineId){
+  const w=wines.find(x=>x.id===wineId);if(!w)return;
+  const query=(w.nome+(w.cantina?' '+w.cantina:'')).trim();
+  /* Vivino non accetta query string esterna diretta sulla SPA —
+     la ricerca tramite Google site: è il metodo più affidabile */
+  const googleVivino='https://www.google.com/search?q='+encodeURIComponent('site:vivino.com '+query);
+  /* Wine-Searcher come alternativa diretta con query string funzionante */
+  const wineSearcher='https://www.wine-searcher.com/find/'+encodeURIComponent(query)+'/1/Italy';
+
+  showModal('Cerca vino online',
+    '<div style="font-family:\'Playfair Display\',serif;font-size:15px;color:var(--text);margin-bottom:12px">'+esc(w.nome)+(w.cantina?' &mdash; '+esc(w.cantina):'')+'</div>'+
+    '<div style="font-size:12px;color:var(--text-dim)">Scegli dove cercare:</div>',
+    [
+      {label:'🍷 Vivino', cls:'primary', action:()=>{ window.open(googleVivino,'_blank','noopener,noreferrer'); closeModal(); }},
+      {label:'🔍 Wine-Searcher',       cls:'secondary', action:()=>{ window.open(wineSearcher,'_blank','noopener,noreferrer'); closeModal(); }},
+      {label:'Annulla',               cls:'secondary', action:closeModal},
+    ]
+  );
+}
+
+/* ══════════════════════════════════════════════════════════
+   BACKUP / RESTORE SU CARTELLA — File System Access API
+   Chrome/Android Chrome: scrittura diretta nella cartella scelta.
+   Fallback (iOS/Firefox): download separati per ogni file.
+   ══════════════════════════════════════════════════════════ */
+
+const BACKUP_DIR_KEY      = 'cantina_backup_dir_handle';
+const BACKUP_DIR_NAME_KEY = 'cantina_backup_dir_name';
+const FSA_SUPPORTED       = ('showDirectoryPicker' in window);
+
+/* ── UI: mostra nome cartella corrente ── */
+async function loadBackupFolderName(){
+  const name = await dbSetting(BACKUP_DIR_NAME_KEY) || 'Download';
+  const el = document.getElementById('backup-folder-name');
+  if(el) el.textContent = '📁 ' + name;
+}
+
+/* ── Scegli cartella (memorizzata in IDB) ── */
+async function pickBackupFolder(){
+  if(!FSA_SUPPORTED){
+    showToast('File System Access non supportato su questo browser', true);
+    return;
+  }
+  try{
+    const handle = await window.showDirectoryPicker({mode:'readwrite', startIn:'downloads'});
+    await dbSetting(BACKUP_DIR_KEY, handle);
+    await dbSetting(BACKUP_DIR_NAME_KEY, handle.name);
+    const el = document.getElementById('backup-folder-name');
+    if(el) el.textContent = '📁 ' + handle.name;
+    showToast('✓ Cartella impostata: ' + handle.name);
+  } catch(e){
+    if(e.name !== 'AbortError') showToast('Cartella non selezionata', true);
+  }
+}
+
+/* ── Recupera handle con rinnovo permesso ── */
+async function getBackupDirHandle(readOnly=false){
+  const mode = readOnly ? 'read' : 'readwrite';
+  try{
+    const handle = await dbSetting(BACKUP_DIR_KEY);
+    if(!handle) return null;
+    let perm = await handle.queryPermission({mode});
+    if(perm !== 'granted') perm = await handle.requestPermission({mode});
+    return perm === 'granted' ? handle : null;
+  } catch(e){ return null; }
+}
+
+/* ── Helper: base64 → Uint8Array ── */
+function b64ToBytes(b64DataUrl){
+  const b64 = b64DataUrl.split(',')[1];
+  const bin = atob(b64);
+  const bytes = new Uint8Array(bin.length);
+  for(let i=0;i<bin.length;i++) bytes[i]=bin.charCodeAt(i);
+  return bytes;
+}
+
+/* ── Helper: File → base64 data URL ── */
+function fileToDataURL(file){
+  return new Promise(res=>{
+    const r=new FileReader();
+    r.onload=e=>res(e.target.result);
+    r.readAsDataURL(file);
+  });
+}
+
+/* ── Helper: scrivi file nella cartella ── */
+async function writeToDirHandle(dirHandle, filename, content){
+  const fh = await dirHandle.getFileHandle(filename, {create:true});
+  const wr = await fh.createWritable();
+  await wr.write(content);
+  await wr.close();
+}
+
+/* ── ESPORTA NELLA CARTELLA ── */
+async function exportToFolder(){
+  if(!wines.length){ showToast('Nessun vino da esportare', true); return; }
+  const date = new Date().toISOString().split('T')[0];
+
+  /* Campi CSV vini (senza foto base64 — le foto vanno come file separati) */
+  const WINE_FIELDS = CSV_FIELDS.filter(f=>f!=='foto');
+  const WINE_LABELS = CSV_LABELS.filter((_,i)=>CSV_FIELDS[i]!=='foto');
+
+  const wineRows = [WINE_LABELS.join(',')];
+  wines.forEach(w=>wineRows.push(WINE_FIELDS.map(f=>csvCell(w[f]||'')).join(',')));
+  const wineCSV = '\uFEFF' + wineRows.join('\r\n');
+
+  const moveRows = ['ID,Tipo,Data,Vino,Cantina,Quantita,Negozio,Prezzo,Note'];
+  movements.forEach(m=>moveRows.push([m.id,m.tipo,m.data,m.wineNome,m.wineCantina,m.quantita,m.negozio,m.prezzo,m.note].map(csvCell).join(',')));
+  const moveCSV = '\uFEFF' + moveRows.join('\r\n');
+
+  const winesWithPhoto = wines.filter(w=>w.foto);
+
+  /* ── Tentativo con File System Access API ── */
+  if(FSA_SUPPORTED){
+    let dirHandle = await getBackupDirHandle();
+    if(!dirHandle){
+      /* Prima volta: apri il picker */
+      try{
+        dirHandle = await window.showDirectoryPicker({mode:'readwrite', startIn:'downloads'});
+        await dbSetting(BACKUP_DIR_KEY, dirHandle);
+        await dbSetting(BACKUP_DIR_NAME_KEY, dirHandle.name);
+        const el=document.getElementById('backup-folder-name');
+        if(el) el.textContent='📁 '+dirHandle.name;
+      } catch(e){
+        if(e.name!=='AbortError') showToast('Cartella non selezionata', true);
+        return;
+      }
+    }
+
+    showToast('💾 Salvataggio in corso…');
+    try{
+      await writeToDirHandle(dirHandle, `cantina_vini_${date}.csv`,   new Blob([wineCSV], {type:'text/csv'}));
+      await writeToDirHandle(dirHandle, `cantina_movimenti_${date}.csv`, new Blob([moveCSV], {type:'text/csv'}));
+      let imgOK=0;
+      for(const w of winesWithPhoto){
+        try{
+          await writeToDirHandle(dirHandle, `${w.id}.jpg`, new Blob([b64ToBytes(w.foto)], {type:'image/jpeg'}));
+          imgOK++;
+        } catch(e){ console.warn('img write:',e); }
+      }
+      showToast(`✓ Backup in "${dirHandle.name}": vini, movimenti, ${imgOK} foto`);
+      return;
+    } catch(e){
+      showToast('Errore scrittura: '+e.message, true);
+      return;
+    }
+  }
+
+  /* ── Fallback: download separati ── */
+  const dl = (blob, name) => {
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement('a');a.href=url;a.download=name;a.click();
+    URL.revokeObjectURL(url);
+  };
+  dl(new Blob([wineCSV],{type:'text/csv'}), `cantina_vini_${date}.csv`);
+  setTimeout(()=>dl(new Blob([moveCSV],{type:'text/csv'}), `cantina_movimenti_${date}.csv`), 600);
+  let delay=1200;
+  for(const w of winesWithPhoto){
+    setTimeout(()=>dl(new Blob([b64ToBytes(w.foto)],{type:'image/jpeg'}), `${w.id}.jpg`), delay);
+    delay+=200;
+  }
+  showToast(`Download: vini, movimenti, ${winesWithPhoto.length} foto`);
+}
+
+/* ── RIPRISTINA DA CARTELLA ── */
+async function importFromFolder(){
+  if(!FSA_SUPPORTED){
+    showToast('Usa Importa CSV per ripristinare su questo browser', true);
+    return;
+  }
+  let dirHandle;
+  try{
+    dirHandle = await window.showDirectoryPicker({mode:'read', startIn:'downloads'});
+  } catch(e){ return; }
+
+  showToast('📂 Scansione cartella…');
+  let wineCSV=null, moveCSV=null;
+  const imageMap={}; /* id → base64 dataURL */
+
+  try{
+    for await(const [name, handle] of dirHandle.entries()){
+      if(handle.kind !== 'file') continue;
+      const lname = name.toLowerCase();
+      if(lname.startsWith('cantina_vini_') && lname.endsWith('.csv')){
+        const f=await handle.getFile(); wineCSV=await f.text();
+      } else if(lname.startsWith('cantina_movimenti_') && lname.endsWith('.csv')){
+        const f=await handle.getFile(); moveCSV=await f.text();
+      } else if(lname.endsWith('.jpg')||lname.endsWith('.jpeg')||lname.endsWith('.png')){
+        const id=name.replace(/\.(jpg|jpeg|png)$/i,'');
+        const f=await handle.getFile();
+        imageMap[id]=await fileToDataURL(f);
+      }
+    }
+  } catch(e){ showToast('Errore lettura cartella: '+e.message, true); return; }
+
+  /* Parsa subito per sapere i conteggi */
+  const importedWines = wineCSV ? parseCSVToWines(wineCSV) : [];
+  const importedMoves = moveCSV ? parseMovementsCSV(moveCSV) : [];
+  const imgCount      = Object.keys(imageMap).length;
+
+  if(!importedWines.length && !importedMoves.length && !imgCount){
+    showToast('Nessun file di backup trovato nella cartella', true); return;
+  }
+
+  /* ── STEP 1: cosa ripristinare ── */
+  const hasWines = importedWines.length > 0;
+  const hasMoves = importedMoves.length > 0;
+  const hasImgs  = imgCount > 0;
+
+  const chkId = s => 'restore-chk-'+s;
+  let step1HTML =
+    '<div style="font-size:12px;color:var(--text-dim);margin-bottom:12px">'+
+    'Trovati nella cartella <b style="color:var(--text)">'+dirHandle.name+'</b>:</div>'+
+    '<div style="display:flex;flex-direction:column;gap:8px">';
+
+  const makeChk = (id, label, sublabel, count, avail) =>
+    `<label style="display:flex;align-items:center;gap:11px;padding:10px 12px;background:var(--surface2);border:1px solid ${avail?'var(--border)':'var(--border)'};border-radius:10px;cursor:${avail?'pointer':'default'};opacity:${avail?1:.4}">
+      <input type="checkbox" id="${id}" ${avail?'checked':''} ${avail?'':'disabled'}
+        style="width:17px;height:17px;accent-color:var(--gold);cursor:${avail?'pointer':'default'}">
+      <div>
+        <div style="font-size:13px;color:var(--text)">${label}
+          <span style="font-size:11px;color:var(--gold);margin-left:6px">${count}</span>
+        </div>
+        <div style="font-size:11px;color:var(--text-faint);margin-top:1px">${sublabel}</div>
+      </div>
+    </label>`;
+
+  step1HTML += makeChk(chkId('wines'), '🍷 Schede vino',    'Dati anagrafici e campi',           hasWines?importedWines.length+' vini':'—',   hasWines);
+  step1HTML += makeChk(chkId('moves'), '📋 Movimenti',       'Carichi e scarichi',                hasMoves?importedMoves.length+' record':'—', hasMoves);
+  step1HTML += makeChk(chkId('imgs'),  '📷 Foto',            'File '+imgCount+' immagini .jpg',   hasImgs?imgCount+' immagini':'—',            hasImgs);
+  step1HTML += '</div>';
+
+  showModal('Cosa ripristinare?', step1HTML, [
+    {label:'Avanti →', cls:'primary', action:()=>{
+      const doWines = hasWines && document.getElementById(chkId('wines'))?.checked;
+      const doMoves = hasMoves && document.getElementById(chkId('moves'))?.checked;
+      const doImgs  = hasImgs  && document.getElementById(chkId('imgs'))?.checked;
+      if(!doWines && !doMoves && !doImgs){
+        showToast('Seleziona almeno un elemento', true); return;
+      }
+      closeModal();
+      /* ── STEP 2: come ripristinare ── */
+      const selSummary = [
+        doWines && importedWines.length+' vini',
+        doMoves && importedMoves.length+' movimenti',
+        doImgs  && imgCount+' foto',
+      ].filter(Boolean).join(', ');
+
+      showModal('Come ripristinare?',
+        '<div style="font-size:13px;color:var(--text-dim);line-height:1.6">Elementi selezionati: <b style="color:var(--text)">'+selSummary+'</b><br><br>'+
+        '<b>Unisci</b>: aggiunge solo gli elementi non ancora presenti.<br>'+
+        '<b>Sostituisci</b>: cancella i dati attuali e li rimpiazza con quelli del backup.</div>',
+        [
+          {label:'Unisci — aggiungi nuovi', cls:'primary', action:()=>{
+            let addedW=0, addedM=0, addedImg=0;
+            if(doWines){
+              const ids=new Set(wines.map(w=>w.id));
+              const news=importedWines.filter(w=>!ids.has(w.id));
+              wines=[...news,...wines]; addedW=news.length;
+            }
+            if(doMoves){
+              const mids=new Set(movements.map(m=>m.id));
+              const newm=importedMoves.filter(m=>!mids.has(m.id));
+              movements=[...newm,...movements]; addedM=newm.length;
+            }
+            if(doImgs){
+              /* Abbina foto ai vini esistenti per ID */
+              wines.forEach(w=>{ if(imageMap[w.id]&&!w.foto){ w.foto=imageMap[w.id]; addedImg++; } });
+              /* Abbina anche ai vini appena importati (già in array) */
+              if(doWines) wines.forEach(w=>{ if(imageMap[w.id]&&!w.foto){ w.foto=imageMap[w.id]; addedImg++; } });
+            }
+            if(doWines||doImgs) save();
+            if(doMoves) saveMoves();
+            renderList(); closeModal();
+            showToast('✓ Aggiunti: '+[addedW&&addedW+' vini',addedM&&addedM+' movimenti',addedImg&&addedImg+' foto'].filter(Boolean).join(', '));
+          }},
+          {label:'Sostituisci selezione', cls:'secondary', action:()=>{
+            let addedImg=0;
+            if(doWines){ wines=importedWines; }
+            if(doMoves){ movements=importedMoves; }
+            if(doImgs){
+              wines.forEach(w=>{ if(imageMap[w.id]){ w.foto=imageMap[w.id]; addedImg++; } });
+            }
+            if(doWines||doImgs) save();
+            if(doMoves) saveMoves();
+            renderList(); closeModal();
+            showToast('✓ Ripristinati: '+[doWines&&importedWines.length+' vini',doMoves&&importedMoves.length+' movimenti',doImgs&&addedImg+' foto'].filter(Boolean).join(', '));
+          }},
+          {label:'← Indietro', cls:'secondary', action:()=>{ closeModal(); importFromFolder(); }},
+        ]
+      );
+    }},
+    {label:'Annulla', cls:'secondary', action:closeModal},
+  ]);
+}
+
+/* ── Parser CSV → array vini (senza foto inline) ── */
+function parseCSVToWines(text){
+  const lines=text.replace(/^\uFEFF/,'').split(/\r?\n/).filter(l=>l.trim());
+  if(lines.length<2) return [];
+  const hdr=parseCSVRow(lines[0]).map(h=>h.trim().toLowerCase());
+  /* Usa i WINE_FIELDS (senza foto) */
+  const WINE_FIELDS_NO_FOTO = CSV_FIELDS.filter(f=>f!=='foto');
+  const WINE_LABELS_NO_FOTO = CSV_LABELS.filter((_,i)=>CSV_FIELDS[i]!=='foto');
+  const idx={};
+  WINE_LABELS_NO_FOTO.forEach((h,i)=>{ idx[WINE_FIELDS_NO_FOTO[i]]=hdr.indexOf(h.toLowerCase()); });
+  /* Anche prova con colonna foto se presente (import da CSV completo) */
+  const fotoIdx = hdr.indexOf('foto base64');
+  const result=[];
+  for(let i=1;i<lines.length;i++){
+    const cols=parseCSVRow(lines[i]);
+    const w={};
+    WINE_FIELDS_NO_FOTO.forEach(f=>{ w[f]=idx[f]>=0?(cols[idx[f]]||'').trim():''; });
+    if(fotoIdx>=0) w.foto=(cols[fotoIdx]||'').trim()||null;
+    if(!w.nome&&!w.cantina) continue;
+    if(!w.id) w.id=genId();
+    result.push(w);
+  }
+  return result;
+}
+
+/* ── Parser movimenti CSV ── */
+function parseMovementsCSV(text){
+  const lines=text.replace(/^\uFEFF/,'').split(/\r?\n/).filter(l=>l.trim());
+  if(lines.length<2) return [];
+  const hdr=parseCSVRow(lines[0]).map(h=>h.trim().toLowerCase());
+  const fi=(name)=>hdr.indexOf(name.toLowerCase());
+  const result=[];
+  for(let i=1;i<lines.length;i++){
+    const c=parseCSVRow(lines[i]);
+    const get=idx=>idx>=0?(c[idx]||'').trim():'';
+    const m={
+      id:         get(fi('id'))||genId(),
+      tipo:       get(fi('tipo'))||'carico',
+      data:       get(fi('data')),
+      wineNome:   get(fi('vino')),
+      wineCantina:get(fi('cantina')),
+      quantita:   parseInt(get(fi('quantita')))||1,
+      negozio:    get(fi('negozio')),
+      prezzo:     get(fi('prezzo')),
+      note:       get(fi('note')),
+      wineId:     get(fi('wineid'))||'',
+    };
+    if(!m.wineNome) continue;
+    result.push(m);
+  }
+  return result;
+}
+
+/* ══════════════════════════════════════════════════════
+   TERRITORI — Nazioni e Regioni
+   Struttura: { id, nome, regioni: ['Roma','Toscana',...] }
+   Salvato in IDB settings con chiave 'territori_v1'
+   ══════════════════════════════════════════════════════ */
+
+const TERRITORI_KEY = 'territori_v1';
+let _territori = []; /* cache in memoria */
+
+/* Nazioni/regioni predefinite (caricato solo al primo avvio) */
+const TERRITORI_DEFAULT = [
+  {id:'IT', nome:'Italia',    regioni:['Piemonte','Valle d\'Aosta','Liguria','Lombardia','Trentino-Alto Adige','Veneto','Friuli-Venezia Giulia','Emilia-Romagna','Toscana','Umbria','Marche','Lazio','Abruzzo','Molise','Campania','Puglia','Basilicata','Calabria','Sicilia','Sardegna']},
+  {id:'FR', nome:'Francia',   regioni:['Alsazia','Bordeaux','Borgogna','Champagne','Côtes du Rhône','Languedoc','Loire','Provenza']},
+  {id:'ES', nome:'Spagna',    regioni:['Rioja','Ribera del Duero','Priorat','Penedès','Rías Baixas','Jerez']},
+  {id:'DE', nome:'Germania',  regioni:['Mosella','Renania','Baden','Franken','Rheingau']},
+  {id:'PT', nome:'Portogallo',regioni:['Douro','Alentejo','Vinho Verde','Dão','Bairrada']},
+  {id:'AT', nome:'Austria',   regioni:['Wachau','Kamptal','Steiermark','Burgenland']},
+  {id:'US', nome:'USA',       regioni:['Napa Valley','Sonoma','Oregon','Washington']},
+  {id:'AR', nome:'Argentina', regioni:['Mendoza','Salta','Patagonia']},
+  {id:'CL', nome:'Cile',      regioni:['Maipo','Casablanca','Colchagua']},
+  {id:'AU', nome:'Australia', regioni:['Barossa Valley','Clare Valley','Yarra Valley','McLaren Vale']},
+  {id:'NZ', nome:'Nuova Zelanda',regioni:['Marlborough','Hawke\'s Bay','Central Otago']},
+  {id:'ZA', nome:'Sud Africa',regioni:['Stellenbosch','Franschhoek','Swartland']},
+  {id:'GR', nome:'Grecia',    regioni:['Santorini','Naoussa','Nemea']},
+  {id:'HU', nome:'Ungheria',  regioni:['Tokaj','Eger']},
+  {id:'SI', nome:'Slovenia',  regioni:['Brda','Vipava']},
+  {id:'HR', nome:'Croazia',   regioni:['Dalmazia','Istria']},
+];
+
+async function loadTerritorio(){
+  const stored = await dbSetting(TERRITORI_KEY);
+  if(stored && Array.isArray(stored) && stored.length){
+    _territori = stored;
+  } else {
+    _territori = JSON.parse(JSON.stringify(TERRITORI_DEFAULT));
+    await dbSetting(TERRITORI_KEY, _territori);
+  }
+}
+
+async function saveTerritorio(){
+  await dbSetting(TERRITORI_KEY, _territori);
+}
+
+/* Popola il select nazione nel form */
+function populateNazioneSelect(selectedNazione='', selectedRegione=''){
+  const sel = document.getElementById('f-nazione');
+  sel.innerHTML = '<option value="">— Nazione —</option>';
+  _territori.slice().sort((a,b)=>a.nome.localeCompare(b.nome)).forEach(t=>{
+    const opt = document.createElement('option');
+    opt.value = t.nome; opt.textContent = t.nome;
+    if(t.nome === selectedNazione) opt.selected = true;
+    sel.appendChild(opt);
+  });
+  populateRegioneSelect(selectedNazione, selectedRegione);
+}
+
+function populateRegioneSelect(nazione='', selectedRegione=''){
+  const sel = document.getElementById('f-regione');
+  sel.innerHTML = '<option value="">— Regione —</option>';
+  const t = _territori.find(x=>x.nome===nazione);
+  if(t && t.regioni.length){
+    t.regioni.slice().sort().forEach(r=>{
+      const opt = document.createElement('option');
+      opt.value = r; opt.textContent = r;
+      if(r === selectedRegione) opt.selected = true;
+      sel.appendChild(opt);
+    });
+    sel.disabled = false;
+  } else {
+    sel.disabled = true;
+  }
+}
+
+function onNazioneChange(){
+  const naz = document.getElementById('f-nazione').value;
+  populateRegioneSelect(naz, '');
+}
+
+/* ── Manager Territori ── */
+function showTerritoriManager(){
+  document.getElementById('territori-overlay').style.display='flex';
+  renderTerritoriList();
+}
+function closeTerritoriManager(){
+  document.getElementById('territori-overlay').style.display='none';
+}
+
+function renderTerritoriList(){
+  const container = document.getElementById('territori-list');
+  if(!_territori.length){
+    container.innerHTML='<div class="empty"><div class="icon">🌍</div><h3>Nessuna nazione</h3></div>';
+    return;
+  }
+  const sorted = [..._territori].sort((a,b)=>a.nome.localeCompare(b.nome));
+  container.innerHTML = sorted.map(t=>`
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:11px;margin-bottom:10px;overflow:hidden">
+      <!-- Nazione header -->
+      <div style="display:flex;align-items:center;gap:8px;padding:10px 12px;background:var(--surface2);border-bottom:1px solid var(--border)">
+        <span style="flex:1;font-family:'Playfair Display',serif;font-size:15px;color:var(--gold)">${esc(t.nome)}</span>
+        <span style="font-size:11px;color:var(--text-faint)">${t.regioni.length} regioni</span>
+        <button onclick="deleteNazione('${esc(t.nome)}')" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:16px;padding:2px 4px" title="Elimina nazione">🗑</button>
+      </div>
+      <!-- Regioni -->
+      <div style="padding:8px 10px">
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">
+          ${t.regioni.map(r=>`
+            <span style="display:inline-flex;align-items:center;gap:4px;background:var(--gold-bg);border:1px solid var(--gold-dim);border-radius:16px;padding:3px 9px 3px 11px;font-size:12px;color:var(--gold)">
+              ${esc(r)}
+              <button onclick="deleteRegione('${esc(t.nome)}','${esc(r)}')" style="background:none;border:none;color:var(--gold);cursor:pointer;font-size:13px;line-height:1;padding:0 0 0 2px">×</button>
+            </span>`).join('')}
+        </div>
+        <!-- Aggiungi regione -->
+        <div style="display:flex;gap:7px">
+          <input id="new-reg-${esc(t.nome)}" class="field-input" type="text" placeholder="Aggiungi regione..." style="flex:1;padding:7px 10px;font-size:13px">
+          <button onclick="addRegione('${esc(t.nome)}')" style="background:var(--gold-bg);border:1px solid var(--gold-dim);border-radius:9px;color:var(--gold);padding:7px 12px;font-size:12px;cursor:pointer;font-family:inherit;white-space:nowrap">+ Regione</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+function addNazione(){
+  const inp = document.getElementById('new-nazione-input');
+  const nome = inp.value.trim();
+  if(!nome){ showToast('Inserisci il nome della nazione', true); return; }
+  if(_territori.find(t=>t.nome.toLowerCase()===nome.toLowerCase())){
+    showToast('Nazione già presente', true); return;
+  }
+  _territori.push({id:genId(), nome, regioni:[]});
+  saveTerritorio();
+  inp.value='';
+  renderTerritoriList();
+  showToast('✓ Nazione aggiunta: '+nome);
+}
+
+function deleteNazione(nome){
+  showModal('Elimina nazione','Eliminare "'+nome+'" e tutte le sue regioni?',[
+    {label:'Elimina', cls:'primary', action:()=>{
+      _territori = _territori.filter(t=>t.nome!==nome);
+      saveTerritorio(); closeModal(); renderTerritoriList();
+      showToast('Nazione eliminata');
+    }},
+    {label:'Annulla', cls:'secondary', action:closeModal}
+  ]);
+}
+
+function addRegione(nazione){
+  const key = 'new-reg-'+nazione;
+  const inp = document.getElementById(key);
+  if(!inp) return;
+  const regione = inp.value.trim();
+  if(!regione){ showToast('Inserisci il nome della regione', true); return; }
+  const t = _territori.find(x=>x.nome===nazione);
+  if(!t) return;
+  if(t.regioni.find(r=>r.toLowerCase()===regione.toLowerCase())){
+    showToast('Regione già presente', true); return;
+  }
+  t.regioni.push(regione);
+  saveTerritorio();
+  inp.value='';
+  renderTerritoriList();
+  showToast('✓ Regione aggiunta: '+regione);
+}
+
+function deleteRegione(nazione, regione){
+  const t = _territori.find(x=>x.nome===nazione);
+  if(!t) return;
+  t.regioni = t.regioni.filter(r=>r!==regione);
+  saveTerritorio();
+  renderTerritoriList();
+  showToast('Regione rimossa');
+}
+
+function confirmDelete(id){
+  const w=wines.find(x=>x.id===id);if(!w)return;
+  showModal('Elimina vino','Eliminare "'+w.nome+'" di '+w.cantina+'?',[
+    {label:'Elimina',cls:'primary',action:()=>{wines=wines.filter(x=>x.id!==id);save();closeModal();showList();showToast('Vino eliminato');}},
+    {label:'Annulla',cls:'secondary',action:closeModal}
+  ]);
+}
+
+function exportJSON(){
+  if(!wines.length){showToast('Nessun vino',true);return;}
+  const data={version:'4.0',exported:new Date().toISOString(),wines,movements};
+  const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;
+  a.download='cantina_backup_'+new Date().toISOString().split('T')[0]+'.json';
+  a.click();URL.revokeObjectURL(url);
+  showToast('Esportati '+wines.length+' vini + '+movements.length+' movimenti');
+}
+
+function importJSON(e){
+  const file=e.target.files?.[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      const data=JSON.parse(ev.target.result);
+      const imported=Array.isArray(data)?data:(data.wines||[]);
+      const importedMoves=data.movements||[];
+      if(!imported.length){showToast('File vuoto',true);return;}
+      showModal('Importa JSON','Trovati '+imported.length+' vini e '+importedMoves.length+' movimenti.',[
+        {label:'Unisci - aggiungi nuovi',cls:'primary',action:()=>{
+          const ids=new Set(wines.map(w=>w.id));const news=imported.filter(w=>!ids.has(w.id));wines=[...news,...wines];
+          const mids=new Set(movements.map(m=>m.id));const newm=importedMoves.filter(m=>!mids.has(m.id));movements=[...newm,...movements];
+          save();saveMoves();renderList();closeModal();showToast('Aggiunti '+news.length+' vini');
+        }},
+        {label:'Sostituisci tutto',cls:'secondary',action:()=>{wines=imported;movements=importedMoves;save();saveMoves();renderList();closeModal();showToast('Importati '+wines.length+' vini');}},
+        {label:'Annulla',cls:'secondary',action:closeModal}
+      ]);
+    }catch{showToast('File non valido',true);}
+    e.target.value='';
+  };
+  reader.readAsText(file);
+}
+
+const CSV_FIELDS=['id','cantina','nome','nazione','regione','anno','tipologia','gradi','vitigno','formato','quantita','prezzo','date','datalimite','posizione','scaffale','acquistato','rating','note','foto'];
+const CSV_LABELS=['ID','Cantina','Nome','Nazione','Regione','Annata','Tipologia','Gradi %','Vitigno','Formato','Bottiglie','Prezzo','Data Acquisto','Data Limite','Posizione','Scaffale','Acquistato Presso','Punteggio','Note','Foto base64'];
+
+function csvCell(v){const s=String(v===null||v===undefined?'':v);return(s.includes(',')||s.includes('"')||s.includes('\n'))?'"'+s.replace(/"/g,'""')+'"':s;}
+
+function exportCSV(){
+  if(!wines.length){showToast('Nessun vino',true);return;}
+  const rows=[CSV_LABELS.join(',')];
+  wines.forEach(w=>rows.push(CSV_FIELDS.map(f=>csvCell(w[f]||'')).join(',')));
+  rows.push('','');
+  rows.push(['ID','Tipo','Data','Vino','Cantina','Quantita','Negozio','Prezzo','Note'].join(','));
+  movements.forEach(m=>rows.push([m.id,m.tipo,m.data,m.wineNome,m.wineCantina,m.quantita,m.negozio,m.prezzo,m.note].map(csvCell).join(',')));
+  const blob=new Blob(['\uFEFF'+rows.join('\r\n')],{type:'text/csv;charset=utf-8'});
+  const url=URL.createObjectURL(blob);const a=document.createElement('a');a.href=url;
+  a.download='cantina_'+new Date().toISOString().split('T')[0]+'.csv';
+  a.click();URL.revokeObjectURL(url);
+  showToast('CSV esportato ('+wines.length+' vini + foto)');
+}
+
+function parseCSVRow(line){const out=[];let cur='',inQ=false;for(let i=0;i<line.length;i++){const c=line[i];if(c==='"'){if(inQ&&line[i+1]==='"'){cur+='"';i++;}else inQ=!inQ;}else if(c===','&&!inQ){out.push(cur);cur='';}else cur+=c;}out.push(cur);return out;}
+
+function importCSV(e){
+  const file=e.target.files?.[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=ev=>{
+    try{
+      const text=ev.target.result.replace(/^\uFEFF/,'');
+      const lines=text.split(/\r?\n/).filter(l=>l.trim());
+      if(lines.length<2){showToast('CSV vuoto',true);return;}
+      const hdr=parseCSVRow(lines[0]).map(h=>h.trim().toLowerCase());
+      const idx={};CSV_LABELS.forEach((h,i)=>{idx[CSV_FIELDS[i]]=hdr.indexOf(h.toLowerCase());});
+      const imported=[];
+      for(let i=1;i<lines.length;i++){
+        const cols=parseCSVRow(lines[i]);
+        const w={};CSV_FIELDS.forEach(f=>{w[f]=idx[f]>=0?(cols[idx[f]]||'').trim():'';});
+        if(!w.nome&&!w.cantina)continue;
+        if(!w.id)w.id=genId();
+        imported.push(w);
+      }
+      if(!imported.length){showToast('Nessun vino trovato',true);return;}
+      showModal('Importa CSV','Trovati '+imported.length+' vini.',[
+        {label:'Unisci',cls:'primary',action:()=>{const ids=new Set(wines.map(w=>w.id));const news=imported.filter(w=>!ids.has(w.id));wines=[...news,...wines];save();renderList();closeModal();showToast('Aggiunti '+news.length+' vini');}},
+        {label:'Sostituisci',cls:'secondary',action:()=>{wines=imported;save();renderList();closeModal();showToast('Importati '+wines.length+' vini');}},
+        {label:'Annulla',cls:'secondary',action:closeModal}
+      ]);
+    }catch(err){showToast('Errore CSV',true);console.error(err);}
+    e.target.value='';
+  };
+  reader.readAsText(file,'UTF-8');
+}
+
+function openDrawer(){
+  document.getElementById('drawer').classList.add('open');
+  document.getElementById('drawer-overlay').classList.add('open');
+  loadOCRKeyField();
+  loadBackupFolderName();
+}
+function closeDrawer(){document.getElementById('drawer').classList.remove('open');document.getElementById('drawer-overlay').classList.remove('open');}
+
+function openManual(){
+  document.getElementById('manual-overlay').classList.add('open');
+  /* Ricarica per assicurarsi che rifletta modifiche al file */
+  const frame=document.getElementById('manual-frame');
+  frame.src=frame.src;
+}
+function closeManual(){document.getElementById('manual-overlay').classList.remove('open');}
+
+/* ══════════ OCR — OCR.space REST API (gratuito, veloce, preciso) ══════════
+   Servizio: https://ocr.space  — Engine 2, supporto ITA+ENG
+   Chiave demo pubblica: "helloworld" (500 req/giorno)
+   Chiave personale gratuita: registrazione su ocr.space (25.000 req/mese)
+   ═══════════════════════════════════════════════════════════════════════ */
+
+const OCR_KEY_STORE = 'cantina_ocr_key_v1';
+
+function getOCRKey(){ return localStorage.getItem(OCR_KEY_STORE)||'helloworld'; }
+function saveOCRKey(){
+  const v=document.getElementById('ocr-key-input')?.value?.trim()||'';
+  if(v){ localStorage.setItem(OCR_KEY_STORE,v); document.getElementById('ocr-key-status').textContent='✓ Chiave salvata'; }
+  else { localStorage.removeItem(OCR_KEY_STORE); document.getElementById('ocr-key-status').textContent='Chiave rimossa — verrà usata la demo'; }
+}
+function loadOCRKeyField(){
+  const k=localStorage.getItem(OCR_KEY_STORE)||'';
+  const inp=document.getElementById('ocr-key-input');
+  if(inp) inp.value=k;
+}
+
+/* Comprime la foto a max ~900KB (limite pratico di ocr.space free tier) */
+async function compressForOCR(b64){
+  return new Promise(res=>{
+    const img=new Image();
+    img.onload=()=>{
+      /* Max 1800px sul lato lungo — buon compromesso velocità/qualità OCR */
+      const MAX=1800;
+      let w=img.naturalWidth,h=img.naturalHeight;
+      const r=Math.min(MAX/w,MAX/h,1);
+      w=Math.round(w*r); h=Math.round(h*r);
+      const c=document.createElement('canvas');
+      c.width=w; c.height=h;
+      const ctx=c.getContext('2d');
+      ctx.imageSmoothingQuality='high';
+      ctx.drawImage(img,0,0,w,h);
+      /* Stima dimensione: se troppo grande, riduci qualità */
+      let q=0.85, out=c.toDataURL('image/jpeg',q);
+      while(out.length>1200000 && q>0.5){ q-=0.1; out=c.toDataURL('image/jpeg',q); }
+      res(out);
+    };
+    img.onerror=()=>res(b64);
+    img.src=b64;
+  });
+}
+
+/* Parser testo estratto — invariato, funziona con qualsiasi fonte OCR */
+function parseWineLabel(rawText){
+  const lines=rawText.split(/\r?\n/).map(l=>l.replace(/[|\\[\]{}]/g,' ').replace(/\s{2,}/g,' ').trim()).filter(l=>l.length>1);
+  const full=lines.join(' ');
+  const result={nome:'',cantina:'',annata:'',tipologia:'',gradi:''};
+
+  /* Annata */
+  const ym=full.match(/\b(19[5-9]\d|20[0-2]\d)\b/);
+  if(ym) result.annata=ym[1];
+
+  /* Gradi alcolici */
+  const gm=full.match(/(\d{1,2}[.,]\d{1,2})\s*%\s*(?:vol|alc|v)/i)
+    ||full.match(/[Aa]lc[.\s]*(\d{1,2}[.,]\d)/i)
+    ||full.match(/(\d{1,2}[.,]\d)\s*%/i)
+    ||full.match(/(\d{2})\s*%\s*vol/i);
+  if(gm) result.gradi=gm[1].replace(',','.');
+
+  /* Tipologia */
+  const tipoKw=[
+    ['Spumante',/spumante|prosecco|cava|crémant|champagne|metodo\s*classico|metodo\s*charmat/i],
+    ['Rosso',/\brosso\b|red\s*wine|vino\s*rosso|barolo|barbaresco|amarone|brunello/i],
+    ['Bianco',/\bbianco\b|white\s*wine|vino\s*bianco|soave|vermentino/i],
+    ['Rosé',/\brosé\b|\brosato\b|rose\s*wine/i],
+    ['Passito',/passito|recioto|vendemmia\s*tardiva|late\s*harvest/i],
+    ['Grappa',/grappa|acquavite/i],
+  ];
+  for(const[label,re]of tipoKw){if(re.test(full)){result.tipologia=label;break;}}
+
+  /* Nome e cantina */
+  const STOP=new Set(['vino','wine','rosso','bianco','rosé','rosato','spumante','doc','docg','igt','dop','igp','denominazione','controllata','garantita','indicazione','geografica','tipica','prodotto','imbottigliato','italia','italy','riserva','superiore','classico','gran','selezione','annata','vendemmia','bottiglia','bottiglie','magnum','cl','ml','lt','75','150','contiene','solfiti','sulphites','sulfites','e','di','da','del','della','dello','delle','dei','degli','il','la','lo','le','gli','i','un','una','e','o','the','of','by','and','con','per','in','al','allo','alla','alle','ai','agli','su','sul']);
+  const cands=lines.filter(l=>!/^\d+$/.test(l)&&!/^\d+[.,]\d/.test(l)&&l.length>=2&&l.length<=70)
+    .map(l=>l.replace(/[®™©°]/g,'').trim())
+    .filter(l=>l.split(/\s+/).some(w=>w.length>=2&&!STOP.has(w.toLowerCase())&&!/^\d/.test(w)));
+  const scored=cands.map(l=>{
+    const letters=l.replace(/\s/g,'');
+    const ur=(letters.match(/[A-ZÀÈÌÒÙÁÉÍÓÚ]/g)||[]).length/(letters.length||1);
+    const ls=l.length>=5&&l.length<=25?0.2:0;
+    const sp=l.split(/\s+/).every(w=>STOP.has(w.toLowerCase()))?-1:0;
+    return{text:l,score:ur+ls+sp};
+  });
+  scored.sort((a,b)=>b.score-a.score);
+  const canRe=/cantina|tenuta|azienda|podere|fattoria|winery|domaine|château|estate/i;
+  let nSet=false,cSet=false;
+  for(const{text}of scored){
+    if(!cSet&&canRe.test(text)){result.cantina=text;cSet=true;}
+    else if(!nSet){result.nome=text;nSet=true;}
+    if(nSet&&cSet)break;
+  }
+  if(!cSet&&scored.length>=2&&nSet){
+    const others=scored.filter(s=>s.text!==result.nome);
+    if(others.length)result.cantina=others[0].text;
+  }
+  return result;
+}
+
+/* ── OCR PRINCIPALE ── */
+async function runOCR(){
+  if(!currentPhotoB64){showToast('Carica prima una foto',true);return;}
+  const btn=document.getElementById('ocr-btn');
+  const status=document.getElementById('ocr-status');
+  const result=document.getElementById('ocr-result');
+  btn.disabled=true;
+  status.classList.add('show');
+  status.innerHTML='📤 Invio immagine a OCR.space…';
+  result.classList.remove('show');
+  result.innerHTML='';
+
+  try{
+    const compressed=await compressForOCR(currentPhotoB64);
+    const t0=Date.now();
+
+    const fd=new FormData();
+    fd.append('base64Image', compressed);
+    fd.append('language','ita');           /* Italiano principale */
+    fd.append('apikey', getOCRKey());
+    fd.append('OCREngine','2');            /* Engine 2: più accurato su testi complessi */
+    fd.append('detectOrientation','true'); /* Auto-ruota se necessario */
+    fd.append('scale','true');             /* Migliora testo piccolo */
+    fd.append('isTable','false');
+    fd.append('isOverlayRequired','false');
+
+    const resp=await fetch('https://api.ocr.space/parse/image',{method:'POST',body:fd});
+    if(!resp.ok) throw new Error('Servizio non raggiungibile (HTTP '+resp.status+')');
+
+    const data=await resp.json();
+    const ms=Date.now()-t0;
+
+    /* Gestione errori specifici di ocr.space */
+    if(data.IsErroredOnProcessing){
+      const msg=(data.ParsedResults?.[0]?.ErrorMessage||data.ErrorMessage||'Errore sconosciuto');
+      if(msg.includes('API key') || msg.includes('free plan') || msg.includes('limit')){
+        throw new Error('Limite chiave demo raggiunto. Registra una chiave gratuita su ocr.space e inseriscila nelle Impostazioni (⚙).');
+      }
+      throw new Error(msg);
+    }
+
+    const rawText=(data.ParsedResults||[]).map(r=>r.ParsedText||'').join('\n').trim();
+    if(!rawText) throw new Error('Nessun testo trovato nell\'immagine. Prova con una foto più nitida e ravvicinata.');
+
+    status.classList.remove('show');
+
+    const parsed=parseWineLabel(rawText);
+    const rawEsc=esc(rawText.slice(0,700)).replace(/\n/g,'<br>');
+
+    const FIELDS=[
+      {key:'nome',     label:'Nome Vino', id:'f-nome'},
+      {key:'cantina',  label:'Cantina',   id:'f-cantina'},
+      {key:'annata',   label:'Annata',    id:'f-anno'},
+      {key:'tipologia',label:'Tipologia', id:'f-tipo'},
+      {key:'gradi',    label:'Gradi %',   id:'f-gradi'},
+    ];
+    const found=FIELDS.filter(f=>parsed[f.key]&&String(parsed[f.key]).trim());
+
+    let html=`<div style="font-size:11px;color:var(--text-faint);margin-bottom:9px">⚡ Analisi completata in ${(ms/1000).toFixed(1)}s</div>`;
+
+    if(found.length===0){
+      html+='<div style="color:var(--text-dim)">⚠ Nessun campo riconoscibile.<br><small>Prova con: foto ravvicinata, buona luce, etichetta ben inquadrata.</small></div>';
+    }else{
+      html+='<div style="font-weight:600;margin-bottom:9px;color:var(--gold)">📖 Dati trovati:</div>';
+      found.forEach(f=>{
+        const val=String(parsed[f.key]).trim();
+        const safeVal=val.replace(/\\/g,'\\\\').replace(/'/g,"\\'");
+        html+='<div style="display:flex;align-items:center;gap:8px;margin-bottom:7px">'+
+          '<span style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:1px;min-width:58px">'+f.label+'</span>'+
+          '<span style="flex:1;font-size:13px;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="'+esc(val)+'">'+esc(val)+'</span>'+
+          '<button onclick="applyOCR(\''+f.id+'\',\''+safeVal+'\')" style="background:var(--green-bg);border:1px solid var(--green);border-radius:7px;color:var(--green);padding:3px 9px;font-size:11px;cursor:pointer;font-family:inherit;flex-shrink:0">✓</button>'+
+          '</div>';
+      });
+      html+='<button onclick="applyAllOCR()" style="width:100%;margin-top:4px;padding:9px;background:var(--green-bg);border:1px solid var(--green);border-radius:8px;color:var(--green);font-size:13px;cursor:pointer;font-family:inherit">✓ Applica tutti</button>';
+    }
+
+    /* Salva parsed globalmente per applyAllOCR() */
+    window._lastOCRParsed = parsed;
+
+    html+='<details style="margin-top:10px"><summary style="font-size:11px;color:var(--text-faint);cursor:pointer">Testo grezzo OCR</summary>'+
+      '<div style="font-size:11px;color:var(--text-faint);line-height:1.5;margin-top:6px;max-height:140px;overflow-y:auto;background:var(--surface2);border-radius:6px;padding:8px">'+rawEsc+'</div></details>';
+
+    result.innerHTML=html;
+    result.classList.add('show');
+
+  }catch(err){
+    status.classList.remove('show');
+    result.innerHTML='<div style="color:var(--red);line-height:1.5">⚠ '+esc(err.message||String(err))+'</div>';
+    result.classList.add('show');
+  }finally{
+    status.innerHTML='';
+    btn.disabled=false;
+  }
+}
+
+function applyOCR(fieldId,value){
+  const el=document.getElementById(fieldId);if(!el)return;
+  el.value=value;el.style.borderColor='var(--green)';
+  setTimeout(()=>el.style.borderColor='',1600);
+  showToast('✓ Campo aggiornato');
+}
+function applyAllOCR(){
+  const parsed=window._lastOCRParsed;
+  if(!parsed){showToast('Nessun dato OCR disponibile',true);return;}
+  const map={nome:'f-nome',cantina:'f-cantina',annata:'f-anno',tipologia:'f-tipo',gradi:'f-gradi'};
+  let n=0;
+  Object.entries(map).forEach(([k,id])=>{if(parsed[k]&&String(parsed[k]).trim()){const el=document.getElementById(id);if(el){el.value=String(parsed[k]).trim();n++;}}});
+  showToast('✓ Applicati '+n+' campi');
+}
+
+/* ══════════ PHOTO ZOOM LIGHTBOX ══════════ */
+(function(){
+  let scale=1,minScale=1,maxScale=5;
+  let panX=0,panY=0;
+  let lastDist=0,lastMidX=0,lastMidY=0;
+  let isDragging=false,dragStartX=0,dragStartY=0,panStartX=0,panStartY=0;
+  let lastTap=0;
+
+  function clamp(v,lo,hi){return Math.max(lo,Math.min(hi,v));}
+  function applyTransform(){
+    const img=document.getElementById('zoom-img');
+    img.style.transform='translate('+panX+'px,'+panY+'px) scale('+scale+')';
+  }
+  function resetZoom(){scale=1;panX=0;panY=0;applyTransform();}
+
+  window.openZoom=function(encodedSrc){
+    const src=decodeURIComponent(encodedSrc);
+    const img=document.getElementById('zoom-img');
+    img.src=src;
+    resetZoom();
+    document.getElementById('zoom-overlay').classList.add('open');
+    document.body.style.overflow='hidden';
+  };
+  window.closeZoom=function(e){
+    if(e&&e.target!==document.getElementById('zoom-overlay')&&!e.target.classList.contains('zoom-overlay-close'))return;
+    document.getElementById('zoom-overlay').classList.remove('open');
+    document.body.style.overflow='';
+    resetZoom();
+  };
+
+  const wrap=document.getElementById('zoom-img-wrap');
+
+  /* ── PINCH ZOOM (touch) ── */
+  wrap.addEventListener('touchstart',function(e){
+    if(e.touches.length===2){
+      lastDist=Math.hypot(e.touches[0].pageX-e.touches[1].pageX,e.touches[0].pageY-e.touches[1].pageY);
+      lastMidX=(e.touches[0].pageX+e.touches[1].pageX)/2;
+      lastMidY=(e.touches[0].pageY+e.touches[1].pageY)/2;
+    } else if(e.touches.length===1){
+      isDragging=true;
+      dragStartX=e.touches[0].pageX;dragStartY=e.touches[0].pageY;
+      panStartX=panX;panStartY=panY;
+      /* double-tap to reset */
+      const now=Date.now();
+      if(now-lastTap<300){resetZoom();}
+      lastTap=now;
+    }
+    e.preventDefault();
+  },{passive:false});
+
+  wrap.addEventListener('touchmove',function(e){
+    if(e.touches.length===2){
+      const dist=Math.hypot(e.touches[0].pageX-e.touches[1].pageX,e.touches[0].pageY-e.touches[1].pageY);
+      const delta=dist/lastDist;
+      scale=clamp(scale*delta,minScale,maxScale);
+      lastDist=dist;
+      applyTransform();
+    } else if(e.touches.length===1&&isDragging&&scale>1){
+      panX=panStartX+(e.touches[0].pageX-dragStartX);
+      panY=panStartY+(e.touches[0].pageY-dragStartY);
+      applyTransform();
+    }
+    e.preventDefault();
+  },{passive:false});
+
+  wrap.addEventListener('touchend',function(e){if(e.touches.length===0)isDragging=false;});
+
+  /* ── MOUSE WHEEL ZOOM (desktop/trackpad) ── */
+  wrap.addEventListener('wheel',function(e){
+    e.preventDefault();
+    const delta=e.deltaY>0?0.9:1.1;
+    scale=clamp(scale*delta,minScale,maxScale);
+    applyTransform();
+  },{passive:false});
+
+  /* ── MOUSE DRAG (desktop) ── */
+  wrap.addEventListener('mousedown',function(e){isDragging=true;dragStartX=e.pageX;dragStartY=e.pageY;panStartX=panX;panStartY=panY;});
+  window.addEventListener('mousemove',function(e){if(!isDragging||scale<=1)return;panX=panStartX+(e.pageX-dragStartX);panY=panStartY+(e.pageY-dragStartY);applyTransform();});
+  window.addEventListener('mouseup',function(){isDragging=false;});
+
+  /* close on Escape — gestito dal listener globale in sezione navigazione */
+})();
+
+function showUpdateInfo(){showModal('Aggiornare senza perdere dati','I dati sono in IndexedDB nel browser, non nel file HTML. Per aggiornare: scarica la nuova versione, aprila nello stesso browser. I dati appaiono automaticamente. Fai sempre un backup JSON prima.',[{label:'OK',cls:'primary',action:closeModal}]);}
+
+function showModal(title,msg,btns){
+  document.getElementById('modal-title').textContent=title;
+  document.getElementById('modal-msg').innerHTML=msg;
+  document.getElementById('modal-btns').innerHTML=btns.map((b,i)=>'<button class="btn-modal '+b.cls+'" onclick="_ma('+i+')">'+b.label+'</button>').join('');
+  window._macts=btns.map(b=>b.action);
+  document.getElementById('modal').classList.add('open');
+}
+window._ma=i=>window._macts?.[i]?.();
+function closeModal(){document.getElementById('modal').classList.remove('open');}
+document.getElementById('modal').addEventListener('click',e=>{if(e.target===e.currentTarget)closeModal();});
+
+function showToast(msg,isErr=false){
+  const t=document.getElementById('toast');clearTimeout(toastTimer);
+  t.textContent=msg;t.className='toast'+(isErr?' err':'');
+  requestAnimationFrame(()=>t.classList.add('show'));
+  toastTimer=setTimeout(()=>t.classList.remove('show'),2700);
+}
+
+let _newSW=null;
+function applyUpdate(){if(_newSW){_newSW.postMessage('SKIP_WAITING');_newSW.addEventListener('statechange',()=>{if(_newSW.state==='activated')window.location.reload();});}else window.location.reload();}
+if('serviceWorker'in navigator){
+  navigator.serviceWorker.register('./sw.js').then(reg=>{
+    if(reg.waiting){_newSW=reg.waiting;document.getElementById('update-banner').classList.add('show');}
+    reg.addEventListener('updatefound',()=>{const nw=reg.installing;nw.addEventListener('statechange',()=>{if(nw.state==='installed'&&navigator.serviceWorker.controller){_newSW=nw;document.getElementById('update-banner').classList.add('show');}});});
+  }).catch(()=>{});
+  navigator.serviceWorker.addEventListener('controllerchange',()=>window.location.reload());
+}
+
+/* ══════════ INIT ASINCRONO (IndexedDB) ══════════ */
+(async function init(){
+  /* Mostra spinner durante il caricamento */
+  document.getElementById('view-list').classList.remove('active');
+  const spinner=document.createElement('div');
+  spinner.style.cssText='position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:var(--bg);z-index:9999';
+  spinner.innerHTML='<div style="font-size:52px">🍷</div><div style="width:36px;height:36px;border:3px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite"></div><div style="font-size:12px;color:var(--text-faint);letter-spacing:1px;text-transform:uppercase">Caricamento cantina…</div>';
+  document.body.appendChild(spinner);
+
+  try{
+    await dbLoad();   /* IndexedDB + migrazione automatica */
+    loadTheme();
+    document.getElementById('f-date').value=new Date().toISOString().split('T')[0];
+    document.getElementById('m-date').value=new Date().toISOString().split('T')[0];
+  } catch(e){
+    console.error('[Cantina] Errore init:',e);
+  } finally{
+    spinner.remove();
+    document.getElementById('view-list').classList.add('active');
+    renderList();
+  }
+})();
+
+/* ══════════ EXIT CONFIRMATION ══════════ */
+window.addEventListener('beforeunload',function(e){
+  /* Solo se ci sono dati salvati */
+  if(wines.length>0){
+    e.preventDefault();
+    e.returnValue='Sei sicuro di voler uscire da La Mia Cantina?';
+    return e.returnValue;
+  }
+});
+
+
+
+/* ══════════ VISTA PER ZONA ══════════ */
+function showZone(){renderZone();showView('zone');}
+function showTipo(){renderTipo();showView('tipo');}
+
+function renderTipo(){
+  const filtered=getFilteredWines();
+  const q=getSearchQuery();
+  const container=document.getElementById('tipo-body');
+  if(filtered.length===0){
+    container.innerHTML='<div class="empty"><div class="icon">🍷</div><h3>'+(q?'Nessun risultato':'Nessun vino in archivio')+'</h3><p>'+(q?'Prova un\'altra parola chiave':'Aggiungi vini con tipologia')+'</p></div>';
+    return;
+  }
+  const grouped={},untyped=[];
+  filtered.forEach(w=>{
+    const tipo=(w.tipologia||'').trim();
+    if(!tipo){untyped.push(w);return;}
+    if(!grouped[tipo])grouped[tipo]=[];
+    grouped[tipo].push(w);
+  });
+  let html='';
+  if(q)html+='<div style="background:var(--gold-bg);border:1px solid var(--gold-dim);border-radius:10px;padding:8px 13px;margin-bottom:12px;font-size:12px;color:var(--gold)">🔍 Filtro: «'+esc(q)+'» · '+filtered.length+' vini</div>';
+
+  function mkRows(ws){
+    const rows=ws.map(w=>{
+      const qty=parseInt(w.quantita)||0;
+      const thumb=w.foto
+        ?'<img class="zone-trow-img" src="'+w.foto+'" alt="">'
+        :'<div class="zone-trow-img-ph">🍷</div>';
+      const posStr=[w.posizione,w.scaffale].filter(Boolean).join(' / ')||'—';
+      const stars=starsHTML(w.rating,'mini');
+      return '<div class="zone-trow" data-id="'+w.id+'" onclick="showDetail(\''+w.id+'\')">'
+        +thumb
+        +'<div class="zone-tcell zone-tc-cantina">'+esc(w.cantina)+'</div>'
+        +'<div class="zone-tcell zone-tc-nome">'+esc(w.nome)+'</div>'
+        +'<div class="zone-tcell zone-tc-anno">'+(w.anno?esc(w.anno):'—')+'</div>'
+        +'<div class="zone-tcell zone-tc-tipo">'+(w.tipologia?esc(w.tipologia):'—')+'</div>'
+        +'<div class="zone-tcell zone-tc-pos">'+esc(posStr)+'</div>'
+        +'<div class="zone-tcell zone-tc-stars">'+(stars||'—')+'</div>'
+        +'<div class="zone-tcell zone-tc-qty"><span class="card-badge qty'+(qty===0?' zero':'')+'">'+qty+'</span></div>'
+        +'</div>';
+    }).join('');
+    return '<div class="zone-table-scroll">'+rows+'</div>';
+  }
+
+  Object.keys(grouped).sort().forEach(tipo=>{
+    const ws=grouped[tipo];
+    const totBot=ws.reduce((s,w)=>s+(parseInt(w.quantita)||0),0);
+    html+='<div class="zone-section">';
+    html+='<div class="zone-header">';
+    html+='<div class="zone-title">'+esc(tipo)+'</div>';
+    html+='<div class="zone-badge">'+ws.length+' et. · '+totBot+' bot.</div>';
+    html+='</div>';
+    html+=mkRows(ws);
+    html+='</div>';
+  });
+  if(untyped.length>0){
+    html+='<div class="zone-section zone-unassigned">';
+    html+='<div class="zone-header"><div class="zone-title">⚠ Senza tipologia ('+untyped.length+')</div>'
+         +'<div class="zone-badge" style="background:var(--text-faint)">'+untyped.length+' et.</div></div>';
+    html+=mkRows(untyped);
+    html+='</div>';
+  }
+  container.innerHTML=html;
+  /* Drag orizzontale mouse sulle zone-table-scroll */
+  container.querySelectorAll('.zone-table-scroll').forEach(sc=>{
+    let dn=false,sx=0,sl=0;
+    sc.addEventListener('mousedown',e=>{
+      if(e.target.closest('[data-id]'))return;
+      dn=true;sc.style.cursor='grabbing';
+      sx=e.pageX-sc.offsetLeft;sl=sc.scrollLeft;
+    });
+    sc.addEventListener('mouseleave',()=>{dn=false;sc.style.cursor='grab';});
+    sc.addEventListener('mouseup',()=>{dn=false;sc.style.cursor='grab';});
+    sc.addEventListener('mousemove',e=>{
+      if(!dn)return;e.preventDefault();
+      sc.scrollLeft=sl-(e.pageX-sc.offsetLeft-sx);
+    });
+  });
+}
+
+function renderZone(){
+  const filtered=getFilteredWines();
+  const q=getSearchQuery();
+  const container=document.getElementById('zone-body');
+  if(filtered.length===0){
+    container.innerHTML='<div class="empty"><div class="icon">\uD83C\uDF0D</div><h3>'+(q?'Nessun risultato':'Nessun vino in archivio')+'</h3><p>'+(q?'Prova un\'altra parola chiave':'Aggiungi vini con nazione e regione')+'</p></div>';
+    return;
+  }
+  const grouped={},unzoned=[];
+  filtered.forEach(w=>{
+    const naz=(w.nazione||'').trim(),reg=(w.regione||'').trim();
+    if(!naz&&!reg){unzoned.push(w);return;}
+    const key=naz+'|||'+reg;
+    if(!grouped[key])grouped[key]={nazione:naz,regione:reg,wines:[]};
+    grouped[key].wines.push(w);
+  });
+  let html='';
+  if(q)html+='<div style="background:var(--gold-bg);border:1px solid var(--gold-dim);border-radius:10px;padding:8px 13px;margin-bottom:12px;font-size:12px;color:var(--gold)">\uD83D\uDD0D Filtro: \xAB'+esc(q)+'\xBB \xB7 '+filtered.length+' vini</div>';
+
+  function mkRows(ws){
+    const rows=ws.map(w=>{
+      const qty=parseInt(w.quantita)||0;
+      const thumb=w.foto
+        ?'<img class="zone-trow-img" src="'+w.foto+'" alt="">'
+        :'<div class="zone-trow-img-ph">\uD83C\uDF77</div>';
+      const posStr=[w.posizione,w.scaffale].filter(Boolean).join(' / ')||'\u2014';
+      const stars=starsHTML(w.rating,'mini');
+      return '<div class="zone-trow" data-id="'+w.id+'" onclick="showDetail(\''+w.id+'\')">'
+        +thumb
+        +'<div class="zone-tcell zone-tc-cantina">'+esc(w.cantina)+'</div>'
+        +'<div class="zone-tcell zone-tc-nome">'+esc(w.nome)+'</div>'
+        +'<div class="zone-tcell zone-tc-anno">'+(w.anno?esc(w.anno):'\u2014')+'</div>'
+        +'<div class="zone-tcell zone-tc-tipo">'+(w.tipologia?esc(w.tipologia):'\u2014')+'</div>'
+        +'<div class="zone-tcell zone-tc-pos">'+esc(posStr)+'</div>'
+        +'<div class="zone-tcell zone-tc-stars">'+(stars||'\u2014')+'</div>'
+        +'<div class="zone-tcell zone-tc-qty"><span class="card-badge qty'+(qty===0?' zero':'')+'">'+qty+'</span></div>'
+        +'</div>';
+    }).join('');
+    return '<div class="zone-table-scroll">'+rows+'</div>';
+  }
+
+  Object.keys(grouped).sort().forEach(key=>{
+    const{nazione,regione,wines:ws}=grouped[key];
+    const totBot=ws.reduce((s,w)=>s+(parseInt(w.quantita)||0),0);
+    html+='<div class="zone-section" data-nazione="'+esc(nazione)+'" data-regione="'+esc(regione)+'">';
+    html+='<div class="zone-header">';
+    html+='<div class="zone-title">'+esc(nazione)+(regione?' \xB7 '+esc(regione):'')+'</div>';
+    html+='<div class="zone-badge">'+ws.length+' et. \xB7 '+totBot+' bot.</div>';
+    html+='</div>';
+    html+=mkRows(ws);
+    html+='<div class="zone-dnd-hint">\u2193 Rilascia qui per spostare in questa zona</div>';
+    html+='</div>';
+  });
+  if(unzoned.length>0){
+    html+='<div class="zone-section zone-unassigned" data-nazione="" data-regione="">';
+    html+='<div class="zone-header"><div class="zone-title">\u26A0 Senza zona ('+unzoned.length+')</div>'
+         +'<div class="zone-badge" style="background:var(--text-faint)">'+unzoned.length+' et.</div></div>';
+    html+=mkRows(unzoned);
+    html+='<div class="zone-dnd-hint">\u2193 Rilascia qui (rimuove zona)</div>';
+    html+='</div>';
+  }
+  container.innerHTML=html;
+  /* Drag orizzontale con il mouse sulle zone-table-scroll */
+  container.querySelectorAll('.zone-table-scroll').forEach(sc=>{
+    let dn=false,sx=0,sl=0;
+    sc.addEventListener('mousedown',e=>{
+      if(e.target.closest('[data-id]'))return;
+      dn=true;sc.style.cursor='grabbing';
+      sx=e.pageX-sc.offsetLeft;sl=sc.scrollLeft;
+    });
+    sc.addEventListener('mouseleave',()=>{dn=false;sc.style.cursor='grab';});
+    sc.addEventListener('mouseup',()=>{dn=false;sc.style.cursor='grab';});
+    sc.addEventListener('mousemove',e=>{
+      if(!dn)return;e.preventDefault();
+      sc.scrollLeft=sl-(e.pageX-sc.offsetLeft-sx);
+    });
+  });
+
+}
+
+/* ══════════ DnD UNIFICATO — LONG PRESS (touch + mouse)
+   Trascina solo dopo 500ms di pressione prolungata.
+   Movimento > 8px prima del timeout annulla il long-press
+   permettendo pan orizzontale (zona) e scroll verticale.
+══════════════════════════════════════════════════════════ */
+(function initLongPressDnD(){
+  let ds=null;
+  const HOLD=500, PX=8;
+
+  function mkGhost(el){
+    const r=el.getBoundingClientRect();
+    const g=el.cloneNode(true);
+    g.querySelectorAll('[onclick]').forEach(n=>n.removeAttribute('onclick'));
+    g.style.cssText='position:fixed;pointer-events:none;z-index:9000;'
+      +'width:'+r.width+'px;left:'+r.left+'px;top:'+r.top+'px;'
+      +'opacity:.6;background:var(--surface2);'
+      +'border:2px solid var(--gold);border-radius:9px;'
+      +'box-shadow:0 6px 20px rgba(0,0,0,.35);';
+    document.body.appendChild(g);return g;
+  }
+
+  function clearOv(){
+    document.querySelectorAll('.dnd-over,.zone-dnd-over')
+      .forEach(z=>z.classList.remove('dnd-over','zone-dnd-over'));
+  }
+
+  function findZone(x,y,isZ){
+    const s=isZ?'.zone-section[data-nazione]'
+               :'.pos-shelf[data-pos],.pos-unassigned[data-pos]';
+    for(const z of document.querySelectorAll(s)){
+      const r=z.getBoundingClientRect();
+      if(x>=r.left&&x<=r.right&&y>=r.top&&y<=r.bottom)return z;
+    }return null;
+  }
+
+  function activate(){
+    if(!ds)return;
+    ds.ghost=mkGhost(ds.el);
+    ds.el.classList.add('dnd-dragging');
+    ds.active=true;
+    if(navigator.vibrate)navigator.vibrate(35);
+  }
+
+  function begin(el,x,y){
+    const inPos=!!el.closest('#pos-body');
+    const inZone=!!el.closest('#zone-body');
+    if(!inPos&&!inZone)return;
+    const id=el.dataset.id;if(!id)return;
+    ds={el,id,x0:x,y0:y,active:false,ghost:null,isZone:inZone,
+        timer:setTimeout(activate,HOLD)};
+  }
+
+  function move(x,y){
+    if(!ds)return;
+    if(!ds.active){
+      if(Math.abs(x-ds.x0)>PX||Math.abs(y-ds.y0)>PX){clearTimeout(ds.timer);ds=null;}
+      return;
+    }
+    if(ds.ghost){
+      ds.ghost.style.left=(x-ds.ghost.offsetWidth/2)+'px';
+      ds.ghost.style.top=(y-36)+'px';
+    }
+    clearOv();
+    const zone=findZone(x,y,ds.isZone);
+    if(zone)zone.classList.add(ds.isZone?'zone-dnd-over':'dnd-over');
+  }
+
+  function finish(x,y){
+    if(!ds)return;
+    clearTimeout(ds.timer);
+    if(!ds.active){ds=null;return;}
+    clearOv();
+    if(ds.ghost)ds.ghost.remove();
+    ds.el.classList.remove('dnd-dragging');
+    document.body.style.userSelect='';
+    const zone=findZone(x,y,ds.isZone);
+    if(zone){
+      const wine=wines.find(w=>w.id===ds.id);
+      if(wine){
+        if(ds.isZone){
+          const naz=zone.dataset.nazione||'',reg=zone.dataset.regione||'';
+          if(wine.nazione!==naz||wine.regione!==reg){
+            wine.nazione=naz;wine.regione=reg;
+            save();renderZone();
+            showToast('Zona \u2192 '+(naz||'\u2014')+(reg?' \xB7 '+reg:''));
+          }
+        }else{
+          const pos=zone.dataset.pos||'',sh=zone.dataset.shelf||'';
+          if(wine.posizione!==pos||wine.scaffale!==sh){
+            wine.posizione=pos;wine.scaffale=sh;
+            save();renderPosition();
+            showToast('Spostato \u2192 '+(pos||'senza posizione')+(sh?' / '+sh:''));
+          }
+        }
+      }
+    }
+    ds=null;
+  }
+
+  /* Touch */
+  document.addEventListener('touchstart',e=>{
+    const el=e.target.closest('[data-id]');
+    if(el)begin(el,e.touches[0].clientX,e.touches[0].clientY);
+  },{passive:true});
+  document.addEventListener('touchmove',e=>{
+    if(ds&&ds.active){e.preventDefault();move(e.touches[0].clientX,e.touches[0].clientY);}
+    else if(ds)move(e.touches[0].clientX,e.touches[0].clientY);
+  },{passive:false});
+  document.addEventListener('touchend',e=>{
+    const t=e.changedTouches[0];finish(t.clientX,t.clientY);
+  },{passive:true});
+  document.addEventListener('touchcancel',()=>{
+    if(!ds)return;clearTimeout(ds.timer);
+    if(ds.ghost)ds.ghost.remove();
+    if(ds.el)ds.el.classList.remove('dnd-dragging');
+    clearOv();ds=null;
+  },{passive:true});
+
+  /* Mouse */
+  document.addEventListener('mousedown',e=>{
+    if(e.button!==0)return;
+    const el=e.target.closest('[data-id]');
+    if(el)begin(el,e.clientX,e.clientY);
+  });
+  document.addEventListener('mousemove',e=>move(e.clientX,e.clientY));
+  document.addEventListener('mouseup',e=>finish(e.clientX,e.clientY));
+})();
+
+
+/* ══════════ NAVIGAZIONE — BACK / ESC / HARDWARE BACK ══════════
+   goBack()  : torna sempre alla vista precedente corretta
+   askExit() : chiede conferma prima di uscire dall'app
+   - ESC da tastiera (desktop)
+   - Tasto hardware Back (Android PWA) via popstate
+   - Bottoni "Indietro" nell'UI chiamano goBack()
+══════════════════════════════════════════════════════════════ */
+
+function goBack(){
+  /* Chiudi prima gli overlay aperti */
+  if(document.getElementById('zoom-overlay').classList.contains('open')){
+    document.getElementById('zoom-overlay').classList.remove('open');
+    document.body.style.overflow='';
+    return;
+  }
+  const _to=document.getElementById('territori-overlay');
+  if(_to&&_to.style.display&&_to.style.display!=='none'){closeTerritoriManager();return;}
+  if(document.getElementById('manual-overlay').classList.contains('open')){closeManual();return;}
+  if(document.getElementById('drawer').classList.contains('open')){closeDrawer();return;}
+  if(document.getElementById('modal').classList.contains('open')){closeModal();return;}
+
+  switch(_currentView){
+    case 'list':
+      askExit();
+      break;
+    case 'detail':
+      if(_detailFrom==='position'){renderPosition();showView('position');}
+      else if(_detailFrom==='zone'){renderZone();showView('zone');}
+      else if(_detailFrom==='tipo'){renderTipo();showView('tipo');}
+      else{showView('list');renderList();}
+      break;
+    case 'add':
+      /* Se stavamo modificando un vino torna al dettaglio, altrimenti alla lista */
+      if(editingId){showDetail(editingId,true);}
+      else{showView('list');renderList();}
+      break;
+    case 'position':
+    case 'zone':
+    case 'tipo':
+    case 'moves':
+      showView('list');renderList();
+      break;
+    case 'movedit':
+      renderMoves();showView('moves');
+      break;
+    default:
+      showView('list');renderList();
+  }
+}
+
+function askExit(){
+  showModal('Uscire dall\'app?',
+    'Vuoi uscire da <b style="color:var(--gold)">La Mia Cantina</b>?<br>I tuoi dati sono al sicuro.',
+    [
+      {label:'Esci',cls:'primary',action:()=>{
+        closeModal();
+        /* Tenta chiusura finestra; su iOS/PWA potrebbe non funzionare */
+        try{ window.close(); }catch(e){}
+        /* Fallback visivo */
+        setTimeout(()=>showToast('Usa il tasto Home per chiudere l\'app'),350);
+      }},
+      {label:'Rimani',cls:'secondary',action:closeModal}
+    ]
+  );
+}
+
+/* ── Hardware Back button (Android) via History API ── */
+history.replaceState({cantina:true},'');
+window.addEventListener('popstate',function(){
+  /* Reinserisce lo stato per intercettare il prossimo back */
+  history.pushState({cantina:true},'');
+  goBack();
+});
+
+/* ── Tasto ESC (desktop) + chiusura zoom ── */
+window.addEventListener('keydown',function(e){
+  if(e.key!=='Escape')return;
+  /* La chiusura zoom è gestita qui */
+  const zo=document.getElementById('zoom-overlay');
+  if(zo&&zo.classList.contains('open')){
+    zo.classList.remove('open');
+    document.body.style.overflow='';
+    return;
+  }
+  goBack();
+});
+
+</script>
+</body>
+</html>

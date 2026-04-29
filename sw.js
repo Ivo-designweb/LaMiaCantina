@@ -3,7 +3,7 @@
 
    ⚠️  REGOLA: aggiorna CACHE_VERSION ad ogni release,
        mantenendola ALLINEATA con la versione mostrata
-       in index.html (es. v4.6 → 'cantina-v4.8').
+       in index.html (es. v4.6 → 'cantina-v4.10').
 
    Strategia di aggiornamento:
    - Il nuovo SW si installa in background senza
@@ -14,7 +14,7 @@
      tutti gli asset, nessun blocco senza connessione.
 ═══════════════════════════════════════════════════ */
 
-const CACHE_VERSION = 'cantina-v4.8';
+const CACHE_VERSION = 'cantina-v4.10';
 const ASSETS = [
   './index.html',
   './manifest.json',

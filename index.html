@@ -337,7 +337,7 @@ textarea.field-input{resize:vertical;min-height:74px}
     <div>
       <div style="display:flex;align-items:baseline;gap:8px">
         <div class="header-title">La Mia Cantina</div>
-        <span style="font-size:10px;color:var(--text-faint);letter-spacing:.5px;font-family:'Lora',serif">v4.8</span>
+        <span style="font-size:10px;color:var(--text-faint);letter-spacing:.5px;font-family:'Lora',serif">v4.10</span>
       </div>
       <div id="header-sub" class="header-sub">0 vini</div>
     </div>
@@ -653,7 +653,7 @@ textarea.field-input{resize:vertical;min-height:74px}
     </button>
 
   </div>
-  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label">v4.8</span></div>
+  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label">v4.10</span></div>
 </div>
 
 <!-- MANUAL OVERLAY -->
@@ -2318,28 +2318,24 @@ async function runOCR(){
     fd.append('isTable','false');
     fd.append('isOverlayRequired','false');
 
-    /* Timeout compatibile con tutti i browser incluso Safari iOS */
-    const _ctrl=new AbortController();
-    const _timer=setTimeout(()=>_ctrl.abort(),30000);
-    let resp;
-    try{
-      resp=await fetch('https://api.ocr.space/parse/image',{
-        method:'POST',
-        body:fd,
-        signal:_ctrl.signal
-      });
-    }catch(fetchErr){
-      clearTimeout(_timer);
-      /* Distingue i tipi di errore per diagnostica precisa */
-      if(fetchErr.name==='AbortError')
-        throw new Error('Timeout (30s): ocr.space non ha risposto. Riprova.');
-      if(fetchErr.name==='TypeError')
-        throw new Error('Errore CORS o rete (TypeError): ocr.space non raggiungibile da questa PWA. Dettaglio: '+fetchErr.message);
-      throw new Error('Errore fetch ['+fetchErr.name+']: '+fetchErr.message);
-    }finally{ clearTimeout(_timer); }
-    if(!resp.ok) throw new Error('Servizio non raggiungibile (HTTP '+resp.status+')');
-
-    const data=await resp.json();
+    /* Usa XMLHttpRequest invece di fetch: evita interferenze del
+       Service Worker su Android Chrome con richieste POST esterne */
+    const data = await new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', 'https://api.ocr.space/parse/image');
+      xhr.timeout = 30000;
+      xhr.onload = () => {
+        if(xhr.status >= 200 && xhr.status < 300){
+          try{ resolve(JSON.parse(xhr.responseText)); }
+          catch(e){ reject(new Error('Risposta non valida dal server OCR')); }
+        } else {
+          reject(new Error('Servizio non raggiungibile (HTTP '+xhr.status+')'));
+        }
+      };
+      xhr.onerror   = () => reject(new Error('Errore di rete — ocr.space non raggiungibile. Controlla la connessione.'));
+      xhr.ontimeout = () => reject(new Error('Timeout (30s): ocr.space non ha risposto. Riprova.'));
+      xhr.send(fd);
+    });
     const ms=Date.now()-t0;
 
     /* Gestione errori specifici di ocr.space */
@@ -2397,13 +2393,7 @@ async function runOCR(){
 
   }catch(err){
     status.classList.remove('show');
-    let msg = err.message || String(err);
-    /* Messaggi più chiari per errori comuni */
-    if(err.name==='TimeoutError' || msg.includes('timeout'))
-      msg='Timeout: ocr.space non ha risposto in 30s. Riprova tra qualche istante.';
-    else if(msg.toLowerCase().includes('failed to fetch') || msg.toLowerCase().includes('network'))
-      msg='Errore di rete — controlla la connessione e riprova. Se il problema persiste ocr.space potrebbe essere temporaneamente non disponibile.';
-    result.innerHTML='<div style="color:var(--red);line-height:1.5">⚠ '+esc(msg)+'</div>';
+    result.innerHTML='<div style="color:var(--red);line-height:1.5">⚠ '+esc(err.message||String(err))+'</div>';
     result.classList.add('show');
   }finally{
     status.innerHTML='';
@@ -2570,6 +2560,13 @@ if('serviceWorker'in navigator){
   try{
     await dbLoad();   /* IndexedDB + migrazione automatica */
     loadTheme();
+
+    /* Precarica chiave OCR in cache subito all'avvio —
+       così getOCRKey() restituisce il valore corretto
+       anche senza aver mai aperto il drawer */
+    const _k = await dbSetting('cantina_ocr_key_v1');
+    window._ocrKeyCache = _k || 'helloworld';
+
     document.getElementById('f-date').value=new Date().toISOString().split('T')[0];
     document.getElementById('m-date').value=new Date().toISOString().split('T')[0];
   } catch(e){

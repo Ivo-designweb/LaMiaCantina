@@ -337,7 +337,7 @@ textarea.field-input{resize:vertical;min-height:74px}
     <div>
       <div style="display:flex;align-items:baseline;gap:8px">
         <div class="header-title">La Mia Cantina</div>
-        <span style="font-size:10px;color:var(--text-faint);letter-spacing:.5px;font-family:'Lora',serif">v4.7</span>
+        <span style="font-size:10px;color:var(--text-faint);letter-spacing:.5px;font-family:'Lora',serif">v4.8</span>
       </div>
       <div id="header-sub" class="header-sub">0 vini</div>
     </div>
@@ -653,7 +653,7 @@ textarea.field-input{resize:vertical;min-height:74px}
     </button>
 
   </div>
-  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label">v4.7</span></div>
+  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label">v4.8</span></div>
 </div>
 
 <!-- MANUAL OVERLAY -->
@@ -2299,14 +2299,22 @@ async function runOCR(){
   try{
     const compressed=await compressForOCR(currentPhotoB64);
     const t0=Date.now();
+    const ocrKey=getOCRKey();
+
+    /* Avvisa se si usa la chiave demo — potrebbe essere bloccata */
+    if(ocrKey==='helloworld'){
+      status.innerHTML='⚠️ Chiave demo in uso — potrebbe essere limitata. Configura una chiave gratuita in Impostazioni (⚙).';
+      await new Promise(r=>setTimeout(r,2200)); /* mostra il messaggio 2 sec */
+    }
+    status.innerHTML='📤 Invio immagine a OCR.space…';
 
     const fd=new FormData();
     fd.append('base64Image', compressed);
-    fd.append('language','ita');           /* Italiano principale */
-    fd.append('apikey', getOCRKey());
-    fd.append('OCREngine','2');            /* Engine 2: più accurato su testi complessi */
-    fd.append('detectOrientation','true'); /* Auto-ruota se necessario */
-    fd.append('scale','true');             /* Migliora testo piccolo */
+    fd.append('language','ita');
+    fd.append('apikey', ocrKey);
+    fd.append('OCREngine','2');
+    fd.append('detectOrientation','true');
+    fd.append('scale','true');
     fd.append('isTable','false');
     fd.append('isOverlayRequired','false');
 
@@ -2320,6 +2328,14 @@ async function runOCR(){
         body:fd,
         signal:_ctrl.signal
       });
+    }catch(fetchErr){
+      clearTimeout(_timer);
+      /* Distingue i tipi di errore per diagnostica precisa */
+      if(fetchErr.name==='AbortError')
+        throw new Error('Timeout (30s): ocr.space non ha risposto. Riprova.');
+      if(fetchErr.name==='TypeError')
+        throw new Error('Errore CORS o rete (TypeError): ocr.space non raggiungibile da questa PWA. Dettaglio: '+fetchErr.message);
+      throw new Error('Errore fetch ['+fetchErr.name+']: '+fetchErr.message);
     }finally{ clearTimeout(_timer); }
     if(!resp.ok) throw new Error('Servizio non raggiungibile (HTTP '+resp.status+')');
 

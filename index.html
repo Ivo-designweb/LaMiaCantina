@@ -337,7 +337,7 @@ textarea.field-input{resize:vertical;min-height:74px}
     <div>
       <div style="display:flex;align-items:baseline;gap:8px">
         <div class="header-title">La Mia Cantina</div>
-        <span style="font-size:10px;color:var(--text-faint);letter-spacing:.5px;font-family:'Lora',serif">v4.6</span>
+        <span style="font-size:10px;color:var(--text-faint);letter-spacing:.5px;font-family:'Lora',serif">v4.7</span>
       </div>
       <div id="header-sub" class="header-sub">0 vini</div>
     </div>
@@ -653,7 +653,7 @@ textarea.field-input{resize:vertical;min-height:74px}
     </button>
 
   </div>
-  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label">v4.6</span></div>
+  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label">v4.7</span></div>
 </div>
 
 <!-- MANUAL OVERLAY -->
@@ -1991,20 +1991,6 @@ function closeManual(){document.getElementById('manual-overlay').classList.remov
    Chiave personale gratuita: registrazione su ocr.space (25.000 req/mese)
    ═══════════════════════════════════════════════════════════════════════ */
 
-const OCR_KEY_STORE = 'cantina_ocr_key_v1';
-
-function getOCRKey(){ return localStorage.getItem(OCR_KEY_STORE)||'helloworld'; }
-function saveOCRKey(){
-  const v=document.getElementById('ocr-key-input')?.value?.trim()||'';
-  if(v){ localStorage.setItem(OCR_KEY_STORE,v); document.getElementById('ocr-key-status').textContent='✓ Chiave salvata'; }
-  else { localStorage.removeItem(OCR_KEY_STORE); document.getElementById('ocr-key-status').textContent='Chiave rimossa — verrà usata la demo'; }
-}
-function loadOCRKeyField(){
-  const k=localStorage.getItem(OCR_KEY_STORE)||'';
-  const inp=document.getElementById('ocr-key-input');
-  if(inp) inp.value=k;
-}
-
 /* ══════════════════════════════════════════════════════════
    GOOGLE CUSTOM SEARCH — IMAGE SEARCH
    Richiede: API Key + CX (Custom Search Engine ID)
@@ -2324,7 +2310,17 @@ async function runOCR(){
     fd.append('isTable','false');
     fd.append('isOverlayRequired','false');
 
-    const resp=await fetch('https://api.ocr.space/parse/image',{method:'POST',body:fd});
+    /* Timeout compatibile con tutti i browser incluso Safari iOS */
+    const _ctrl=new AbortController();
+    const _timer=setTimeout(()=>_ctrl.abort(),30000);
+    let resp;
+    try{
+      resp=await fetch('https://api.ocr.space/parse/image',{
+        method:'POST',
+        body:fd,
+        signal:_ctrl.signal
+      });
+    }finally{ clearTimeout(_timer); }
     if(!resp.ok) throw new Error('Servizio non raggiungibile (HTTP '+resp.status+')');
 
     const data=await resp.json();
@@ -2385,7 +2381,13 @@ async function runOCR(){
 
   }catch(err){
     status.classList.remove('show');
-    result.innerHTML='<div style="color:var(--red);line-height:1.5">⚠ '+esc(err.message||String(err))+'</div>';
+    let msg = err.message || String(err);
+    /* Messaggi più chiari per errori comuni */
+    if(err.name==='TimeoutError' || msg.includes('timeout'))
+      msg='Timeout: ocr.space non ha risposto in 30s. Riprova tra qualche istante.';
+    else if(msg.toLowerCase().includes('failed to fetch') || msg.toLowerCase().includes('network'))
+      msg='Errore di rete — controlla la connessione e riprova. Se il problema persiste ocr.space potrebbe essere temporaneamente non disponibile.';
+    result.innerHTML='<div style="color:var(--red);line-height:1.5">⚠ '+esc(msg)+'</div>';
     result.classList.add('show');
   }finally{
     status.innerHTML='';

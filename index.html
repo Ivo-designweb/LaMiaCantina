@@ -281,15 +281,35 @@ textarea.field-input{resize:vertical;min-height:74px}
 .btn-ocr:disabled{opacity:.45;cursor:not-allowed}
 
 /* ── PHOTO BUTTONS ROW ── */
-.photo-btn-row{display:flex;gap:8px;margin-top:8px}
-.photo-btn-row button,.photo-btn-row label{flex:1;padding:9px 6px;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text-dim);font-family:inherit;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;transition:background .15s;text-align:center}
+.photo-btn-row{display:flex;gap:6px;margin-top:8px}
+.photo-btn-row button,.photo-btn-row label{flex:1;padding:7px 4px;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text-dim);font-family:inherit;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;transition:background .15s;text-align:center;line-height:1.2}
 .photo-btn-row button:active,.photo-btn-row label:active{background:var(--surface2)}
+.photo-btn-row button.web-search{border-color:var(--gold-dim);color:var(--gold)}
 
 /* ── OCR SPINNER ── */
 .ocr-status{display:none;text-align:center;padding:10px;font-size:12px;color:var(--text-dim)}
 .ocr-status.show{display:block}
 .ocr-result{display:none;background:var(--green-bg);border:1px solid var(--green);border-radius:11px;padding:12px;margin-top:8px;font-size:13px;color:var(--text)}
 .ocr-result.show{display:block}
+
+/* ── IMAGE SEARCH OVERLAY ── */
+.imgsearch-overlay{display:none;position:fixed;inset:0;background:var(--bg);z-index:350;flex-direction:column}
+.imgsearch-overlay.open{display:flex}
+.imgsearch-header{background:var(--header-bg);border-bottom:1px solid var(--border);padding:13px 16px 11px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.imgsearch-title{font-family:'Playfair Display',serif;font-size:16px;color:var(--gold)}
+.imgsearch-sub{font-size:11px;color:var(--text-dim);margin-top:2px}
+.imgsearch-body{flex:1;overflow-y:auto;padding:16px}
+.imgsearch-status{text-align:center;padding:40px 20px;font-size:13px;color:var(--text-dim)}
+.imgsearch-spinner{font-size:28px;margin-bottom:12px;animation:spin .9s linear infinite;display:inline-block}
+@keyframes spin{to{transform:rotate(360deg)}}
+.imgsearch-grid{display:flex;flex-direction:column;gap:14px}
+.imgsearch-card{background:var(--card-bg);border:1px solid var(--border);border-radius:13px;overflow:hidden;box-shadow:var(--shadow)}
+.imgsearch-card img{width:100%;max-height:240px;object-fit:contain;display:block;background:var(--surface2)}
+.imgsearch-card-foot{padding:9px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;border-top:1px solid var(--border)}
+.imgsearch-card-src{font-size:10px;color:var(--text-faint);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.btn-use-img{background:linear-gradient(135deg,var(--gold),var(--gold-dim));border:none;border-radius:8px;color:#fff;font-family:inherit;font-size:12px;font-weight:600;padding:6px 14px;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.btn-use-img:active{opacity:.8}
+.btn-use-img:disabled{opacity:.5;cursor:not-allowed}
 
 /* ── HEADER LOGO ── */
 .header-logo{width:70px;height:70px;border-radius:10px;object-fit:cover;opacity:1;flex-shrink:0;transition:opacity .2s;position:relative;z-index:1}
@@ -314,7 +334,10 @@ textarea.field-input{resize:vertical;min-height:74px}
 <div id="view-list" class="view active">
   <div class="header">
     <div>
-      <div class="header-title">La Mia Cantina</div>
+      <div style="display:flex;align-items:baseline;gap:8px">
+        <div class="header-title">La Mia Cantina</div>
+        <span style="font-size:10px;color:var(--text-faint);letter-spacing:.5px;font-family:'Lora',serif">v4.5</span>
+      </div>
       <div id="header-sub" class="header-sub">0 vini</div>
     </div>
     <div style="display:flex;align-items:center;gap:6px">
@@ -365,14 +388,18 @@ textarea.field-input{resize:vertical;min-height:74px}
       <input type="file" id="photo-input-gallery" accept="image/*"                       style="display:none" onchange="handlePhoto(event)">
       <div class="photo-btn-row">
         <button onclick="document.getElementById('photo-input').click()">
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
           Fotocamera
         </button>
         <label>
-          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-          Scegli da Galleria
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          Galleria
           <input type="file" id="photo-gallery-hidden" accept="image/*" style="display:none" onchange="handlePhoto(event)">
         </label>
+        <button class="web-search" onclick="searchWineImages()">
+          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          Cerca su Web
+        </button>
       </div>
       <!-- OCR section -->
       <div id="ocr-area" style="display:none">
@@ -599,6 +626,15 @@ textarea.field-input{resize:vertical;min-height:74px}
       <input id="ocr-key-input" class="field-input" type="text" placeholder="es. K12345678 (opzionale)" style="font-size:13px;padding:9px 11px" oninput="saveOCRKey()">
       <div id="ocr-key-status" style="font-size:11px;color:var(--text-faint);margin-top:5px"></div>
     </div>
+    <div style="background:var(--surface2);border:1px solid var(--gold-dim);border-radius:10px;padding:10px 12px;margin-top:4px">
+      <div style="font-size:10px;color:var(--gold);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:5px">🔍 Ricerca Immagini — Google Custom Search</div>
+      <div style="font-size:11px;color:var(--text-faint);margin-bottom:8px;line-height:1.5">Necessario per "Cerca su Web". Gratuito fino a 100 ricerche/giorno. Configura su <b style="color:var(--text-dim)">console.cloud.google.com</b> e <b style="color:var(--text-dim)">programmablesearchengine.google.com</b></div>
+      <div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">API Key</div>
+      <input id="gimg-api-key-input" class="field-input" type="text" placeholder="AIza..." style="font-size:13px;padding:9px 11px;margin-bottom:8px" oninput="saveGImgKey()">
+      <div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Search Engine ID (CX)</div>
+      <input id="gimg-cx-input" class="field-input" type="text" placeholder="es. 012345678901234567890:abc..." style="font-size:13px;padding:9px 11px" oninput="saveGImgCX()">
+      <div id="gimg-key-status" style="font-size:11px;color:var(--text-faint);margin-top:5px"></div>
+    </div>
 
     <!-- 4. INFO -->
     <div class="drawer-section-label">4 · Info</div>
@@ -616,7 +652,7 @@ textarea.field-input{resize:vertical;min-height:74px}
     </button>
 
   </div>
-  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label">v4.3</span></div>
+  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label">v4.5</span></div>
 </div>
 
 <!-- MANUAL OVERLAY -->
@@ -627,6 +663,23 @@ textarea.field-input{resize:vertical;min-height:74px}
   </div>
   <div class="manual-body">
     <iframe id="manual-frame" src="./manual.html" title="Manuale"></iframe>
+  </div>
+</div>
+
+<!-- IMAGE SEARCH OVERLAY -->
+<div id="imgsearch-overlay" class="imgsearch-overlay">
+  <div class="imgsearch-header">
+    <div>
+      <div class="imgsearch-title">🔍 Cerca Immagine Vino</div>
+      <div class="imgsearch-sub" id="imgsearch-sub">Ricerca in corso…</div>
+    </div>
+    <button class="btn-icon" onclick="closeImgSearch()" style="color:var(--text-dim);font-size:20px;background:none;border:none;cursor:pointer">✕</button>
+  </div>
+  <div class="imgsearch-body" id="imgsearch-body">
+    <div class="imgsearch-status">
+      <div class="imgsearch-spinner">🔍</div>
+      <div>Ricerca immagini…</div>
+    </div>
   </div>
 </div>
 
@@ -1273,6 +1326,50 @@ function openVivino(wineId){
 }
 
 /* ══════════════════════════════════════════════════════════
+   PLATFORM DETECTION
+   ══════════════════════════════════════════════════════════ */
+
+function getPlatform(){
+  const ua = navigator.userAgent.toLowerCase();
+  if(/iphone|ipad|ipod/.test(ua)) return 'ios';
+  if(/android/.test(ua)) return 'android';
+  /* iPad con iPadOS ≥ 13 che si spaccia per macOS */
+  if(navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) return 'ios';
+  return 'desktop';
+}
+
+/**
+ * Mostra un toast informativo contestuale alla piattaforma
+ * dopo un'operazione di esportazione.
+ * @param {'folder'|'json'|'csv'} type  tipo di export
+ * @param {number} delay  ms di ritardo rispetto al toast principale
+ */
+function showPlatformExportHint(type, delay = 1800){
+  const platform = getPlatform();
+  let msg = null;
+
+  if(platform === 'ios'){
+    if(type === 'folder'){
+      msg = '📱 iPhone: ogni file apparirà nel pannello di sistema — scegli dove salvarlo (iCloud o Sul mio iPhone)';
+    } else if(type === 'json'){
+      msg = '📱 iPhone: il file JSON apparirà nel pannello di sistema — scegli dove salvarlo';
+    } else if(type === 'csv'){
+      msg = '📱 iPhone: i file CSV arriveranno uno alla volta nel pannello di sistema';
+    }
+  } else if(platform === 'android'){
+    if(type === 'folder'){
+      msg = '🤖 Android: file salvati direttamente nella cartella selezionata';
+    } else if(type === 'json'){
+      msg = '🤖 Android: file JSON salvato nella cartella Download';
+    } else if(type === 'csv'){
+      msg = '🤖 Android: file CSV salvato nella cartella Download';
+    }
+  }
+
+  if(msg) setTimeout(() => showToast(msg), delay);
+}
+
+/* ══════════════════════════════════════════════════════════
    BACKUP / RESTORE SU CARTELLA — File System Access API
    Chrome/Android Chrome: scrittura diretta nella cartella scelta.
    Fallback (iOS/Firefox): download separati per ogni file.
@@ -1393,6 +1490,7 @@ async function exportToFolder(){
         } catch(e){ console.warn('img write:',e); }
       }
       showToast(`✓ Backup in "${dirHandle.name}": vini, movimenti, ${imgOK} foto`);
+      showPlatformExportHint('folder');
       return;
     } catch(e){
       showToast('Errore scrittura: '+e.message, true);
@@ -1414,6 +1512,7 @@ async function exportToFolder(){
     delay+=200;
   }
   showToast(`Download: vini, movimenti, ${winesWithPhoto.length} foto`);
+  showPlatformExportHint('folder');
 }
 
 /* ── RIPRISTINA DA CARTELLA ── */
@@ -1789,6 +1888,7 @@ function exportJSON(){
   a.download='cantina_backup_'+new Date().toISOString().split('T')[0]+'.json';
   a.click();URL.revokeObjectURL(url);
   showToast('Esportati '+wines.length+' vini + '+movements.length+' movimenti');
+  showPlatformExportHint('json');
 }
 
 function importJSON(e){
@@ -1832,6 +1932,7 @@ function exportCSV(){
   a.download='cantina_'+new Date().toISOString().split('T')[0]+'.csv';
   a.click();URL.revokeObjectURL(url);
   showToast('CSV esportato ('+wines.length+' vini + foto)');
+  showPlatformExportHint('csv');
 }
 
 function parseCSVRow(line){const out=[];let cur='',inQ=false;for(let i=0;i<line.length;i++){const c=line[i];if(c==='"'){if(inQ&&line[i+1]==='"'){cur+='"';i++;}else inQ=!inQ;}else if(c===','&&!inQ){out.push(cur);cur='';}else cur+=c;}out.push(cur);return out;}
@@ -1870,6 +1971,7 @@ function openDrawer(){
   document.getElementById('drawer').classList.add('open');
   document.getElementById('drawer-overlay').classList.add('open');
   loadOCRKeyField();
+  loadGImgKeyFields();
   loadBackupFolderName();
 }
 function closeDrawer(){document.getElementById('drawer').classList.remove('open');document.getElementById('drawer-overlay').classList.remove('open');}
@@ -1900,6 +2002,219 @@ function loadOCRKeyField(){
   const k=localStorage.getItem(OCR_KEY_STORE)||'';
   const inp=document.getElementById('ocr-key-input');
   if(inp) inp.value=k;
+}
+
+/* ══════════════════════════════════════════════════════════
+   GOOGLE CUSTOM SEARCH — IMAGE SEARCH
+   Richiede: API Key + CX (Custom Search Engine ID)
+   Gratuito: 100 ricerche/giorno
+   Setup: console.cloud.google.com + programmablesearchengine.google.com
+   ══════════════════════════════════════════════════════════ */
+
+const GIMG_API_KEY_STORE = 'cantina_gimg_api_key_v1';
+const GIMG_CX_STORE      = 'cantina_gimg_cx_v1';
+
+function getGImgApiKey(){ return localStorage.getItem(GIMG_API_KEY_STORE)||''; }
+function getGImgCX(){     return localStorage.getItem(GIMG_CX_STORE)||''; }
+
+function saveGImgKey(){
+  const v=document.getElementById('gimg-api-key-input')?.value?.trim()||'';
+  if(v){ localStorage.setItem(GIMG_API_KEY_STORE,v); _gimgStatus('✓ API Key salvata'); }
+  else { localStorage.removeItem(GIMG_API_KEY_STORE); _gimgStatus('API Key rimossa'); }
+}
+function saveGImgCX(){
+  const v=document.getElementById('gimg-cx-input')?.value?.trim()||'';
+  if(v){ localStorage.setItem(GIMG_CX_STORE,v); _gimgStatus('✓ Search Engine ID salvato'); }
+  else { localStorage.removeItem(GIMG_CX_STORE); _gimgStatus('CX rimosso'); }
+}
+function _gimgStatus(msg){
+  const el=document.getElementById('gimg-key-status');
+  if(el) el.textContent=msg;
+}
+function loadGImgKeyFields(){
+  const k=localStorage.getItem(GIMG_API_KEY_STORE)||'';
+  const cx=localStorage.getItem(GIMG_CX_STORE)||'';
+  const ki=document.getElementById('gimg-api-key-input');
+  const ci=document.getElementById('gimg-cx-input');
+  if(ki) ki.value=k;
+  if(ci) ci.value=cx;
+  _gimgStatus( (k&&cx) ? '✓ Configurato' : (!k&&!cx) ? '' : !k ? 'Manca API Key' : 'Manca Search Engine ID' );
+}
+
+/* ── Apre l'overlay e avvia la ricerca ── */
+async function searchWineImages(){
+  const nome    = document.getElementById('f-nome')?.value?.trim()||'';
+  const cantina = document.getElementById('f-cantina')?.value?.trim()||'';
+
+  if(!nome && !cantina){
+    showToast('Inserisci prima il nome del vino o la cantina', true);
+    return;
+  }
+
+  const apiKey = getGImgApiKey();
+  const cx     = getGImgCX();
+
+  if(!apiKey || !cx){
+    showToast('Configura la chiave API Google nelle Impostazioni (⚙)', true);
+    return;
+  }
+
+  /* Apre overlay con spinner */
+  openImgSearch([nome, cantina].filter(Boolean).join(' · '));
+
+  /* Query ottimizzata: bottiglia vino + cantina + nome */
+  const q = [nome, cantina, 'vino bottiglia etichetta wine bottle'].filter(Boolean).join(' ');
+  const url = `https://www.googleapis.com/customsearch/v1`
+    + `?key=${encodeURIComponent(apiKey)}`
+    + `&cx=${encodeURIComponent(cx)}`
+    + `&searchType=image`
+    + `&imgType=photo`
+    + `&imgSize=large`
+    + `&num=3`
+    + `&safe=active`
+    + `&q=${encodeURIComponent(q)}`;
+
+  try{
+    const res  = await fetch(url);
+    const data = await res.json();
+
+    if(data.error){
+      _imgSearchError('Errore API: ' + (data.error.message||'sconosciuto'));
+      return;
+    }
+
+    const items = data.items||[];
+    if(!items.length){
+      _imgSearchError('Nessuna immagine trovata per questo vino.');
+      return;
+    }
+
+    _imgSearchShowResults(items);
+
+  } catch(e){
+    _imgSearchError('Errore di rete: ' + e.message);
+  }
+}
+
+/* ── Apre overlay ── */
+function openImgSearch(label){
+  document.getElementById('imgsearch-sub').textContent = label||'';
+  document.getElementById('imgsearch-body').innerHTML =
+    `<div class="imgsearch-status"><div class="imgsearch-spinner">🔍</div><div>Ricerca immagini…</div></div>`;
+  document.getElementById('imgsearch-overlay').classList.add('open');
+}
+function closeImgSearch(){
+  document.getElementById('imgsearch-overlay').classList.remove('open');
+}
+
+/* ── Mostra errore nell'overlay ── */
+function _imgSearchError(msg){
+  document.getElementById('imgsearch-body').innerHTML =
+    `<div class="imgsearch-status">⚠️<br><br>${msg}</div>`;
+}
+
+/* ── Mostra i risultati nell'overlay ── */
+function _imgSearchShowResults(items){
+  const body = document.getElementById('imgsearch-body');
+  const grid = document.createElement('div');
+  grid.className = 'imgsearch-grid';
+
+  items.forEach((item, idx)=>{
+    const imgUrl   = item.link;
+    const thumbUrl = item.image?.thumbnailLink || imgUrl;
+    const domain   = (item.displayLink||'').replace(/^www\./,'');
+
+    const card = document.createElement('div');
+    card.className = 'imgsearch-card';
+    card.innerHTML = `
+      <img src="${thumbUrl}" alt="${item.title||''}"
+           loading="lazy"
+           onerror="this.src='';this.style.minHeight='120px';this.alt='Anteprima non disponibile'">
+      <div class="imgsearch-card-foot">
+        <span class="imgsearch-card-src">${domain}</span>
+        <button class="btn-use-img" id="use-img-btn-${idx}" onclick="applyWebImage('${imgUrl.replace(/'/g,"\\'")}', ${idx})">
+          Usa questa foto
+        </button>
+      </div>`;
+    grid.appendChild(card);
+  });
+
+  body.innerHTML = '';
+  body.appendChild(grid);
+  document.getElementById('imgsearch-sub').textContent = `${items.length} immagini trovate — scegli`;
+}
+
+/* ── Scarica l'immagine scelta e la imposta come foto del vino ── */
+async function applyWebImage(imgUrl, btnIdx){
+  /* Disabilita tutti i bottoni durante il download */
+  document.querySelectorAll('.btn-use-img').forEach(b=>{ b.disabled=true; b.textContent='…'; });
+  const btn = document.getElementById(`use-img-btn-${btnIdx}`);
+  if(btn) btn.textContent = '⏳';
+
+  showToast('⏳ Download immagine in corso…');
+
+  /* Strategia 1: fetch diretto (funziona se il server ha CORS aperto) */
+  /* Strategia 2: proxy CORS pubblico come fallback */
+  const attempts = [
+    imgUrl,
+    'https://corsproxy.io/?' + encodeURIComponent(imgUrl),
+  ];
+
+  for(const src of attempts){
+    try{
+      const r = await fetch(src, {mode:'cors'});
+      if(!r.ok) continue;
+      const blob = await r.blob();
+      if(!blob.size) continue;
+
+      /* Converti in base64 e comprimi */
+      const b64raw = await new Promise(res=>{
+        const fr=new FileReader(); fr.onload=e=>res(e.target.result); fr.readAsDataURL(blob);
+      });
+
+      /* Comprimi come le altre foto (max 1200px) */
+      const b64 = await _compressWebImage(b64raw);
+
+      /* Applica alla scheda */
+      currentPhotoB64 = b64;
+      document.getElementById('photo-preview').src = b64;
+      document.getElementById('photo-preview').style.display = 'block';
+      document.getElementById('photo-placeholder').style.display = 'none';
+      document.getElementById('photo-remove').style.display = 'block';
+      document.getElementById('ocr-area').style.display = 'block';
+
+      closeImgSearch();
+      showToast('✓ Immagine importata dal web');
+      return;
+
+    } catch(e){ /* prova prossimo */ }
+  }
+
+  /* Tutti i tentativi falliti */
+  document.querySelectorAll('.btn-use-img').forEach(b=>{ b.disabled=false; b.textContent='Usa questa foto'; });
+  if(btn){ btn.disabled=false; btn.textContent='Usa questa foto'; }
+  showToast('Impossibile scaricare questa foto — prova un\'altra', true);
+}
+
+/* ── Comprimi immagine web a max 1200px ── */
+function _compressWebImage(b64){
+  return new Promise(res=>{
+    const img=new Image();
+    img.onload=()=>{
+      const MAX=1200;
+      let w=img.naturalWidth, h=img.naturalHeight;
+      const r=Math.min(MAX/w, MAX/h, 1);
+      w=Math.round(w*r); h=Math.round(h*r);
+      const c=document.createElement('canvas');
+      c.width=w; c.height=h;
+      c.getContext('2d').drawImage(img,0,0,w,h);
+      let q=0.85, out=c.toDataURL('image/jpeg',q);
+      while(out.length>900000 && q>0.5){ q-=0.1; out=c.toDataURL('image/jpeg',q); }
+      res(out);
+    };
+    img.onerror=()=>res(b64);
+    img.src=b64;
+  });
 }
 
 /* Comprime la foto a max ~900KB (limite pratico di ocr.space free tier) */
@@ -2544,6 +2859,7 @@ function goBack(){
     document.body.style.overflow='';
     return;
   }
+  if(document.getElementById('imgsearch-overlay').classList.contains('open')){closeImgSearch();return;}
   const _to=document.getElementById('territori-overlay');
   if(_to&&_to.style.display&&_to.style.display!=='none'){closeTerritoriManager();return;}
   if(document.getElementById('manual-overlay').classList.contains('open')){closeManual();return;}
@@ -2580,19 +2896,8 @@ function goBack(){
 }
 
 function askExit(){
-  showModal('Uscire dall\'app?',
-    'Vuoi uscire da <b style="color:var(--gold)">La Mia Cantina</b>?<br>I tuoi dati sono al sicuro.',
-    [
-      {label:'Esci',cls:'primary',action:()=>{
-        closeModal();
-        /* Tenta chiusura finestra; su iOS/PWA potrebbe non funzionare */
-        try{ window.close(); }catch(e){}
-        /* Fallback visivo */
-        setTimeout(()=>showToast('Usa il tasto Home per chiudere l\'app'),350);
-      }},
-      {label:'Rimani',cls:'secondary',action:closeModal}
-    ]
-  );
+  /* Comportamento standard mobile: non esce, informa l'utente */
+  showToast('Premi il tasto Home per uscire dall\'app');
 }
 
 /* ── Hardware Back button (Android) via History API ── */

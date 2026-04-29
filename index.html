@@ -243,8 +243,9 @@ textarea.field-input{resize:vertical;min-height:74px}
 .btn-modal.secondary{background:var(--surface2);border:1px solid var(--border);color:var(--text-dim)}
 .update-banner{display:none;position:fixed;top:0;left:0;right:0;max-width:500px;margin:0 auto;background:#1C3A1C;border-bottom:1px solid #3A6A3A;color:#8ACA8A;padding:9px 14px;z-index:300;font-size:13px;gap:9px;align-items:center}
 .update-banner.show{display:flex}
-.update-banner span{flex:1}
-.btn-update{background:#3A7A3A;border:1px solid #5A9A5A;color:#C8EAC8;border-radius:7px;padding:4px 11px;font-size:12px;cursor:pointer;font-family:inherit}
+.update-banner span{flex:1;line-height:1.4}
+.btn-update{background:#3A7A3A;border:1px solid #5A9A5A;color:#C8EAC8;border-radius:7px;padding:4px 11px;font-size:12px;cursor:pointer;font-family:inherit;white-space:nowrap}
+.btn-update-dismiss{background:none;border:none;color:#5A9A5A;font-size:18px;cursor:pointer;line-height:1;padding:0 2px;flex-shrink:0}
 .empty{text-align:center;padding:52px 26px;color:var(--text-faint)}
 .empty .icon{font-size:50px;margin-bottom:13px}
 .empty h3{font-size:17px;color:var(--text-dim);margin-bottom:7px;font-weight:normal}
@@ -325,9 +326,9 @@ textarea.field-input{resize:vertical;min-height:74px}
 </head>
 <body data-theme="light">
 <div id="update-banner" class="update-banner">
-  <span>Nuova versione disponibile</span>
-  <button class="btn-update" onclick="applyUpdate()">Aggiorna</button>
-  <button style="background:none;border:none;color:#5A8A5A;cursor:pointer;font-size:17px" onclick="this.parentElement.classList.remove('show')">x</button>
+  <span>✨ Nuova versione disponibile — si applica alla prossima apertura</span>
+  <button class="btn-update" onclick="applyUpdate()">Aggiorna ora</button>
+  <button class="btn-update-dismiss" onclick="document.getElementById('update-banner').classList.remove('show')" title="Ignora">✕</button>
 </div>
 
 <!-- LIST -->
@@ -336,7 +337,7 @@ textarea.field-input{resize:vertical;min-height:74px}
     <div>
       <div style="display:flex;align-items:baseline;gap:8px">
         <div class="header-title">La Mia Cantina</div>
-        <span style="font-size:10px;color:var(--text-faint);letter-spacing:.5px;font-family:'Lora',serif">v4.5</span>
+        <span style="font-size:10px;color:var(--text-faint);letter-spacing:.5px;font-family:'Lora',serif">v4.6</span>
       </div>
       <div id="header-sub" class="header-sub">0 vini</div>
     </div>
@@ -652,7 +653,7 @@ textarea.field-input{resize:vertical;min-height:74px}
     </button>
 
   </div>
-  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label">v4.5</span></div>
+  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label">v4.6</span></div>
 </div>
 
 <!-- MANUAL OVERLAY -->
@@ -2511,13 +2512,32 @@ function showToast(msg,isErr=false){
 }
 
 let _newSW=null;
-function applyUpdate(){if(_newSW){_newSW.postMessage('SKIP_WAITING');_newSW.addEventListener('statechange',()=>{if(_newSW.state==='activated')window.location.reload();});}else window.location.reload();}
+function applyUpdate(){
+  if(_newSW){
+    _newSW.postMessage('SKIP_WAITING');
+    /* Ricarica quando il nuovo SW prende il controllo */
+    navigator.serviceWorker.addEventListener('controllerchange',()=>window.location.reload(),{once:true});
+  } else {
+    window.location.reload();
+  }
+}
 if('serviceWorker'in navigator){
-  navigator.serviceWorker.register('./sw.js').then(reg=>{
+  navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).then(reg=>{
+    /* SW già in attesa (es. app riaperta dopo un aggiornamento mancato) */
     if(reg.waiting){_newSW=reg.waiting;document.getElementById('update-banner').classList.add('show');}
-    reg.addEventListener('updatefound',()=>{const nw=reg.installing;nw.addEventListener('statechange',()=>{if(nw.state==='installed'&&navigator.serviceWorker.controller){_newSW=nw;document.getElementById('update-banner').classList.add('show');}});});
+    /* Nuovo SW trovato durante questa sessione */
+    reg.addEventListener('updatefound',()=>{
+      const nw=reg.installing;
+      nw.addEventListener('statechange',()=>{
+        if(nw.state==='installed'&&navigator.serviceWorker.controller){
+          _newSW=nw;
+          document.getElementById('update-banner').classList.add('show');
+        }
+      });
+    });
   }).catch(()=>{});
-  navigator.serviceWorker.addEventListener('controllerchange',()=>window.location.reload());
+  /* Niente listener globale su controllerchange:
+     il reload avviene solo se l'utente preme "Aggiorna ora". */
 }
 
 /* ══════════ INIT ASINCRONO (IndexedDB) ══════════ */

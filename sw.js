@@ -1,28 +1,39 @@
 /* ═══════════════════════════════════════════════════
    La Mia Cantina — Service Worker
-   Versione cache: aggiorna CACHE_VERSION per forzare
-   il refresh dell'app su tutti i dispositivi.
+
+   ⚠️  REGOLA: aggiorna CACHE_VERSION ad ogni release,
+       mantenendola ALLINEATA con la versione mostrata
+       in index.html (es. v4.6 → 'cantina-v4.6').
+
+   Strategia di aggiornamento:
+   - Il nuovo SW si installa in background senza
+     interrompere la sessione in corso.
+   - Diventa attivo solo alla prossima apertura dell'app
+     (oppure se l'utente preme "Aggiorna ora").
+   - L'app funziona sempre offline: cache-first per
+     tutti gli asset, nessun blocco senza connessione.
 ═══════════════════════════════════════════════════ */
 
-const CACHE_VERSION = 'cantina-v2.1';
+const CACHE_VERSION = 'cantina-v4.6';
 const ASSETS = [
   './index.html',
   './manifest.json',
-  './icon192.png',
-  './icon512.png',
+  './icon-192.png',
+  './icon-512.png',
   'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Lora:ital,wght@0,400;0,600;1,400&display=swap'
 ];
 
-/* ── Install: pre-cache all assets ── */
+/* ── Install: pre-cache degli asset, NON forza attivazione immediata ── */
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_VERSION)
       .then(cache => cache.addAll(ASSETS).catch(() => {}))
-      .then(() => self.skipWaiting())
+    /* Niente self.skipWaiting(): il nuovo SW aspetta che
+       l'utente chiuda/riapra l'app o prema "Aggiorna ora". */
   );
 });
 
-/* ── Activate: remove old caches ── */
+/* ── Activate: rimuove cache vecchie, NON reclama tab aperte ── */
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(keys =>
@@ -31,13 +42,14 @@ self.addEventListener('activate', event => {
           .filter(k => k !== CACHE_VERSION)
           .map(k => caches.delete(k))
       )
-    ).then(() => self.clients.claim())
+    )
+    /* Niente self.clients.claim(): le tab aperte continuano
+       con il vecchio SW fino alla prossima apertura volontaria. */
   );
 });
 
-/* ── Fetch: cache-first, fallback to network ── */
+/* ── Fetch: cache-first, fallback rete, fallback offline ── */
 self.addEventListener('fetch', event => {
-  // Skip non-GET and chrome-extension requests
   if (event.request.method !== 'GET') return;
   if (event.request.url.startsWith('chrome-extension://')) return;
 
@@ -54,7 +66,6 @@ self.addEventListener('fetch', event => {
           return response;
         })
         .catch(() => {
-          // Offline fallback: return cached index.html for navigation
           if (event.request.mode === 'navigate') {
             return caches.match('./index.html');
           }
@@ -63,7 +74,7 @@ self.addEventListener('fetch', event => {
   );
 });
 
-/* ── Message: force update from app ── */
+/* ── Message: skipWaiting solo su richiesta esplicita dell'utente ── */
 self.addEventListener('message', event => {
   if (event.data === 'SKIP_WAITING') self.skipWaiting();
 });

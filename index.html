@@ -71,8 +71,8 @@ body{display:flex;flex-direction:column;max-width:500px;margin:0 auto;height:100
 .card-scarica:active{opacity:.75}
 .card-pos{font-size:10px;color:var(--text-faint);display:flex;align-items:center;gap:4px;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .card-pos svg{flex-shrink:0}
-.toolbar{display:flex;gap:7px;padding:0 13px max(13px,env(safe-area-inset-bottom));flex-shrink:0}
-.btn-tool{flex:1;padding:9px 5px;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text-dim);font-family:inherit;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;transition:background .15s}
+.toolbar{display:flex;gap:5px;padding:0 13px max(13px,env(safe-area-inset-bottom)) 13px;padding-right:72px;flex-shrink:0}
+.btn-tool{flex:1;padding:8px 4px;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text-dim);font-family:inherit;font-size:10.5px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;transition:background .15s}
 .btn-tool:active,.btn-tool.active{background:var(--surface2)}
 .btn-tool.active{border-color:var(--gold);color:var(--gold)}
 .fab{position:fixed;bottom:max(22px,calc(16px + env(safe-area-inset-bottom)));right:calc(50% - 228px);width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,var(--red),var(--red2));border:none;color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-fab);cursor:pointer;z-index:40;transition:transform .15s}
@@ -144,6 +144,15 @@ textarea.field-input{resize:vertical;min-height:74px}
 .pos-row-qty{font-size:11px;font-weight:700;color:var(--text);background:var(--surface2);border:1px solid var(--border);border-radius:7px;padding:1px 6px}
 .pos-unassigned{border:1px dashed var(--border);border-radius:11px;padding:11px 13px;margin-bottom:9px}
 .pos-unassigned-label{font-size:11px;color:var(--text-faint);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:7px}
+
+/* ── ASSAGGIATI ── */
+.flash-badge{display:inline-flex;align-items:center;gap:3px;background:linear-gradient(135deg,#8B2050,#C43060);color:#fff;border-radius:20px;padding:2px 8px;font-size:9.5px;font-weight:700;letter-spacing:.5px;white-space:nowrap}
+.assaggiato-banner{display:flex;align-items:center;gap:10px;background:linear-gradient(135deg,rgba(139,32,80,.12),rgba(196,48,96,.08));border:1px solid rgba(139,32,80,.25);border-radius:12px;padding:10px 14px;margin-bottom:12px}
+.assaggiato-banner .ab-icon{font-size:20px;flex-shrink:0}
+.assaggiato-banner .ab-text{flex:1;min-width:0}
+.assaggiato-banner .ab-title{font-size:11px;font-weight:700;color:#8B2050;text-transform:uppercase;letter-spacing:1px}
+.assaggiato-banner .ab-sub{font-size:12px;color:var(--text-dim);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.btn-eye{background:none;border:none;cursor:pointer;padding:6px;display:flex;align-items:center;transition:color .15s}
 
 /* ── ZONE VIEW ── */
 .zone-body{flex:1;overflow-y:auto;padding:13px 13px max(80px,calc(60px + env(safe-area-inset-bottom)))}
@@ -243,9 +252,8 @@ textarea.field-input{resize:vertical;min-height:74px}
 .btn-modal.secondary{background:var(--surface2);border:1px solid var(--border);color:var(--text-dim)}
 .update-banner{display:none;position:fixed;top:0;left:0;right:0;max-width:500px;margin:0 auto;background:#1C3A1C;border-bottom:1px solid #3A6A3A;color:#8ACA8A;padding:9px 14px;z-index:300;font-size:13px;gap:9px;align-items:center}
 .update-banner.show{display:flex}
-.update-banner span{flex:1;line-height:1.4}
-.btn-update{background:#3A7A3A;border:1px solid #5A9A5A;color:#C8EAC8;border-radius:7px;padding:4px 11px;font-size:12px;cursor:pointer;font-family:inherit;white-space:nowrap}
-.btn-update-dismiss{background:none;border:none;color:#5A9A5A;font-size:18px;cursor:pointer;line-height:1;padding:0 2px;flex-shrink:0}
+.update-banner span{flex:1}
+.btn-update{background:#3A7A3A;border:1px solid #5A9A5A;color:#C8EAC8;border-radius:7px;padding:4px 11px;font-size:12px;cursor:pointer;font-family:inherit}
 .empty{text-align:center;padding:52px 26px;color:var(--text-faint)}
 .empty .icon{font-size:50px;margin-bottom:13px}
 .empty h3{font-size:17px;color:var(--text-dim);margin-bottom:7px;font-weight:normal}
@@ -282,35 +290,15 @@ textarea.field-input{resize:vertical;min-height:74px}
 .btn-ocr:disabled{opacity:.45;cursor:not-allowed}
 
 /* ── PHOTO BUTTONS ROW ── */
-.photo-btn-row{display:flex;gap:6px;margin-top:8px}
-.photo-btn-row button,.photo-btn-row label{flex:1;padding:7px 4px;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text-dim);font-family:inherit;font-size:11px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;transition:background .15s;text-align:center;line-height:1.2}
+.photo-btn-row{display:flex;gap:8px;margin-top:8px}
+.photo-btn-row button,.photo-btn-row label{flex:1;padding:9px 6px;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text-dim);font-family:inherit;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;transition:background .15s;text-align:center}
 .photo-btn-row button:active,.photo-btn-row label:active{background:var(--surface2)}
-.photo-btn-row button.web-search{border-color:var(--gold-dim);color:var(--gold)}
 
 /* ── OCR SPINNER ── */
 .ocr-status{display:none;text-align:center;padding:10px;font-size:12px;color:var(--text-dim)}
 .ocr-status.show{display:block}
 .ocr-result{display:none;background:var(--green-bg);border:1px solid var(--green);border-radius:11px;padding:12px;margin-top:8px;font-size:13px;color:var(--text)}
 .ocr-result.show{display:block}
-
-/* ── IMAGE SEARCH OVERLAY ── */
-.imgsearch-overlay{display:none;position:fixed;inset:0;background:var(--bg);z-index:350;flex-direction:column}
-.imgsearch-overlay.open{display:flex}
-.imgsearch-header{background:var(--header-bg);border-bottom:1px solid var(--border);padding:13px 16px 11px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
-.imgsearch-title{font-family:'Playfair Display',serif;font-size:16px;color:var(--gold)}
-.imgsearch-sub{font-size:11px;color:var(--text-dim);margin-top:2px}
-.imgsearch-body{flex:1;overflow-y:auto;padding:16px}
-.imgsearch-status{text-align:center;padding:40px 20px;font-size:13px;color:var(--text-dim)}
-.imgsearch-spinner{font-size:28px;margin-bottom:12px;animation:spin .9s linear infinite;display:inline-block}
-@keyframes spin{to{transform:rotate(360deg)}}
-.imgsearch-grid{display:flex;flex-direction:column;gap:14px}
-.imgsearch-card{background:var(--card-bg);border:1px solid var(--border);border-radius:13px;overflow:hidden;box-shadow:var(--shadow)}
-.imgsearch-card img{width:100%;max-height:240px;object-fit:contain;display:block;background:var(--surface2)}
-.imgsearch-card-foot{padding:9px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px;border-top:1px solid var(--border)}
-.imgsearch-card-src{font-size:10px;color:var(--text-faint);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
-.btn-use-img{background:linear-gradient(135deg,var(--gold),var(--gold-dim));border:none;border-radius:8px;color:#fff;font-family:inherit;font-size:12px;font-weight:600;padding:6px 14px;cursor:pointer;white-space:nowrap;flex-shrink:0}
-.btn-use-img:active{opacity:.8}
-.btn-use-img:disabled{opacity:.5;cursor:not-allowed}
 
 /* ── HEADER LOGO ── */
 .header-logo{width:70px;height:70px;border-radius:10px;object-fit:cover;opacity:1;flex-shrink:0;transition:opacity .2s;position:relative;z-index:1}
@@ -326,22 +314,22 @@ textarea.field-input{resize:vertical;min-height:74px}
 </head>
 <body data-theme="light">
 <div id="update-banner" class="update-banner">
-  <span>✨ Nuova versione disponibile — si applica alla prossima apertura</span>
-  <button class="btn-update" onclick="applyUpdate()">Aggiorna ora</button>
-  <button class="btn-update-dismiss" onclick="document.getElementById('update-banner').classList.remove('show')" title="Ignora">✕</button>
+  <span>Nuova versione disponibile</span>
+  <button class="btn-update" onclick="applyUpdate()">Aggiorna</button>
+  <button style="background:none;border:none;color:#5A8A5A;cursor:pointer;font-size:17px" onclick="this.parentElement.classList.remove('show')">x</button>
 </div>
 
 <!-- LIST -->
 <div id="view-list" class="view active">
   <div class="header">
     <div>
-      <div style="display:flex;align-items:baseline;gap:8px">
-        <div class="header-title">La Mia Cantina</div>
-        <span style="font-size:10px;color:var(--text-faint);letter-spacing:.5px;font-family:'Lora',serif">v4.10</span>
-      </div>
+      <div class="header-title">La Mia Cantina</div>
       <div id="header-sub" class="header-sub">0 vini</div>
     </div>
-    <div style="display:flex;align-items:center;gap:6px">
+    <div style="display:flex;align-items:center;gap:4px">
+      <button id="btn-toggle-assaggiati" class="btn-eye" onclick="toggleAssaggiatiView()" title="Mostra vini assaggiati" style="color:var(--text-dim)">
+        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+      </button>
       <img src="./icon512.png" class="header-logo" alt="cantina" onclick="openManual()" style="cursor:pointer">
       <button class="btn-icon" onclick="openDrawer()">
         <svg width="21" height="21" fill="none" stroke="var(--gold)" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
@@ -389,18 +377,14 @@ textarea.field-input{resize:vertical;min-height:74px}
       <input type="file" id="photo-input-gallery" accept="image/*"                       style="display:none" onchange="handlePhoto(event)">
       <div class="photo-btn-row">
         <button onclick="document.getElementById('photo-input').click()">
-          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
           Fotocamera
         </button>
         <label>
-          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-          Galleria
+          <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+          Scegli da Galleria
           <input type="file" id="photo-gallery-hidden" accept="image/*" style="display:none" onchange="handlePhoto(event)">
         </label>
-        <button class="web-search" onclick="searchWineImages()">
-          <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          Cerca su Web
-        </button>
       </div>
       <!-- OCR section -->
       <div id="ocr-area" style="display:none">
@@ -453,6 +437,20 @@ textarea.field-input{resize:vertical;min-height:74px}
       <div><label class="field-label">Scaffale</label><input class="field-input" id="f-scaffale" type="text" placeholder="es. A1..."></div>
     </div>
     <div class="field-group"><label class="field-label">Acquistato Presso</label><input class="field-input" id="f-acquistato" type="text" placeholder="es. Enoteca..."></div>
+    <div class="field-group">
+      <label class="field-label">Vino Assaggiato (fuori cantina)</label>
+      <div class="toggle-row">
+        <button type="button" class="toggle-btn active" id="btn-ass-no" onclick="setAssaggiato(false)">🍾 In cantina</button>
+        <button type="button" class="toggle-btn" id="btn-ass-si" onclick="setAssaggiato(true)">🥂 Assaggiato</button>
+      </div>
+      <div id="ass-info" style="display:none;margin-top:8px;background:rgba(139,32,80,.08);border:1px solid rgba(139,32,80,.2);border-radius:9px;padding:8px 11px;font-size:12px;color:#8B2050;line-height:1.5">
+        ℹ I vini assaggiati non fanno parte della cantina. Non vengono registrati movimenti di carico/scarico.
+      </div>
+    </div>
+    <div class="field-group" id="bevuto-presso-group" style="display:none">
+      <label class="field-label">Bevuto Presso</label>
+      <input class="field-input" id="f-bevutopresso" type="text" placeholder="es. Ristorante Da Mario, Enoteca...">
+    </div>
     <div class="field-group"><label class="field-label">Vitigno / Uvaggio</label><input class="field-input" id="f-vitigno" type="text" placeholder="es. Sangiovese, Cabernet..."></div>
     <div class="field-group">
       <label class="field-label">Punteggio personale</label>
@@ -627,15 +625,6 @@ textarea.field-input{resize:vertical;min-height:74px}
       <input id="ocr-key-input" class="field-input" type="text" placeholder="es. K12345678 (opzionale)" style="font-size:13px;padding:9px 11px" oninput="saveOCRKey()">
       <div id="ocr-key-status" style="font-size:11px;color:var(--text-faint);margin-top:5px"></div>
     </div>
-    <div style="background:var(--surface2);border:1px solid var(--gold-dim);border-radius:10px;padding:10px 12px;margin-top:4px">
-      <div style="font-size:10px;color:var(--gold);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:5px">🔍 Ricerca Immagini — Google Custom Search</div>
-      <div style="font-size:11px;color:var(--text-faint);margin-bottom:8px;line-height:1.5">Necessario per "Cerca su Web". Gratuito fino a 100 ricerche/giorno. Configura su <b style="color:var(--text-dim)">console.cloud.google.com</b> e <b style="color:var(--text-dim)">programmablesearchengine.google.com</b></div>
-      <div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">API Key</div>
-      <input id="gimg-api-key-input" class="field-input" type="text" placeholder="AIza..." style="font-size:13px;padding:9px 11px;margin-bottom:8px" oninput="saveGImgKey()">
-      <div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Search Engine ID (CX)</div>
-      <input id="gimg-cx-input" class="field-input" type="text" placeholder="es. 012345678901234567890:abc..." style="font-size:13px;padding:9px 11px" oninput="saveGImgCX()">
-      <div id="gimg-key-status" style="font-size:11px;color:var(--text-faint);margin-top:5px"></div>
-    </div>
 
     <!-- 4. INFO -->
     <div class="drawer-section-label">4 · Info</div>
@@ -653,7 +642,7 @@ textarea.field-input{resize:vertical;min-height:74px}
     </button>
 
   </div>
-  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label">v4.10</span></div>
+  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label">v4.4</span></div>
 </div>
 
 <!-- MANUAL OVERLAY -->
@@ -664,23 +653,6 @@ textarea.field-input{resize:vertical;min-height:74px}
   </div>
   <div class="manual-body">
     <iframe id="manual-frame" src="./manual.html" title="Manuale"></iframe>
-  </div>
-</div>
-
-<!-- IMAGE SEARCH OVERLAY -->
-<div id="imgsearch-overlay" class="imgsearch-overlay">
-  <div class="imgsearch-header">
-    <div>
-      <div class="imgsearch-title">🔍 Cerca Immagine Vino</div>
-      <div class="imgsearch-sub" id="imgsearch-sub">Ricerca in corso…</div>
-    </div>
-    <button class="btn-icon" onclick="closeImgSearch()" style="color:var(--text-dim);font-size:20px;background:none;border:none;cursor:pointer">✕</button>
-  </div>
-  <div class="imgsearch-body" id="imgsearch-body">
-    <div class="imgsearch-status">
-      <div class="imgsearch-spinner">🔍</div>
-      <div>Ricerca immagini…</div>
-    </div>
   </div>
 </div>
 
@@ -722,6 +694,8 @@ const MOVE_KEY='cantina_movimenti_v1';
 const THEME_KEY='cantina_tema_v1';
 let wines=[],movements=[],currentPhotoB64=null,editingId=null,editingMoveId=null;
 let moveFilter='all',currentMoveTipo='carico',currentFormato='Bottiglia',toastTimer=null;
+let currentAssaggiato=false;
+let _showAssaggiati=false;
 /* ── Nav state ── */
 let _currentView='list',_detailFrom='list',_detailId=null;
 
@@ -938,6 +912,26 @@ function selectFormato(btn){
   btn.classList.add('active');
 }
 
+function setAssaggiato(v){
+  currentAssaggiato=v;
+  document.getElementById('btn-ass-no').classList.toggle('active',!v);
+  document.getElementById('btn-ass-si').classList.toggle('active',v);
+  document.getElementById('btn-ass-si').classList.toggle('red',v);
+  document.getElementById('bevuto-presso-group').style.display=v?'block':'none';
+  document.getElementById('ass-info').style.display=v?'block':'none';
+  const qEl=document.getElementById('f-quantita');
+  if(v){qEl.value=0;qEl.disabled=true;}
+  else{qEl.disabled=false;if(!qEl.value||parseInt(qEl.value)===0)qEl.value=1;}
+}
+
+function toggleAssaggiatiView(){
+  _showAssaggiati=!_showAssaggiati;
+  const btn=document.getElementById('btn-toggle-assaggiati');
+  btn.style.color=_showAssaggiati?'#8B2050':'var(--text-dim)';
+  btn.setAttribute('title',_showAssaggiati?'Mostra cantina':'Mostra vini assaggiati');
+  renderList();
+}
+
 function showAdd(wineId=null){
   editingId=wineId;
   const w=wineId?wines.find(x=>x.id===wineId):null;
@@ -961,6 +955,9 @@ function showAdd(wineId=null){
   document.getElementById('f-note').value=w?.note||'';
   currentFormato=w?.formato||'Bottiglia';
   document.querySelectorAll('#formato-row .toggle-btn').forEach(b=>b.classList.toggle('active',b.dataset.val===currentFormato));
+  /* Assaggiato */
+  setAssaggiato(w?.assaggiato===true);
+  document.getElementById('f-bevutopresso').value=w?.bevutoPresso||'';
   currentPhotoB64=w?.foto||null;
   if(currentPhotoB64){document.getElementById('photo-preview').src=currentPhotoB64;document.getElementById('photo-preview').style.display='block';document.getElementById('photo-placeholder').style.display='none';document.getElementById('photo-remove').style.display='block';}
   else{document.getElementById('photo-preview').style.display='none';document.getElementById('photo-preview').src='';document.getElementById('photo-placeholder').style.display='block';document.getElementById('photo-remove').style.display='none';}
@@ -979,18 +976,19 @@ function saveWine(){
   const cantina=document.getElementById('f-cantina').value.trim();
   const nome=document.getElementById('f-nome').value.trim();
   if(!cantina||!nome){showToast('Cantina e Nome obbligatori',true);return;}
-  const qty=parseInt(document.getElementById('f-quantita').value)||0;
-  const fields={cantina,nome,anno:document.getElementById('f-anno').value.trim(),tipologia:document.getElementById('f-tipo').value,gradi:document.getElementById('f-gradi').value.trim(),vitigno:document.getElementById('f-vitigno').value.trim(),nazione:document.getElementById('f-nazione').value,regione:document.getElementById('f-regione').value,formato:currentFormato,quantita:qty,prezzo:document.getElementById('f-prezzo').value.trim(),date:document.getElementById('f-date').value,datalimite:document.getElementById('f-datalimite').value,posizione:document.getElementById('f-posizione').value.trim(),scaffale:document.getElementById('f-scaffale').value.trim(),acquistato:document.getElementById('f-acquistato').value.trim(),rating:parseFloat(document.getElementById('f-rating').value)||0,note:document.getElementById('f-note').value.trim(),foto:currentPhotoB64};
+  const assaggiato=currentAssaggiato===true;
+  const qty=assaggiato?0:(parseInt(document.getElementById('f-quantita').value)||0);
+  const fields={cantina,nome,anno:document.getElementById('f-anno').value.trim(),tipologia:document.getElementById('f-tipo').value,gradi:document.getElementById('f-gradi').value.trim(),vitigno:document.getElementById('f-vitigno').value.trim(),nazione:document.getElementById('f-nazione').value,regione:document.getElementById('f-regione').value,formato:currentFormato,quantita:qty,prezzo:document.getElementById('f-prezzo').value.trim(),date:document.getElementById('f-date').value,datalimite:document.getElementById('f-datalimite').value,posizione:document.getElementById('f-posizione').value.trim(),scaffale:document.getElementById('f-scaffale').value.trim(),acquistato:document.getElementById('f-acquistato').value.trim(),rating:parseFloat(document.getElementById('f-rating').value)||0,note:document.getElementById('f-note').value.trim(),foto:currentPhotoB64,assaggiato,bevutoPresso:document.getElementById('f-bevutopresso').value.trim()};
   if(editingId){
     const oldW=wines.find(w=>w.id===editingId);
     const oldQty=oldW?.quantita||0;
     wines=wines.map(w=>w.id===editingId?{...w,...fields}:w);
-    if(qty!==oldQty){const d=qty-oldQty;logMovement(editingId,fields.nome,fields.cantina,d>0?'carico':'scarico',Math.abs(d),fields.date,'','','Rettifica manuale');}
+    if(!assaggiato&&qty!==oldQty){const d=qty-oldQty;logMovement(editingId,fields.nome,fields.cantina,d>0?'carico':'scarico',Math.abs(d),fields.date,'','','Rettifica manuale');}
     save();showToast('Modifiche salvate');showDetail(editingId,true);
   }else{
     const id=genId();wines.unshift({id,...fields});
-    if(qty>0)logMovement(id,fields.nome,fields.cantina,'carico',qty,fields.date,fields.acquistato,fields.prezzo,'Carico iniziale');
-    save();showToast('Vino aggiunto');showList();
+    if(!assaggiato&&qty>0)logMovement(id,fields.nome,fields.cantina,'carico',qty,fields.date,fields.acquistato,fields.prezzo,'Carico iniziale');
+    save();showToast(assaggiato?'Vino assaggiato aggiunto':'Vino aggiunto');showList();
   }
   editingId=null;
 }
@@ -1033,7 +1031,11 @@ function updateStarPreview(){
 function getSearchQuery(){ return (document.getElementById('search-input')?.value||'').toLowerCase().trim(); }
 function getFilteredWines(){
   const q=getSearchQuery();
-  return q ? wines.filter(w=>[w.cantina,w.nome,w.anno,w.tipologia,w.acquistato,w.posizione,w.scaffale,w.nazione,w.regione,w.note].some(v=>v?.toString().toLowerCase().includes(q))) : wines;
+  /* Separa assaggiati da cantina */
+  const pool=_showAssaggiati
+    ? wines.filter(w=>w.assaggiato===true)
+    : wines.filter(w=>w.assaggiato!==true);
+  return q ? pool.filter(w=>[w.cantina,w.nome,w.anno,w.tipologia,w.acquistato,w.posizione,w.scaffale,w.nazione,w.regione,w.note,w.bevutoPresso].some(v=>v?.toString().toLowerCase().includes(q))) : pool;
 }
 
 function renderList(){
@@ -1041,21 +1043,31 @@ function renderList(){
   const clear=document.getElementById('search-clear');
   if(clear)clear.style.display=q?'block':'none';
   const filtered=getFilteredWines();
-  const totBot=wines.reduce((s,w)=>s+(parseInt(w.quantita)||0),0);
-  const totEuro=wines.reduce((s,w)=>s+(parseFloat(w.prezzo)||0),0);
-  var invStr=totEuro>0?' · '+fmtEuro(totEuro):''; document.getElementById('header-sub').textContent=wines.length+' etichette · '+totBot+' bot.'+invStr;
-  document.getElementById('search-bar').style.display=wines.length>2?'flex':'none';
+  /* Header subtitle */
+  if(_showAssaggiati){
+    document.getElementById('header-sub').textContent=filtered.length+' vini assaggiati';
+  }else{
+    const cantina=wines.filter(w=>w.assaggiato!==true);
+    const totBot=cantina.reduce((s,w)=>s+(parseInt(w.quantita)||0),0);
+    const totEuro=cantina.reduce((s,w)=>s+(parseFloat(w.prezzo)||0),0);
+    var invStr=totEuro>0?' · '+fmtEuro(totEuro):''; document.getElementById('header-sub').textContent=cantina.length+' etichette · '+totBot+' bot.'+invStr;
+  }
+  document.getElementById('search-bar').style.display=filtered.length>2||q?'flex':'none';
   const container=document.getElementById('wine-list');
-  if(filtered.length===0){container.innerHTML='<div class="empty"><div class="icon">x</div><h3>'+(q?'Nessun risultato':'Cantina vuota')+'</h3><p>'+(q?'Prova altra parola chiave':'Aggiungi il tuo primo vino')+'</p></div>';return;}
+  if(filtered.length===0){container.innerHTML='<div class="empty"><div class="icon">'+ (_showAssaggiati?'🥂':'🍾')+'</div><h3>'+(q?'Nessun risultato':(_showAssaggiati?'Nessun vino assaggiato':'Cantina vuota'))+'</h3><p>'+(q?'Prova altra parola chiave':(_showAssaggiati?'Aggiungi vini con il flag "Assaggiato"':'Aggiungi il tuo primo vino'))+'</p></div>';return;}
   container.innerHTML=filtered.map(w=>{
     const qty=parseInt(w.quantita)||0;
     const miniStars=starsHTML(w.rating,'mini');
-    /* Posizione/scaffale: visibile solo durante ricerca attiva */
     const posRow=(q&&(w.posizione||w.scaffale))?
       '<div class="card-pos"><svg width="10" height="10" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>'+
       (w.posizione?esc(w.posizione):'')+(w.posizione&&w.scaffale?' / ':'')+
       (w.scaffale?esc(w.scaffale):'')+
       '</div>':'';
+    if(w.assaggiato){
+      /* Card assaggiato: no pulsante scarica, flash badge, bevuto presso */
+      const bpRow=w.bevutoPresso?'<div class="card-pos">🥂 '+esc(w.bevutoPresso)+'</div>':'';
+      return '<div class="card" onclick="showDetail(\''+w.id+'\')">'+(w.foto?'<img class="card-img" src="'+w.foto+'" alt="">':'<div class="card-img-ph">🍷</div>')+'<div class="card-body"><div class="card-cantina">'+esc(w.cantina)+'</div><div class="card-name">'+esc(w.nome)+'</div><div class="card-meta">'+(w.anno?'<span>'+esc(w.anno)+'</span>':'')+(w.tipologia?'<span>'+esc(w.tipologia)+'</span>':'')+'</div>'+(miniStars?'<div style="margin-top:2px">'+miniStars+'</div>':'')+bpRow+'<div style="display:flex;gap:5px;margin-top:3px"><span class="flash-badge">🥂 Assaggiato</span></div></div></div>';
+    }
     const locStr=(w.posizione||w.scaffale)?esc(w.posizione||'')+(w.posizione&&w.scaffale?' / ':'')+esc(w.scaffale||''):'';
     const rightPanel='<div class="card-right-panel">'+(locStr?'<div class="card-loc-label">'+locStr+'</div>':'')+(qty>0?'<button class="card-scarica" onclick="quickScarica(event,\''+w.id+'\')">- Scarica</button>':'')+'</div>';
     return '<div class="card" onclick="showDetail(\''+w.id+'\')">'+(w.foto?'<img class="card-img" src="'+w.foto+'" alt="">':'<div class="card-img-ph">🍷</div>')+'<div class="card-body"><div class="card-cantina">'+esc(w.cantina)+'</div><div class="card-name">'+esc(w.nome)+'</div><div class="card-meta">'+(w.anno?'<span>'+esc(w.anno)+'</span>':'')+(w.tipologia?'<span>'+esc(w.tipologia)+'</span>':'')+(w.prezzo?'<span class="price">'+fmtEuro(w.prezzo)+'</span>':'')+'</div>'+(miniStars?'<div style="margin-top:2px">'+miniStars+'</div>':'')+posRow+'<div style="display:flex;gap:5px;margin-top:3px"><span class="card-badge qty'+(qty===0?' zero':'')+'">'+qty+' bot.</span>'+(w.formato&&w.formato!=='Bottiglia'?'<span class="card-badge fmt">'+esc(w.formato)+'</span>':'')+'</div></div>'+rightPanel+'</div>';
@@ -1081,12 +1093,15 @@ function showDetail(id,fromSave=false){
   const starsCell=(w.rating&&w.rating>0)?'<div class="detail-cell full"><div class="detail-cell-label">Punteggio personale</div><div class="detail-cell-value" style="display:flex;align-items:center;gap:6px">'+starsHTML(w.rating,'full')+'<span style="font-size:14px;color:var(--text-dim)">'+parseFloat(w.rating).toFixed(1)+'/5</span></div></div>':'';
   document.getElementById('detail-body').innerHTML=hero+
     '<div class="detail-content">'+
+    (w.assaggiato?'<div class="assaggiato-banner"><div class="ab-icon">🥂</div><div class="ab-text"><div class="ab-title">Vino Assaggiato</div>'+(w.bevutoPresso?'<div class="ab-sub">Bevuto presso: '+esc(w.bevutoPresso)+'</div>':'<div class="ab-sub">Degustato fuori cantina</div>')+'</div></div>':'')+
     '<div class="detail-cantina">'+esc(w.cantina)+'</div>'+
     '<div class="detail-name">'+esc(w.nome)+'</div>'+
-    '<div class="qty-bar"><button class="btn-qty minus" onclick="changeQty(\''+w.id+'\',-1)">−</button>'+
-    '<div class="qty-label">Bottiglie disponibili'+(w.formato&&w.formato!=='Bottiglia'?' ('+esc(w.formato)+')':'')+'</div>'+
-    '<div class="qty-val'+(qty===0?' zero':'')+'" id="dqty-'+w.id+'">'+qty+'</div>'+
-    '<button class="btn-qty plus" onclick="changeQty(\''+w.id+'\',+1)">+</button></div>'+
+    (w.assaggiato?'':
+      '<div class="qty-bar"><button class="btn-qty minus" onclick="changeQty(\''+w.id+'\',-1)">−</button>'+
+      '<div class="qty-label">Bottiglie disponibili'+(w.formato&&w.formato!=='Bottiglia'?' ('+esc(w.formato)+')':'')+'</div>'+
+      '<div class="qty-val'+(qty===0?' zero':'')+'" id="dqty-'+w.id+'">'+qty+'</div>'+
+      '<button class="btn-qty plus" onclick="changeQty(\''+w.id+'\',+1)">+</button></div>'
+    )+
     '<div class="detail-grid">'+
     (w.anno?'<div class="detail-cell"><div class="detail-cell-label">Annata</div><div class="detail-cell-value">'+esc(w.anno)+'</div></div>':'')+
     (w.tipologia?'<div class="detail-cell"><div class="detail-cell-label">Tipologia</div><div class="detail-cell-value">'+esc(w.tipologia)+'</div></div>':'')+
@@ -1115,6 +1130,7 @@ function showDetail(id,fromSave=false){
 
 function changeQty(id,delta){
   const w=wines.find(x=>x.id===id);if(!w)return;
+  if(w.assaggiato){showToast('Vino assaggiato: nessun movimento disponibile',true);return;}
   const newQty=Math.max(0,(parseInt(w.quantita)||0)+delta);
   w.quantita=newQty;save();
   const el=document.getElementById('dqty-'+id);
@@ -1126,6 +1142,7 @@ function changeQty(id,delta){
 function quickScarica(event,id){
   event.stopPropagation();
   const w=wines.find(x=>x.id===id);if(!w)return;
+  if(w.assaggiato){showToast('Vino assaggiato: nessun movimento disponibile',true);return;}
   const qty=parseInt(w.quantita)||0;
   if(qty<=0){showToast('Quantita gia zero',true);return;}
   const nid='qs-'+id;
@@ -1236,7 +1253,7 @@ function showMoveEdit(moveId){
   editingMoveId=moveId;
   const m=moveId?movements.find(x=>x.id===moveId):null;
   const sel=document.getElementById('m-wine');
-  sel.innerHTML=wines.map(w=>'<option value="'+w.id+'" data-name="'+esc(w.nome)+'" data-cantina="'+esc(w.cantina)+'">'+esc(w.nome)+' - '+esc(w.cantina)+'</option>').join('');
+  sel.innerHTML=wines.filter(w=>w.assaggiato!==true).map(w=>'<option value="'+w.id+'" data-name="'+esc(w.nome)+'" data-cantina="'+esc(w.cantina)+'">'+esc(w.nome)+' - '+esc(w.cantina)+'</option>').join('');
   if(m?.wineId)sel.value=m.wineId;
   const tipo=m?.tipo||'carico';
   currentMoveTipo=tipo;selectMoveTipo(tipo);
@@ -1324,50 +1341,6 @@ function openVivino(wineId){
       {label:'Annulla',               cls:'secondary', action:closeModal},
     ]
   );
-}
-
-/* ══════════════════════════════════════════════════════════
-   PLATFORM DETECTION
-   ══════════════════════════════════════════════════════════ */
-
-function getPlatform(){
-  const ua = navigator.userAgent.toLowerCase();
-  if(/iphone|ipad|ipod/.test(ua)) return 'ios';
-  if(/android/.test(ua)) return 'android';
-  /* iPad con iPadOS ≥ 13 che si spaccia per macOS */
-  if(navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1) return 'ios';
-  return 'desktop';
-}
-
-/**
- * Mostra un toast informativo contestuale alla piattaforma
- * dopo un'operazione di esportazione.
- * @param {'folder'|'json'|'csv'} type  tipo di export
- * @param {number} delay  ms di ritardo rispetto al toast principale
- */
-function showPlatformExportHint(type, delay = 1800){
-  const platform = getPlatform();
-  let msg = null;
-
-  if(platform === 'ios'){
-    if(type === 'folder'){
-      msg = '📱 iPhone: ogni file apparirà nel pannello di sistema — scegli dove salvarlo (iCloud o Sul mio iPhone)';
-    } else if(type === 'json'){
-      msg = '📱 iPhone: il file JSON apparirà nel pannello di sistema — scegli dove salvarlo';
-    } else if(type === 'csv'){
-      msg = '📱 iPhone: i file CSV arriveranno uno alla volta nel pannello di sistema';
-    }
-  } else if(platform === 'android'){
-    if(type === 'folder'){
-      msg = '🤖 Android: file salvati direttamente nella cartella selezionata';
-    } else if(type === 'json'){
-      msg = '🤖 Android: file JSON salvato nella cartella Download';
-    } else if(type === 'csv'){
-      msg = '🤖 Android: file CSV salvato nella cartella Download';
-    }
-  }
-
-  if(msg) setTimeout(() => showToast(msg), delay);
 }
 
 /* ══════════════════════════════════════════════════════════
@@ -1491,7 +1464,6 @@ async function exportToFolder(){
         } catch(e){ console.warn('img write:',e); }
       }
       showToast(`✓ Backup in "${dirHandle.name}": vini, movimenti, ${imgOK} foto`);
-      showPlatformExportHint('folder');
       return;
     } catch(e){
       showToast('Errore scrittura: '+e.message, true);
@@ -1513,7 +1485,6 @@ async function exportToFolder(){
     delay+=200;
   }
   showToast(`Download: vini, movimenti, ${winesWithPhoto.length} foto`);
-  showPlatformExportHint('folder');
 }
 
 /* ── RIPRISTINA DA CARTELLA ── */
@@ -1889,7 +1860,6 @@ function exportJSON(){
   a.download='cantina_backup_'+new Date().toISOString().split('T')[0]+'.json';
   a.click();URL.revokeObjectURL(url);
   showToast('Esportati '+wines.length+' vini + '+movements.length+' movimenti');
-  showPlatformExportHint('json');
 }
 
 function importJSON(e){
@@ -1933,7 +1903,6 @@ function exportCSV(){
   a.download='cantina_'+new Date().toISOString().split('T')[0]+'.csv';
   a.click();URL.revokeObjectURL(url);
   showToast('CSV esportato ('+wines.length+' vini + foto)');
-  showPlatformExportHint('csv');
 }
 
 function parseCSVRow(line){const out=[];let cur='',inQ=false;for(let i=0;i<line.length;i++){const c=line[i];if(c==='"'){if(inQ&&line[i+1]==='"'){cur+='"';i++;}else inQ=!inQ;}else if(c===','&&!inQ){out.push(cur);cur='';}else cur+=c;}out.push(cur);return out;}
@@ -1972,7 +1941,6 @@ function openDrawer(){
   document.getElementById('drawer').classList.add('open');
   document.getElementById('drawer-overlay').classList.add('open');
   loadOCRKeyField();
-  loadGImgKeyFields();
   loadBackupFolderName();
 }
 function closeDrawer(){document.getElementById('drawer').classList.remove('open');document.getElementById('drawer-overlay').classList.remove('open');}
@@ -1991,217 +1959,18 @@ function closeManual(){document.getElementById('manual-overlay').classList.remov
    Chiave personale gratuita: registrazione su ocr.space (25.000 req/mese)
    ═══════════════════════════════════════════════════════════════════════ */
 
-/* ══════════════════════════════════════════════════════════
-   GOOGLE CUSTOM SEARCH — IMAGE SEARCH
-   Richiede: API Key + CX (Custom Search Engine ID)
-   Gratuito: 100 ricerche/giorno
-   Setup: console.cloud.google.com + programmablesearchengine.google.com
-   ══════════════════════════════════════════════════════════ */
+const OCR_KEY_STORE = 'cantina_ocr_key_v1';
 
-const GIMG_API_KEY_STORE = 'cantina_gimg_api_key_v1';
-const GIMG_CX_STORE      = 'cantina_gimg_cx_v1';
-
-function getGImgApiKey(){ return localStorage.getItem(GIMG_API_KEY_STORE)||''; }
-function getGImgCX(){     return localStorage.getItem(GIMG_CX_STORE)||''; }
-
-function saveGImgKey(){
-  const v=document.getElementById('gimg-api-key-input')?.value?.trim()||'';
-  if(v){ localStorage.setItem(GIMG_API_KEY_STORE,v); _gimgStatus('✓ API Key salvata'); }
-  else { localStorage.removeItem(GIMG_API_KEY_STORE); _gimgStatus('API Key rimossa'); }
+function getOCRKey(){ return localStorage.getItem(OCR_KEY_STORE)||'helloworld'; }
+function saveOCRKey(){
+  const v=document.getElementById('ocr-key-input')?.value?.trim()||'';
+  if(v){ localStorage.setItem(OCR_KEY_STORE,v); document.getElementById('ocr-key-status').textContent='✓ Chiave salvata'; }
+  else { localStorage.removeItem(OCR_KEY_STORE); document.getElementById('ocr-key-status').textContent='Chiave rimossa — verrà usata la demo'; }
 }
-function saveGImgCX(){
-  const v=document.getElementById('gimg-cx-input')?.value?.trim()||'';
-  if(v){ localStorage.setItem(GIMG_CX_STORE,v); _gimgStatus('✓ Search Engine ID salvato'); }
-  else { localStorage.removeItem(GIMG_CX_STORE); _gimgStatus('CX rimosso'); }
-}
-function _gimgStatus(msg){
-  const el=document.getElementById('gimg-key-status');
-  if(el) el.textContent=msg;
-}
-function loadGImgKeyFields(){
-  const k=localStorage.getItem(GIMG_API_KEY_STORE)||'';
-  const cx=localStorage.getItem(GIMG_CX_STORE)||'';
-  const ki=document.getElementById('gimg-api-key-input');
-  const ci=document.getElementById('gimg-cx-input');
-  if(ki) ki.value=k;
-  if(ci) ci.value=cx;
-  _gimgStatus( (k&&cx) ? '✓ Configurato' : (!k&&!cx) ? '' : !k ? 'Manca API Key' : 'Manca Search Engine ID' );
-}
-
-/* ── Apre l'overlay e avvia la ricerca ── */
-async function searchWineImages(){
-  const nome    = document.getElementById('f-nome')?.value?.trim()||'';
-  const cantina = document.getElementById('f-cantina')?.value?.trim()||'';
-
-  if(!nome && !cantina){
-    showToast('Inserisci prima il nome del vino o la cantina', true);
-    return;
-  }
-
-  const apiKey = getGImgApiKey();
-  const cx     = getGImgCX();
-
-  if(!apiKey || !cx){
-    showToast('Configura la chiave API Google nelle Impostazioni (⚙)', true);
-    return;
-  }
-
-  /* Apre overlay con spinner */
-  openImgSearch([nome, cantina].filter(Boolean).join(' · '));
-
-  /* Query ottimizzata: bottiglia vino + cantina + nome */
-  const q = [nome, cantina, 'vino bottiglia etichetta wine bottle'].filter(Boolean).join(' ');
-  const url = `https://www.googleapis.com/customsearch/v1`
-    + `?key=${encodeURIComponent(apiKey)}`
-    + `&cx=${encodeURIComponent(cx)}`
-    + `&searchType=image`
-    + `&imgType=photo`
-    + `&imgSize=large`
-    + `&num=3`
-    + `&safe=active`
-    + `&q=${encodeURIComponent(q)}`;
-
-  try{
-    const res  = await fetch(url);
-    const data = await res.json();
-
-    if(data.error){
-      _imgSearchError('Errore API: ' + (data.error.message||'sconosciuto'));
-      return;
-    }
-
-    const items = data.items||[];
-    if(!items.length){
-      _imgSearchError('Nessuna immagine trovata per questo vino.');
-      return;
-    }
-
-    _imgSearchShowResults(items);
-
-  } catch(e){
-    _imgSearchError('Errore di rete: ' + e.message);
-  }
-}
-
-/* ── Apre overlay ── */
-function openImgSearch(label){
-  document.getElementById('imgsearch-sub').textContent = label||'';
-  document.getElementById('imgsearch-body').innerHTML =
-    `<div class="imgsearch-status"><div class="imgsearch-spinner">🔍</div><div>Ricerca immagini…</div></div>`;
-  document.getElementById('imgsearch-overlay').classList.add('open');
-}
-function closeImgSearch(){
-  document.getElementById('imgsearch-overlay').classList.remove('open');
-}
-
-/* ── Mostra errore nell'overlay ── */
-function _imgSearchError(msg){
-  document.getElementById('imgsearch-body').innerHTML =
-    `<div class="imgsearch-status">⚠️<br><br>${msg}</div>`;
-}
-
-/* ── Mostra i risultati nell'overlay ── */
-function _imgSearchShowResults(items){
-  const body = document.getElementById('imgsearch-body');
-  const grid = document.createElement('div');
-  grid.className = 'imgsearch-grid';
-
-  items.forEach((item, idx)=>{
-    const imgUrl   = item.link;
-    const thumbUrl = item.image?.thumbnailLink || imgUrl;
-    const domain   = (item.displayLink||'').replace(/^www\./,'');
-
-    const card = document.createElement('div');
-    card.className = 'imgsearch-card';
-    card.innerHTML = `
-      <img src="${thumbUrl}" alt="${item.title||''}"
-           loading="lazy"
-           onerror="this.src='';this.style.minHeight='120px';this.alt='Anteprima non disponibile'">
-      <div class="imgsearch-card-foot">
-        <span class="imgsearch-card-src">${domain}</span>
-        <button class="btn-use-img" id="use-img-btn-${idx}" onclick="applyWebImage('${imgUrl.replace(/'/g,"\\'")}', ${idx})">
-          Usa questa foto
-        </button>
-      </div>`;
-    grid.appendChild(card);
-  });
-
-  body.innerHTML = '';
-  body.appendChild(grid);
-  document.getElementById('imgsearch-sub').textContent = `${items.length} immagini trovate — scegli`;
-}
-
-/* ── Scarica l'immagine scelta e la imposta come foto del vino ── */
-async function applyWebImage(imgUrl, btnIdx){
-  /* Disabilita tutti i bottoni durante il download */
-  document.querySelectorAll('.btn-use-img').forEach(b=>{ b.disabled=true; b.textContent='…'; });
-  const btn = document.getElementById(`use-img-btn-${btnIdx}`);
-  if(btn) btn.textContent = '⏳';
-
-  showToast('⏳ Download immagine in corso…');
-
-  /* Strategia 1: fetch diretto (funziona se il server ha CORS aperto) */
-  /* Strategia 2: proxy CORS pubblico come fallback */
-  const attempts = [
-    imgUrl,
-    'https://corsproxy.io/?' + encodeURIComponent(imgUrl),
-  ];
-
-  for(const src of attempts){
-    try{
-      const r = await fetch(src, {mode:'cors'});
-      if(!r.ok) continue;
-      const blob = await r.blob();
-      if(!blob.size) continue;
-
-      /* Converti in base64 e comprimi */
-      const b64raw = await new Promise(res=>{
-        const fr=new FileReader(); fr.onload=e=>res(e.target.result); fr.readAsDataURL(blob);
-      });
-
-      /* Comprimi come le altre foto (max 1200px) */
-      const b64 = await _compressWebImage(b64raw);
-
-      /* Applica alla scheda */
-      currentPhotoB64 = b64;
-      document.getElementById('photo-preview').src = b64;
-      document.getElementById('photo-preview').style.display = 'block';
-      document.getElementById('photo-placeholder').style.display = 'none';
-      document.getElementById('photo-remove').style.display = 'block';
-      document.getElementById('ocr-area').style.display = 'block';
-
-      closeImgSearch();
-      showToast('✓ Immagine importata dal web');
-      return;
-
-    } catch(e){ /* prova prossimo */ }
-  }
-
-  /* Tutti i tentativi falliti */
-  document.querySelectorAll('.btn-use-img').forEach(b=>{ b.disabled=false; b.textContent='Usa questa foto'; });
-  if(btn){ btn.disabled=false; btn.textContent='Usa questa foto'; }
-  showToast('Impossibile scaricare questa foto — prova un\'altra', true);
-}
-
-/* ── Comprimi immagine web a max 1200px ── */
-function _compressWebImage(b64){
-  return new Promise(res=>{
-    const img=new Image();
-    img.onload=()=>{
-      const MAX=1200;
-      let w=img.naturalWidth, h=img.naturalHeight;
-      const r=Math.min(MAX/w, MAX/h, 1);
-      w=Math.round(w*r); h=Math.round(h*r);
-      const c=document.createElement('canvas');
-      c.width=w; c.height=h;
-      c.getContext('2d').drawImage(img,0,0,w,h);
-      let q=0.85, out=c.toDataURL('image/jpeg',q);
-      while(out.length>900000 && q>0.5){ q-=0.1; out=c.toDataURL('image/jpeg',q); }
-      res(out);
-    };
-    img.onerror=()=>res(b64);
-    img.src=b64;
-  });
+function loadOCRKeyField(){
+  const k=localStorage.getItem(OCR_KEY_STORE)||'';
+  const inp=document.getElementById('ocr-key-input');
+  if(inp) inp.value=k;
 }
 
 /* Comprime la foto a max ~900KB (limite pratico di ocr.space free tier) */
@@ -2299,43 +2068,21 @@ async function runOCR(){
   try{
     const compressed=await compressForOCR(currentPhotoB64);
     const t0=Date.now();
-    const ocrKey=getOCRKey();
-
-    /* Avvisa se si usa la chiave demo — potrebbe essere bloccata */
-    if(ocrKey==='helloworld'){
-      status.innerHTML='⚠️ Chiave demo in uso — potrebbe essere limitata. Configura una chiave gratuita in Impostazioni (⚙).';
-      await new Promise(r=>setTimeout(r,2200)); /* mostra il messaggio 2 sec */
-    }
-    status.innerHTML='📤 Invio immagine a OCR.space…';
 
     const fd=new FormData();
     fd.append('base64Image', compressed);
-    fd.append('language','ita');
-    fd.append('apikey', ocrKey);
-    fd.append('OCREngine','2');
-    fd.append('detectOrientation','true');
-    fd.append('scale','true');
+    fd.append('language','ita');           /* Italiano principale */
+    fd.append('apikey', getOCRKey());
+    fd.append('OCREngine','2');            /* Engine 2: più accurato su testi complessi */
+    fd.append('detectOrientation','true'); /* Auto-ruota se necessario */
+    fd.append('scale','true');             /* Migliora testo piccolo */
     fd.append('isTable','false');
     fd.append('isOverlayRequired','false');
 
-    /* Usa XMLHttpRequest invece di fetch: evita interferenze del
-       Service Worker su Android Chrome con richieste POST esterne */
-    const data = await new Promise((resolve, reject) => {
-      const xhr = new XMLHttpRequest();
-      xhr.open('POST', 'https://api.ocr.space/parse/image');
-      xhr.timeout = 30000;
-      xhr.onload = () => {
-        if(xhr.status >= 200 && xhr.status < 300){
-          try{ resolve(JSON.parse(xhr.responseText)); }
-          catch(e){ reject(new Error('Risposta non valida dal server OCR')); }
-        } else {
-          reject(new Error('Servizio non raggiungibile (HTTP '+xhr.status+')'));
-        }
-      };
-      xhr.onerror   = () => reject(new Error('Errore di rete — ocr.space non raggiungibile. Controlla la connessione.'));
-      xhr.ontimeout = () => reject(new Error('Timeout (30s): ocr.space non ha risposto. Riprova.'));
-      xhr.send(fd);
-    });
+    const resp=await fetch('https://api.ocr.space/parse/image',{method:'POST',body:fd});
+    if(!resp.ok) throw new Error('Servizio non raggiungibile (HTTP '+resp.status+')');
+
+    const data=await resp.json();
     const ms=Date.now()-t0;
 
     /* Gestione errori specifici di ocr.space */
@@ -2520,32 +2267,13 @@ function showToast(msg,isErr=false){
 }
 
 let _newSW=null;
-function applyUpdate(){
-  if(_newSW){
-    _newSW.postMessage('SKIP_WAITING');
-    /* Ricarica quando il nuovo SW prende il controllo */
-    navigator.serviceWorker.addEventListener('controllerchange',()=>window.location.reload(),{once:true});
-  } else {
-    window.location.reload();
-  }
-}
+function applyUpdate(){if(_newSW){_newSW.postMessage('SKIP_WAITING');_newSW.addEventListener('statechange',()=>{if(_newSW.state==='activated')window.location.reload();});}else window.location.reload();}
 if('serviceWorker'in navigator){
-  navigator.serviceWorker.register('./sw.js',{updateViaCache:'none'}).then(reg=>{
-    /* SW già in attesa (es. app riaperta dopo un aggiornamento mancato) */
+  navigator.serviceWorker.register('./sw.js').then(reg=>{
     if(reg.waiting){_newSW=reg.waiting;document.getElementById('update-banner').classList.add('show');}
-    /* Nuovo SW trovato durante questa sessione */
-    reg.addEventListener('updatefound',()=>{
-      const nw=reg.installing;
-      nw.addEventListener('statechange',()=>{
-        if(nw.state==='installed'&&navigator.serviceWorker.controller){
-          _newSW=nw;
-          document.getElementById('update-banner').classList.add('show');
-        }
-      });
-    });
+    reg.addEventListener('updatefound',()=>{const nw=reg.installing;nw.addEventListener('statechange',()=>{if(nw.state==='installed'&&navigator.serviceWorker.controller){_newSW=nw;document.getElementById('update-banner').classList.add('show');}});});
   }).catch(()=>{});
-  /* Niente listener globale su controllerchange:
-     il reload avviene solo se l'utente preme "Aggiorna ora". */
+  navigator.serviceWorker.addEventListener('controllerchange',()=>window.location.reload());
 }
 
 /* ══════════ INIT ASINCRONO (IndexedDB) ══════════ */
@@ -2560,13 +2288,6 @@ if('serviceWorker'in navigator){
   try{
     await dbLoad();   /* IndexedDB + migrazione automatica */
     loadTheme();
-
-    /* Precarica chiave OCR in cache subito all'avvio —
-       così getOCRKey() restituisce il valore corretto
-       anche senza aver mai aperto il drawer */
-    const _k = await dbSetting('cantina_ocr_key_v1');
-    window._ocrKeyCache = _k || 'helloworld';
-
     document.getElementById('f-date').value=new Date().toISOString().split('T')[0];
     document.getElementById('m-date').value=new Date().toISOString().split('T')[0];
   } catch(e){
@@ -2894,7 +2615,6 @@ function goBack(){
     document.body.style.overflow='';
     return;
   }
-  if(document.getElementById('imgsearch-overlay').classList.contains('open')){closeImgSearch();return;}
   const _to=document.getElementById('territori-overlay');
   if(_to&&_to.style.display&&_to.style.display!=='none'){closeTerritoriManager();return;}
   if(document.getElementById('manual-overlay').classList.contains('open')){closeManual();return;}
@@ -2931,8 +2651,19 @@ function goBack(){
 }
 
 function askExit(){
-  /* Comportamento standard mobile: non esce, informa l'utente */
-  showToast('Premi il tasto Home per uscire dall\'app');
+  showModal('Uscire dall\'app?',
+    'Vuoi uscire da <b style="color:var(--gold)">La Mia Cantina</b>?<br>I tuoi dati sono al sicuro.',
+    [
+      {label:'Esci',cls:'primary',action:()=>{
+        closeModal();
+        /* Tenta chiusura finestra; su iOS/PWA potrebbe non funzionare */
+        try{ window.close(); }catch(e){}
+        /* Fallback visivo */
+        setTimeout(()=>showToast('Usa il tasto Home per chiudere l\'app'),350);
+      }},
+      {label:'Rimani',cls:'secondary',action:closeModal}
+    ]
+  );
 }
 
 /* ── Hardware Back button (Android) via History API ── */

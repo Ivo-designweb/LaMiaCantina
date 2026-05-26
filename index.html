@@ -325,10 +325,11 @@ textarea.field-input{resize:vertical;min-height:74px}
     <div>
       <div class="header-title">La Mia Cantina</div>
       <div id="header-sub" class="header-sub">0 vini</div>
+      <div id="header-assaggiati-label" style="display:none;font-size:11px;font-weight:700;color:#8B2050;letter-spacing:.8px;margin-top:1px">🥂 I vini assaggiati</div>
     </div>
     <div style="display:flex;align-items:center;gap:4px">
       <button id="btn-toggle-assaggiati" class="btn-eye" onclick="toggleAssaggiatiView()" title="Mostra vini assaggiati" style="color:var(--text-dim)">
-        <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        <svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
       </button>
       <img src="./icon512.png" class="header-logo" alt="cantina" onclick="openManual()" style="cursor:pointer">
       <button class="btn-icon" onclick="openDrawer()">
@@ -396,6 +397,20 @@ textarea.field-input{resize:vertical;min-height:74px}
         <div class="ocr-result" id="ocr-result"></div>
       </div>
     </div>
+    <div class="field-group">
+      <label class="field-label">Vino Assaggiato (fuori cantina)</label>
+      <div class="toggle-row">
+        <button type="button" class="toggle-btn active" id="btn-ass-no" onclick="setAssaggiato(false)">🍾 In cantina</button>
+        <button type="button" class="toggle-btn" id="btn-ass-si" onclick="setAssaggiato(true)">🥂 Assaggiato</button>
+      </div>
+      <div id="ass-info" style="display:none;margin-top:8px;background:rgba(139,32,80,.08);border:1px solid rgba(139,32,80,.2);border-radius:9px;padding:8px 11px;font-size:12px;color:#8B2050;line-height:1.5">
+        ℹ I vini assaggiati non fanno parte della cantina. Non vengono registrati movimenti di carico/scarico.
+      </div>
+    </div>
+    <div class="field-group" id="bevuto-presso-group" style="display:none">
+      <label class="field-label">Bevuto Presso</label>
+      <input class="field-input" id="f-bevutopresso" type="text" placeholder="es. Ristorante Da Mario, Enoteca...">
+    </div>
     <div class="field-group"><label class="field-label">Cantina *</label><input class="field-input" id="f-cantina" type="text" placeholder="es. Antinori..."></div>
     <div class="field-group"><label class="field-label">Nome del Vino *</label><input class="field-input" id="f-nome" type="text" placeholder="es. Tignanello..."></div>
     <div class="row2" style="margin-bottom:14px">
@@ -437,20 +452,6 @@ textarea.field-input{resize:vertical;min-height:74px}
       <div><label class="field-label">Scaffale</label><input class="field-input" id="f-scaffale" type="text" placeholder="es. A1..."></div>
     </div>
     <div class="field-group"><label class="field-label">Acquistato Presso</label><input class="field-input" id="f-acquistato" type="text" placeholder="es. Enoteca..."></div>
-    <div class="field-group">
-      <label class="field-label">Vino Assaggiato (fuori cantina)</label>
-      <div class="toggle-row">
-        <button type="button" class="toggle-btn active" id="btn-ass-no" onclick="setAssaggiato(false)">🍾 In cantina</button>
-        <button type="button" class="toggle-btn" id="btn-ass-si" onclick="setAssaggiato(true)">🥂 Assaggiato</button>
-      </div>
-      <div id="ass-info" style="display:none;margin-top:8px;background:rgba(139,32,80,.08);border:1px solid rgba(139,32,80,.2);border-radius:9px;padding:8px 11px;font-size:12px;color:#8B2050;line-height:1.5">
-        ℹ I vini assaggiati non fanno parte della cantina. Non vengono registrati movimenti di carico/scarico.
-      </div>
-    </div>
-    <div class="field-group" id="bevuto-presso-group" style="display:none">
-      <label class="field-label">Bevuto Presso</label>
-      <input class="field-input" id="f-bevutopresso" type="text" placeholder="es. Ristorante Da Mario, Enoteca...">
-    </div>
     <div class="field-group"><label class="field-label">Vitigno / Uvaggio</label><input class="field-input" id="f-vitigno" type="text" placeholder="es. Sangiovese, Cabernet..."></div>
     <div class="field-group">
       <label class="field-label">Punteggio personale</label>
@@ -642,7 +643,7 @@ textarea.field-input{resize:vertical;min-height:74px}
     </button>
 
   </div>
-  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label">v4.4</span></div>
+  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label">v4.6</span></div>
 </div>
 
 <!-- MANUAL OVERLAY -->
@@ -927,7 +928,17 @@ function setAssaggiato(v){
 function toggleAssaggiatiView(){
   _showAssaggiati=!_showAssaggiati;
   const btn=document.getElementById('btn-toggle-assaggiati');
-  btn.style.color=_showAssaggiati?'#8B2050':'var(--text-dim)';
+  const lbl=document.getElementById('header-assaggiati-label');
+  if(_showAssaggiati){
+    btn.style.color='#8B2050';
+    btn.style.background='rgba(139,32,80,.12)';
+    btn.style.borderRadius='8px';
+    lbl.style.display='block';
+  }else{
+    btn.style.color='var(--text-dim)';
+    btn.style.background='none';
+    lbl.style.display='none';
+  }
   btn.setAttribute('title',_showAssaggiati?'Mostra cantina':'Mostra vini assaggiati');
   renderList();
 }

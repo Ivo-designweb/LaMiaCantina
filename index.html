@@ -649,7 +649,7 @@ textarea.field-input{resize:vertical;min-height:74px}
     </button>
 
   </div>
-  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label">v5.0</span></div>
+  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label">v5.1</span></div>
 </div>
 
 <!-- MANUAL OVERLAY -->
@@ -1237,6 +1237,7 @@ const WG=(function(){
                r:(.25+Math.random()*.4)*scale,speed:(16+Math.random()*26)*scale};
       });
     }
+    cvs._wgVis=true; /* assume visibile subito; IntersectionObserver corregge se serve */
     cvs._wg={ctx:cvs.getContext('2d'),scale,lY,col,bubbles,phys:new Slosh()};
   }
 
@@ -1251,7 +1252,11 @@ const WG=(function(){
 
   /* ── IntersectionObserver: disegna solo canvas visibili nello schermo ── */
   const _io=new IntersectionObserver(
-    entries=>entries.forEach(e=>{e.target._wgVis=e.isIntersecting;}),
+    entries=>entries.forEach(e=>{
+      e.target._wgVis=e.isIntersecting;
+      /* se il loop era in pausa e un canvas diventa visibile → risveglia */
+      if(e.isIntersecting&&_paused){_paused=false;_last=performance.now();requestAnimationFrame(_frame);}
+    }),
     {threshold:0.01}
   );
 

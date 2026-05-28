@@ -566,6 +566,12 @@ textarea.field-input{resize:vertical;min-height:74px}
   </div>
   <div class="drawer-body">
 
+    <!-- 0. AGGIORNAMENTO -->
+    <button class="drawer-btn" style="border-color:var(--gold-dim);background:var(--gold-bg);padding:13px" onclick="forceUpdate()">
+      <svg width="18" height="18" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+      <div class="lbl" style="color:var(--gold);font-weight:600">Forza Aggiornamento<span class="sub" style="color:var(--gold-dim)">Svuota cache e scarica l'ultima versione</span></div>
+    </button>
+
     <!-- 1. BACKUP / RESTORE -->
     <div class="drawer-section-label">1 · Backup / Restore</div>
     <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:6px">
@@ -643,7 +649,7 @@ textarea.field-input{resize:vertical;min-height:74px}
     </button>
 
   </div>
-  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label">v4.7</span></div>
+  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label">v4.8</span></div>
 </div>
 
 <!-- MANUAL OVERLAY -->
@@ -2329,6 +2335,22 @@ function showToast(msg,isErr=false){
 
 let _newSW=null;
 function applyUpdate(){if(_newSW){_newSW.postMessage('SKIP_WAITING');_newSW.addEventListener('statechange',()=>{if(_newSW.state==='activated')window.location.reload();});}else window.location.reload();}
+
+async function forceUpdate(){
+  closeDrawer();
+  showToast('Aggiornamento in corso…');
+  try{
+    if('serviceWorker'in navigator){
+      const regs=await navigator.serviceWorker.getRegistrations();
+      await Promise.all(regs.map(r=>r.unregister()));
+    }
+    if('caches'in window){
+      const keys=await caches.keys();
+      await Promise.all(keys.map(k=>caches.delete(k)));
+    }
+  }catch(e){}
+  window.location.reload(true);
+}
 if('serviceWorker'in navigator){
   navigator.serviceWorker.register('./sw.js').then(reg=>{
     if(reg.waiting){_newSW=reg.waiting;document.getElementById('update-banner').classList.add('show');}

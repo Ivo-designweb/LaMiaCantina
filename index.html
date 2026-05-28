@@ -643,7 +643,7 @@ textarea.field-input{resize:vertical;min-height:74px}
     </button>
 
   </div>
-  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label">v4.6</span></div>
+  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label">v4.7</span></div>
 </div>
 
 <!-- MANUAL OVERLAY -->
@@ -1049,6 +1049,56 @@ function getFilteredWines(){
   return q ? pool.filter(w=>[w.cantina,w.nome,w.anno,w.tipologia,w.acquistato,w.posizione,w.scaffale,w.nazione,w.regione,w.note,w.bevutoPresso].some(v=>v?.toString().toLowerCase().includes(q))) : pool;
 }
 
+/* ══════════ WINE GLASS SVG PLACEHOLDER ══════════
+   SVG inline di un bicchiere colorato in base alla tipologia.
+   Grappa = dimensioni invariate; tutti gli altri = un po' più grandi.
+══════════════════════════════════════════════════════════════ */
+function wineGlassSVG(tipologia, size) {
+  const t = (tipologia || '').toLowerCase().trim();
+  const isGrappa = t === 'grappa';
+
+  /* Colore liquido per tipologia */
+  let liqColor, liqOpacity, liquidY = 17;
+  if      (t === 'rosé' || t === 'rose') { liqColor='#D4788A'; liqOpacity=0.80; }
+  else if (t === 'bianco')               { liqColor='#C8A832'; liqOpacity=0.72; }
+  else if (t === 'spumante')             { liqColor='#D4C060'; liqOpacity=0.72; }
+  else if (t === 'grappa')               { liqColor='#B8D8F0'; liqOpacity=0.38; liquidY=10; }
+  else if (t === 'passito')              { liqColor='#6B1A78'; liqOpacity=0.88; }
+  else                                   { liqColor='#7A1828'; liqOpacity=0.85; } /* rosso + default */
+
+  /* [w_normale, h_normale, w_grappa, h_grappa] — viewBox 30×46 */
+  const sz = {
+    card:   [40, 61, 26, 40],
+    hero:   [72,110, 46, 70],
+    pos:    [20, 30, 14, 21],
+    small:  [22, 34, 15, 23]
+  }[size] || [40, 61, 26, 40];
+
+  const w = isGrappa ? sz[2] : sz[0];
+  const h = isGrappa ? sz[3] : sz[1];
+
+  /* ID univoco per clipPath (evita collisioni con più bicchieri in pagina) */
+  const uid = 'wg' + Math.random().toString(36).slice(2, 8);
+
+  /* Percorso bicchiere: coppa larga → stelo → base */
+  const gPath = 'M 4 3 L 26 3 C 28 14,21 26,17 30 L 17 40 L 22 42 L 8 42 L 13 40 L 13 30 C 9 26,2 14,4 3 Z';
+
+  /* Bollicine per Spumante */
+  let extras = '';
+  if (t === 'spumante') {
+    extras = '<circle cx="15" cy="26" r="1.1" fill="rgba(255,255,255,0.55)"/>'
+           + '<circle cx="18" cy="22" r="0.9" fill="rgba(255,255,255,0.55)"/>'
+           + '<circle cx="13" cy="21" r="0.7" fill="rgba(255,255,255,0.45)"/>';
+  }
+
+  return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 30 46" width="' + w + '" height="' + h + '" style="display:block">'
+    + '<defs><clipPath id="' + uid + '"><path d="' + gPath + '"/></clipPath></defs>'
+    + '<rect x="0" y="' + liquidY + '" width="30" height="' + (46 - liquidY) + '" fill="' + liqColor + '" fill-opacity="' + liqOpacity + '" clip-path="url(#' + uid + ')"/>'
+    + extras
+    + '<path d="' + gPath + '" fill="none" stroke="var(--text-faint)" stroke-width="1.4" stroke-linejoin="round"/>'
+    + '</svg>';
+}
+
 function renderList(){
   const q=getSearchQuery();
   const clear=document.getElementById('search-clear');
@@ -1077,11 +1127,11 @@ function renderList(){
     if(w.assaggiato){
       /* Card assaggiato: no pulsante scarica, flash badge, bevuto presso */
       const bpRow=w.bevutoPresso?'<div class="card-pos">🥂 '+esc(w.bevutoPresso)+'</div>':'';
-      return '<div class="card" onclick="showDetail(\''+w.id+'\')">'+(w.foto?'<img class="card-img" src="'+w.foto+'" alt="">':'<div class="card-img-ph">🍷</div>')+'<div class="card-body"><div class="card-cantina">'+esc(w.cantina)+'</div><div class="card-name">'+esc(w.nome)+'</div><div class="card-meta">'+(w.anno?'<span>'+esc(w.anno)+'</span>':'')+(w.tipologia?'<span>'+esc(w.tipologia)+'</span>':'')+'</div>'+(miniStars?'<div style="margin-top:2px">'+miniStars+'</div>':'')+bpRow+'<div style="display:flex;gap:5px;margin-top:3px"><span class="flash-badge">🥂 Assaggiato</span></div></div></div>';
+      return '<div class="card" onclick="showDetail(\''+w.id+'\')">'+(w.foto?'<img class="card-img" src="'+w.foto+'" alt="">':'<div class="card-img-ph">'+wineGlassSVG(w.tipologia,'card')+'</div>')+'<div class="card-body"><div class="card-cantina">'+esc(w.cantina)+'</div><div class="card-name">'+esc(w.nome)+'</div><div class="card-meta">'+(w.anno?'<span>'+esc(w.anno)+'</span>':'')+(w.tipologia?'<span>'+esc(w.tipologia)+'</span>':'')+'</div>'+(miniStars?'<div style="margin-top:2px">'+miniStars+'</div>':'')+bpRow+'<div style="display:flex;gap:5px;margin-top:3px"><span class="flash-badge">🥂 Assaggiato</span></div></div></div>';
     }
     const locStr=(w.posizione||w.scaffale)?esc(w.posizione||'')+(w.posizione&&w.scaffale?' / ':'')+esc(w.scaffale||''):'';
     const rightPanel='<div class="card-right-panel">'+(locStr?'<div class="card-loc-label">'+locStr+'</div>':'')+(qty>0?'<button class="card-scarica" onclick="quickScarica(event,\''+w.id+'\')">- Scarica</button>':'')+'</div>';
-    return '<div class="card" onclick="showDetail(\''+w.id+'\')">'+(w.foto?'<img class="card-img" src="'+w.foto+'" alt="">':'<div class="card-img-ph">🍷</div>')+'<div class="card-body"><div class="card-cantina">'+esc(w.cantina)+'</div><div class="card-name">'+esc(w.nome)+'</div><div class="card-meta">'+(w.anno?'<span>'+esc(w.anno)+'</span>':'')+(w.tipologia?'<span>'+esc(w.tipologia)+'</span>':'')+(w.prezzo?'<span class="price">'+fmtEuro(w.prezzo)+'</span>':'')+'</div>'+(miniStars?'<div style="margin-top:2px">'+miniStars+'</div>':'')+posRow+'<div style="display:flex;gap:5px;margin-top:3px"><span class="card-badge qty'+(qty===0?' zero':'')+'">'+qty+' bot.</span>'+(w.formato&&w.formato!=='Bottiglia'?'<span class="card-badge fmt">'+esc(w.formato)+'</span>':'')+'</div></div>'+rightPanel+'</div>';
+    return '<div class="card" onclick="showDetail(\''+w.id+'\')">'+(w.foto?'<img class="card-img" src="'+w.foto+'" alt="">':'<div class="card-img-ph">'+wineGlassSVG(w.tipologia,'card')+'</div>')+'<div class="card-body"><div class="card-cantina">'+esc(w.cantina)+'</div><div class="card-name">'+esc(w.nome)+'</div><div class="card-meta">'+(w.anno?'<span>'+esc(w.anno)+'</span>':'')+(w.tipologia?'<span>'+esc(w.tipologia)+'</span>':'')+(w.prezzo?'<span class="price">'+fmtEuro(w.prezzo)+'</span>':'')+'</div>'+(miniStars?'<div style="margin-top:2px">'+miniStars+'</div>':'')+posRow+'<div style="display:flex;gap:5px;margin-top:3px"><span class="card-badge qty'+(qty===0?' zero':'')+'">'+qty+' bot.</span>'+(w.formato&&w.formato!=='Bottiglia'?'<span class="card-badge fmt">'+esc(w.formato)+'</span>':'')+'</div></div>'+rightPanel+'</div>';
   }).join('');
 }
 function clearSearch(){document.getElementById('search-input').value='';renderList();}
@@ -1094,7 +1144,7 @@ function showDetail(id,fromSave=false){
   /* Hero: clicca per aprire zoom lightbox */
   const hero=w.foto
     ?'<img class="detail-hero" src="'+w.foto+'" alt="" onclick="openZoom(\''+encodeURIComponent(w.foto)+'\')" style="cursor:zoom-in" title="Tocca per zoom">'
-    :'<div class="detail-hero-ph">🍷</div>';
+    :'<div class="detail-hero-ph">'+wineGlassSVG(w.tipologia,'hero')+'</div>';
   /* Gradi */
   const gradiCell=w.gradi?'<div class="detail-cell"><div class="detail-cell-label">Gradi Alcolici</div><div class="detail-cell-value">'+esc(w.gradi)+'% vol</div></div>':'';
   /* Vitigno */
@@ -1199,7 +1249,7 @@ function renderPosition(){
       html+='<div class="pos-shelf-header"><div class="pos-shelf-name">'+esc(sk)+'</div><div class="pos-shelf-count">'+list.length+' et. · '+shBot+' bot.</div></div>';
       list.forEach(w=>{
         const ec=isExpiring(w.datalimite),qty=parseInt(w.quantita)||0;
-        const thumb=w.foto?'<img class="pos-row-thumb" src="'+w.foto+'" alt="">':'<div class="pos-row-thumb-ph">🍷</div>';
+        const thumb=w.foto?'<img class="pos-row-thumb" src="'+w.foto+'" alt="">':'<div class="pos-row-thumb-ph">'+wineGlassSVG(w.tipologia,'pos')+'</div>';
         html+='<div class="pos-row" data-id="'+w.id+'" onclick="showDetail(\''+w.id+'\')">'+ thumb+'<div class="pos-row-dot" style="background:'+(ec==='var(--text)'?'var(--red)':ec)+'"></div><div class="pos-row-name">'+esc(w.nome)+'</div><div class="pos-row-meta"><span class="pos-row-cantina">'+esc(w.cantina)+'</span>'+(w.tipologia?'<span class="pos-row-tag">'+esc(w.tipologia)+'</span>':'')+'<span class="pos-row-qty">'+qty+'</span></div></div>';
       });
       html+='<div class="dnd-drop-hint">↓ Rilascia qui</div>';
@@ -1211,7 +1261,7 @@ function renderPosition(){
     html+='<div class="pos-unassigned" data-pos="" data-shelf=""><div class="pos-unassigned-label">⚠ Senza posizione ('+unpositioned.length+')</div>';
     unpositioned.forEach(w=>{
       const qty=parseInt(w.quantita)||0;
-      const thumb=w.foto?'<img class="pos-row-thumb" src="'+w.foto+'" alt="">':'<div class="pos-row-thumb-ph">🍷</div>';
+      const thumb=w.foto?'<img class="pos-row-thumb" src="'+w.foto+'" alt="">':'<div class="pos-row-thumb-ph">'+wineGlassSVG(w.tipologia,'pos')+'</div>';
       html+='<div class="pos-row" data-id="'+w.id+'" onclick="showDetail(\''+w.id+'\')">'+ thumb+'<div class="pos-row-dot" style="background:var(--text-faint)"></div><div class="pos-row-name">'+esc(w.nome)+'</div><div class="pos-row-meta"><span class="pos-row-cantina">'+esc(w.cantina)+'</span><span class="pos-row-qty">'+qty+'</span></div></div>';
     });
     html+='</div>';
@@ -2349,7 +2399,7 @@ function renderTipo(){
       const qty=parseInt(w.quantita)||0;
       const thumb=w.foto
         ?'<img class="zone-trow-img" src="'+w.foto+'" alt="">'
-        :'<div class="zone-trow-img-ph">🍷</div>';
+        :'<div class="zone-trow-img-ph">'+wineGlassSVG(w.tipologia,'small')+'</div>';
       const posStr=[w.posizione,w.scaffale].filter(Boolean).join(' / ')||'—';
       const stars=starsHTML(w.rating,'mini');
       return '<div class="zone-trow" data-id="'+w.id+'" onclick="showDetail(\''+w.id+'\')">'
@@ -2426,7 +2476,7 @@ function renderZone(){
       const qty=parseInt(w.quantita)||0;
       const thumb=w.foto
         ?'<img class="zone-trow-img" src="'+w.foto+'" alt="">'
-        :'<div class="zone-trow-img-ph">\uD83C\uDF77</div>';
+        :'<div class="zone-trow-img-ph">'+wineGlassSVG(w.tipologia,'small')+'</div>';
       const posStr=[w.posizione,w.scaffale].filter(Boolean).join(' / ')||'\u2014';
       const stars=starsHTML(w.rating,'mini');
       return '<div class="zone-trow" data-id="'+w.id+'" onclick="showDetail(\''+w.id+'\')">'

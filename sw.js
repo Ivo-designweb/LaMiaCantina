@@ -4,7 +4,7 @@
    il refresh dell'app su tutti i dispositivi.
 ═══════════════════════════════════════════════════ */
 
-const CACHE_VERSION = 'cantina-v4.4';
+const CACHE_VERSION = 'cantina-v4.8';
 const ASSETS = [
   './index.html',
   './manifest.json',

@@ -638,11 +638,16 @@ textarea.field-input{resize:vertical;min-height:74px}
     <div class="drawer-section-label">3 · Parametri</div>
     <div class="drawer-section-label" style="border-top:none;margin-top:0;padding-top:0;padding-bottom:2px;font-size:9px;letter-spacing:1px">☁ Sincronizzazione Cloud</div>
     <div class="sync-box">
-      <div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px">Chiave di sincronizzazione</div>
-      <div style="font-size:11px;color:var(--text-faint);margin-bottom:2px;line-height:1.5">Inserisci una chiave per sincronizzare vini e movimenti tra dispositivi. Lascia vuoto per lavorare solo in locale.</div>
-      <div class="sync-row-inner">
+      <div style="font-size:11px;color:var(--text-faint);margin-bottom:9px;line-height:1.5">Collega il tuo database Upstash Redis per sincronizzare tra dispositivi. Lascia vuoto per lavorare solo in locale.</div>
+      <div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:4px">URL database Upstash</div>
+      <input id="sync-url-input" class="field-input" type="url" placeholder="https://xxx.upstash.io" style="font-size:12px;padding:8px 10px;margin-bottom:8px" autocomplete="off" autocorrect="off" spellcheck="false">
+      <div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:4px">Token REST Upstash</div>
+      <input id="sync-token-input" class="field-input" type="password" placeholder="AXxx..." style="font-size:12px;padding:8px 10px;margin-bottom:8px" autocomplete="off" autocorrect="off" spellcheck="false">
+      <div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:4px">Chiave condivisione</div>
+      <div style="font-size:11px;color:var(--text-faint);margin-bottom:4px;line-height:1.4">Chi usa la stessa chiave condivide lo stesso archivio.</div>
+      <div class="sync-row-inner" style="margin-bottom:0">
         <input id="sync-key-input" class="field-input" type="text" placeholder="es. MiaCantina2024" style="flex:1;font-size:13px;padding:9px 11px" autocomplete="off" autocorrect="off" spellcheck="false">
-        <button onclick="saveSyncKey()" style="background:var(--gold);border:none;border-radius:10px;color:#fff;padding:9px 14px;font-size:13px;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0">Salva</button>
+        <button onclick="saveSyncConfig()" style="background:var(--gold);border:none;border-radius:10px;color:#fff;padding:9px 14px;font-size:13px;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0">Salva</button>
       </div>
       <div class="sync-status-row">
         <span id="sync-dot-drawer" class="sync-dot nokey"></span>
@@ -652,7 +657,7 @@ textarea.field-input{resize:vertical;min-height:74px}
         <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
         Sincronizza ora
       </button>
-      <div style="font-size:10px;color:var(--text-faint);margin-top:7px;line-height:1.5">ℹ Le foto restano locali (non sincronizzate per risparmio spazio).</div>
+      <div style="font-size:10px;color:var(--text-faint);margin-top:7px;line-height:1.5">ℹ URL e Token si trovano su <b>upstash.com</b> → il tuo database → REST API. Le foto restano locali.</div>
     </div>
     <div class="drawer-section-label" style="border-top:none;margin-top:0;padding-top:0;padding-bottom:2px;font-size:9px;letter-spacing:1px">Tema</div>
     <div class="theme-row" style="margin-bottom:6px">
@@ -682,7 +687,7 @@ textarea.field-input{resize:vertical;min-height:74px}
     </button>
 
   </div>
-  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label">v5.3</span></div>
+  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label">v5.4</span></div>
 </div>
 
 <!-- MANUAL OVERLAY -->
@@ -2248,7 +2253,7 @@ function openDrawer(){
   document.getElementById('drawer-overlay').classList.add('open');
   loadOCRKeyField();
   loadBackupFolderName();
-  loadSyncKeyField();
+  loadSyncConfigFields();
 }
 function closeDrawer(){document.getElementById('drawer').classList.remove('open');document.getElementById('drawer-overlay').classList.remove('open');}
 
@@ -2611,7 +2616,7 @@ if('serviceWorker'in navigator){
   try{
     await dbLoad();   /* IndexedDB + migrazione automatica */
     loadTheme();
-    await loadSyncKeyInit(); /* carica chiave sync e avvia sync iniziale */
+    await loadSyncConfigInit(); /* carica config sync e avvia sync iniziale */
     document.getElementById('f-date').value=new Date().toISOString().split('T')[0];
     document.getElementById('m-date').value=new Date().toISOString().split('T')[0];
   } catch(e){
@@ -3013,59 +3018,80 @@ window.addEventListener('keydown',function(e){
 });
 
 /* ══════════════════════════════════════════════════════════════════
-   CLOUD SYNC — Vercel KV (Upstash Redis)
-   Endpoint:   /api/db  (serverless function su Vercel)
+   CLOUD SYNC — Upstash Redis (chiamata diretta dal browser)
+   Nessuna funzione serverless necessaria. Upstash supporta CORS.
    Strategia:  last-write-wins per timestamp
-   Foto:       non sincronizzate (restano locali, troppo pesanti)
+   Foto:       non sincronizzate (restano locali)
    Flusso:
      1. Al caricamento app → pull se server più recente, altrimenti push
-     2. Dopo ogni save/saveMoves → push immediato al server
-     3. Evento 'online' → syncFull automatico
-   Chiave utente → libera scelta, salvata in IDB settings
+     2. Dopo ogni save/saveMoves → push con debounce 800ms
+     3. Evento 'online'  → syncFull automatico
+   Credenziali: URL + Token da upstash.com → salvati in IDB settings
+   Chiave:      libera scelta utente → namespace nel database
 ══════════════════════════════════════════════════════════════════ */
 
 const SYNC_KEY_IDB   = 'cantina_sync_key_v1';
+const SYNC_URL_IDB   = 'cantina_sync_url_v1';
+const SYNC_TOKEN_IDB = 'cantina_sync_token_v1';
 const SYNC_TS_WINES  = 'cantina_sync_ts_wines';
 const SYNC_TS_MOVES  = 'cantina_sync_ts_moves';
-const CLOUD_API      = '/api/db';
 
-let _syncKey    = null;   /* chiave utente corrente */
+let _syncKey    = null;
+let _syncUrl    = null;
+let _syncToken  = null;
 let _syncStatus = 'nokey'; /* nokey | syncing | ok | error | offline */
 let _lastSyncAt = null;
 let _syncBusy   = false;
 
-/* ── Carica chiave all'avvio (chiamata da init) ── */
-async function loadSyncKeyInit(){
-  _syncKey = (await dbSetting(SYNC_KEY_IDB)) || null;
+function _syncReady(){ return !!(_syncKey && _syncUrl && _syncToken); }
+
+/* ── Carica configurazione all'avvio (chiamata da init) ── */
+async function loadSyncConfigInit(){
+  _syncKey   = (await dbSetting(SYNC_KEY_IDB))   || null;
+  _syncUrl   = (await dbSetting(SYNC_URL_IDB))   || null;
+  _syncToken = (await dbSetting(SYNC_TOKEN_IDB)) || null;
   updateSyncDots();
-  if(_syncKey && navigator.onLine) await syncFull(false);
-  else if(_syncKey) _syncStatus='offline', updateSyncDots();
+  if(_syncReady() && navigator.onLine) await syncFull(false);
+  else if(_syncReady()) { _syncStatus='offline'; updateSyncDots(); }
 }
 
-/* ── Popola il campo input nel drawer ── */
-function loadSyncKeyField(){
-  const inp=document.getElementById('sync-key-input');
-  if(inp) inp.value=_syncKey||'';
+/* ── Popola i campi nel drawer ── */
+function loadSyncConfigFields(){
+  const u=document.getElementById('sync-url-input');
+  const t=document.getElementById('sync-token-input');
+  const k=document.getElementById('sync-key-input');
+  if(u) u.value=_syncUrl||'';
+  if(t) t.value=_syncToken||'';
+  if(k) k.value=_syncKey||'';
   updateSyncDots();
 }
 
-/* ── Salva nuova chiave dall'input drawer ── */
-async function saveSyncKey(){
-  const v=(document.getElementById('sync-key-input')?.value||'').trim();
-  const prev=_syncKey;
-  _syncKey=v||null;
-  await dbSetting(SYNC_KEY_IDB, _syncKey||'');
-  if(!_syncKey){
+/* ── Salva configurazione dal drawer ── */
+async function saveSyncConfig(){
+  const url  =(document.getElementById('sync-url-input')?.value||'').trim().replace(/\/$/,'');
+  const token=(document.getElementById('sync-token-input')?.value||'').trim();
+  const key  =(document.getElementById('sync-key-input')?.value||'').trim();
+  const prev = _syncKey+'|'+_syncUrl+'|'+_syncToken;
+
+  _syncUrl   = url   || null;
+  _syncToken = token || null;
+  _syncKey   = key   || null;
+
+  await dbSetting(SYNC_URL_IDB,   _syncUrl   || '');
+  await dbSetting(SYNC_TOKEN_IDB, _syncToken || '');
+  await dbSetting(SYNC_KEY_IDB,   _syncKey   || '');
+
+  if(!_syncReady()){
     _syncStatus='nokey'; updateSyncDots();
     showToast('Sincronizzazione cloud disabilitata');
     return;
   }
-  if(_syncKey!==prev){
-    /* Nuova chiave: prima pull per ricevere eventuali dati del gruppo */
-    showToast('Chiave salvata — Sincronizzazione in corso…');
+  const changed = (_syncKey+'|'+_syncUrl+'|'+_syncToken) !== prev;
+  if(changed){
+    showToast('Configurazione salvata — Sincronizzazione in corso…');
     await syncFull(true);
   } else {
-    showToast('Chiave confermata');
+    showToast('Configurazione confermata');
     updateSyncDots();
   }
 }
@@ -3075,15 +3101,15 @@ function updateSyncDots(){
   const dot1=document.getElementById('sync-dot');
   const dot2=document.getElementById('sync-dot-drawer');
   const txt =document.getElementById('sync-status-text');
-  const cls = _syncKey ? _syncStatus : 'nokey';
-  [dot1,dot2].forEach(d=>{ if(d){ d.className='sync-dot '+cls; } });
+  const cls = _syncReady() ? _syncStatus : 'nokey';
+  [dot1,dot2].forEach(d=>{ if(d) d.className='sync-dot '+cls; });
   if(txt){
     const labels={
-      nokey:'Non configurato — solo locale',
-      syncing:'Sincronizzazione in corso…',
-      ok:'Sincronizzato'+ (_lastSyncAt?' · '+_fmtTime(_lastSyncAt):''),
-      error:'Errore di sincronizzazione',
-      offline:'Offline — sincronizzerà appena disponibile'
+      nokey:   'Non configurato — solo locale',
+      syncing: 'Sincronizzazione in corso…',
+      ok:      'Sincronizzato'+(_lastSyncAt?' · '+_fmtTime(_lastSyncAt):''),
+      error:   'Errore — verifica URL e Token Upstash',
+      offline: 'Offline — sincronizzerà appena disponibile'
     };
     txt.textContent = labels[cls]||cls;
   }
@@ -3093,138 +3119,141 @@ function _fmtTime(ts){
   return new Date(ts).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
 }
 
-/* ── Push locale → server (un singolo store) ── */
+/* ══ Upstash Redis REST — chiamate dirette dal browser ══
+   POST {url}           body:["CMD","arg1","arg2"]  → {result}
+   POST {url}/pipeline  body:[["CMD","k","v"],...]  → [{result},...] */
+
+async function _redisCmd(...args){
+  const r=await fetch(_syncUrl,{
+    method:'POST',
+    headers:{'Authorization':'Bearer '+_syncToken,'Content-Type':'application/json'},
+    body:JSON.stringify(args)
+  });
+  if(!r.ok){ const t=await r.text().catch(()=>r.status); throw new Error('Redis '+r.status+': '+t); }
+  return (await r.json()).result;
+}
+
+async function _redisPipe(cmds){
+  const r=await fetch(_syncUrl+'/pipeline',{
+    method:'POST',
+    headers:{'Authorization':'Bearer '+_syncToken,'Content-Type':'application/json'},
+    body:JSON.stringify(cmds)
+  });
+  if(!r.ok){ const t=await r.text().catch(()=>r.status); throw new Error('Pipeline '+r.status+': '+t); }
+  return await r.json(); /* array di {result} */
+}
+
+/* ── Push locale → Upstash (un singolo store) ── */
 async function cloudPushStore(store, data){
-  if(!_syncKey||!navigator.onLine) return false;
-  /* Strip foto dai vini */
-  const payload = store==='wines'
-    ? data.map(({foto,...rest})=>rest)
-    : data;
+  if(!_syncReady()||!navigator.onLine) return false;
+  const payload = store==='wines' ? data.map(({foto,...r})=>r) : data;
   const ts=Date.now();
   try{
-    const r=await fetch(CLOUD_API,{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({key:_syncKey, store, data:payload, ts})
-    });
-    if(!r.ok) throw new Error('HTTP '+r.status);
-    const tsKey = store==='wines'?SYNC_TS_WINES:SYNC_TS_MOVES;
-    await dbSetting(tsKey, ts);
+    const k=`cantina:${_syncKey}:${store}`;
+    const kt=`cantina:${_syncKey}:ts_${store}`;
+    await _redisPipe([
+      ['SET', k,  JSON.stringify(payload)],
+      ['SET', kt, String(ts)]
+    ]);
+    await dbSetting(store==='wines'?SYNC_TS_WINES:SYNC_TS_MOVES, ts);
     return true;
-  }catch(e){
-    console.warn('[Sync] push failed:',e);
-    return false;
-  }
+  }catch(e){ console.warn('[Sync] push:',e); return false; }
 }
 
-/* ── Pull server → locale (un singolo store) ── */
+/* ── Pull Upstash → locale (un singolo store) ── */
 async function cloudPullStore(store){
-  if(!_syncKey||!navigator.onLine) return null;
+  if(!_syncReady()||!navigator.onLine) return null;
   try{
-    const r=await fetch(`${CLOUD_API}?key=${encodeURIComponent(_syncKey)}&store=${store}`);
-    if(!r.ok) throw new Error('HTTP '+r.status);
-    return await r.json(); /* {data:[], ts:number} */
-  }catch(e){
-    console.warn('[Sync] pull failed:',e);
-    return null;
-  }
+    const k=`cantina:${_syncKey}:${store}`;
+    const kt=`cantina:${_syncKey}:ts_${store}`;
+    const res = await _redisPipe([['GET',k],['GET',kt]]);
+    const dataStr = res[0]?.result;
+    const tsStr   = res[1]?.result;
+    return { data: dataStr?JSON.parse(dataStr):[], ts: tsStr?parseInt(tsStr,10):0 };
+  }catch(e){ console.warn('[Sync] pull:',e); return null; }
 }
 
-/* ── Push rapido dopo ogni save locale ── */
+/* ── Push rapido dopo ogni save locale (debounce 800ms) ── */
 let _pushDebounceT=null;
 async function cloudPush(store){
-  if(!_syncKey) return;
+  if(!_syncReady()) return;
   clearTimeout(_pushDebounceT);
   _pushDebounceT=setTimeout(async()=>{
     if(!navigator.onLine){ _syncStatus='offline'; updateSyncDots(); return; }
     _syncStatus='syncing'; updateSyncDots();
-    const data = store==='wines'?wines:movements;
-    const ok = await cloudPushStore(store,data);
-    _syncStatus = ok?'ok':'error';
+    const data=store==='wines'?wines:movements;
+    const ok=await cloudPushStore(store,data);
+    _syncStatus=ok?'ok':'error';
     if(ok) _lastSyncAt=Date.now();
     updateSyncDots();
-  }, 800);
+  },800);
 }
 
-/* ── Sincronizzazione completa (pull + push entrambi gli store) ── */
+/* ── Sincronizzazione completa ── */
 async function syncFull(showFeedback=false){
-  if(!_syncKey){ updateSyncDots(); return; }
+  if(!_syncReady()){ updateSyncDots(); return; }
   if(_syncBusy) return;
   if(!navigator.onLine){ _syncStatus='offline'; updateSyncDots(); if(showFeedback)showToast('Sei offline'); return; }
-  _syncBusy=true;
-  _syncStatus='syncing'; updateSyncDots();
-
-  let changed=false;
-  let allOk=true;
-
+  _syncBusy=true; _syncStatus='syncing'; updateSyncDots();
+  let changed=false, allOk=true;
   try{
-    /* ── Vini ── */
-    const localTsW = (await dbSetting(SYNC_TS_WINES))||0;
-    const remote   = await cloudPullStore('wines');
-    if(remote===null){ allOk=false; }
-    else if(remote.ts>localTsW){
-      /* Server più recente → pull e reintegra foto locali */
-      const photoMap={};
-      wines.forEach(w=>{ if(w.foto) photoMap[w.id]=w.foto; });
-      wines=remote.data.map(w=>({...w, foto:photoMap[w.id]||null}));
+    /* Vini */
+    const localTsW=(await dbSetting(SYNC_TS_WINES))||0;
+    const remoteW=await cloudPullStore('wines');
+    if(!remoteW){ allOk=false; }
+    else if(remoteW.ts>localTsW){
+      const pm={}; wines.forEach(w=>{ if(w.foto) pm[w.id]=w.foto; });
+      wines=remoteW.data.map(w=>({...w,foto:pm[w.id]||null}));
       await dbPutAll('wines',wines);
-      await dbSetting(SYNC_TS_WINES,remote.ts);
+      await dbSetting(SYNC_TS_WINES,remoteW.ts);
       changed=true;
-    } else {
-      /* Locale più recente → push */
-      const ok=await cloudPushStore('wines',wines);
-      if(!ok) allOk=false;
-    }
+    } else { if(!await cloudPushStore('wines',wines)) allOk=false; }
 
-    /* ── Movimenti ── */
-    const localTsM = (await dbSetting(SYNC_TS_MOVES))||0;
-    const remoteM  = await cloudPullStore('movements');
-    if(remoteM===null){ allOk=false; }
+    /* Movimenti */
+    const localTsM=(await dbSetting(SYNC_TS_MOVES))||0;
+    const remoteM=await cloudPullStore('movements');
+    if(!remoteM){ allOk=false; }
     else if(remoteM.ts>localTsM){
       movements=remoteM.data;
       await dbPutAll('movements',movements);
       await dbSetting(SYNC_TS_MOVES,remoteM.ts);
       changed=true;
-    } else {
-      const ok=await cloudPushStore('movements',movements);
-      if(!ok) allOk=false;
-    }
+    } else { if(!await cloudPushStore('movements',movements)) allOk=false; }
 
-    _syncStatus = allOk?'ok':'error';
+    _syncStatus=allOk?'ok':'error';
     if(allOk) _lastSyncAt=Date.now();
-    if(changed){ renderList(); if(showFeedback)showToast('Dati aggiornati dal cloud ☁'); }
-    else if(showFeedback && allOk) showToast('Sincronizzato ✓');
-
+    if(changed){ renderList(); if(showFeedback) showToast('Dati aggiornati dal cloud ☁'); }
+    else if(showFeedback&&allOk) showToast('Sincronizzato ✓');
   }catch(e){
-    console.error('[Sync] syncFull error:',e);
-    _syncStatus='error';
-    if(showFeedback) showToast('Errore sincronizzazione',true);
+    console.error('[Sync]',e); _syncStatus='error';
+    if(showFeedback) showToast('Errore sincronizzazione — verifica URL e Token',true);
   }finally{
-    _syncBusy=false;
-    updateSyncDots();
+    _syncBusy=false; updateSyncDots();
   }
 }
 
-/* ── Mostra info stato sync al tap sul pallino ── */
+/* ── Tap sul pallino → mostra info stato ── */
 function showSyncInfo(){
+  const ready=_syncReady();
   const labels={
-    nokey:'Sincronizzazione cloud non attiva.\n\nApri le impostazioni (⚙) e inserisci una chiave per sincronizzare la cantina tra più dispositivi.',
-    syncing:'Sincronizzazione in corso…',
-    ok:'✓ Cantina sincronizzata'+ (_lastSyncAt?' alle '+_fmtTime(_lastSyncAt):'')+'\n\nChiave: '+(_syncKey||'—'),
-    error:'⚠ Errore di sincronizzazione.\n\nVerifica la connessione o riprova dalle impostazioni.',
-    offline:'📴 Dispositivo offline.\n\nI dati vengono salvati localmente e si sincronizzeranno appena disponibile la rete.'
+    nokey:   'Sincronizzazione cloud non attiva.\n\nApri le impostazioni (⚙) e inserisci URL, Token Upstash e una chiave condivisione.',
+    syncing: 'Sincronizzazione in corso…',
+    ok:      '✓ Sincronizzato'+(_lastSyncAt?' alle '+_fmtTime(_lastSyncAt):'')+'\n\nChiave: '+(_syncKey||'—'),
+    error:   '⚠ Errore.\n\nVerifica URL e Token Upstash nelle impostazioni.',
+    offline: '📴 Offline.\n\nI dati si sincronizzeranno appena disponibile la rete.'
   };
-  const cls=_syncKey?_syncStatus:'nokey';
-  showModal('Stato sincronizzazione', labels[cls]||cls, [{label:'OK',cls:'primary',action:closeModal}]);
+  const cls=ready?_syncStatus:'nokey';
+  showModal('Stato sincronizzazione',labels[cls]||cls,[{label:'OK',cls:'primary',action:closeModal}]);
 }
 
 /* ── Listener connessione ── */
 window.addEventListener('online',()=>{
-  if(_syncKey){ _syncStatus='syncing'; updateSyncDots(); syncFull(false); }
+  if(_syncReady()){ _syncStatus='syncing'; updateSyncDots(); syncFull(false); }
 });
 window.addEventListener('offline',()=>{
-  if(_syncKey){ _syncStatus='offline'; updateSyncDots(); }
+  if(_syncReady()){ _syncStatus='offline'; updateSyncDots(); }
 });
+
 
 </script>
 </body>

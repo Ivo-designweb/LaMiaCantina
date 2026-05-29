@@ -242,6 +242,13 @@ textarea.field-input{resize:vertical;min-height:74px}
 .sync-dot.ok{background:var(--green)}
 .sync-dot.error{background:var(--red2)}
 .sync-dot.offline{background:var(--gold-dim)}
+/* barra di stato sync nell'header */
+.sync-bar{height:5px;border-radius:3px;width:38px;cursor:pointer;flex-shrink:0;transition:background .35s,box-shadow .35s}
+.sync-bar.nokey{background:var(--border)}
+.sync-bar.syncing{background:var(--gold);animation:sync-pulse .9s ease-in-out infinite}
+.sync-bar.ok{background:var(--green)}
+.sync-bar.error{background:var(--red2)}
+.sync-bar.offline{background:var(--gold-dim)}
 @keyframes sync-pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(139,90,26,.4)}50%{opacity:.6;box-shadow:0 0 0 5px rgba(139,90,26,0)}}
 .sync-box{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px}
 .sync-row-inner{display:flex;gap:8px;margin-top:6px}
@@ -341,15 +348,20 @@ textarea.field-input{resize:vertical;min-height:74px}
       <div id="header-sub" class="header-sub">0 vini</div>
       <div id="header-assaggiati-label" style="display:none;font-size:11px;font-weight:700;color:#8B2050;letter-spacing:.8px;margin-top:1px">🥂 I vini assaggiati</div>
     </div>
-    <div style="display:flex;align-items:center;gap:4px">
+    <div style="display:flex;align-items:center;gap:5px">
       <button id="btn-toggle-assaggiati" class="btn-eye" onclick="toggleAssaggiatiView()" title="Mostra vini assaggiati" style="color:var(--text-dim)">
         <svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
       </button>
-      <span id="sync-dot" class="sync-dot nokey" title="Sync cloud non attivo" onclick="showSyncInfo()"></span>
       <img src="./icon512.png" class="header-logo" alt="cantina" onclick="openManual()" style="cursor:pointer">
-      <button class="btn-icon" onclick="openDrawer()">
-        <svg width="21" height="21" fill="none" stroke="var(--gold)" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-      </button>
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:space-between;align-self:stretch;padding:2px 0 6px;gap:0">
+        <div id="sync-bar" class="sync-bar nokey" title="Stato sincronizzazione" onclick="showSyncInfo()"></div>
+        <button class="btn-icon" onclick="syncFull(true)" title="Sincronizza ora" id="btn-sync-header" style="padding:4px">
+          <svg width="19" height="19" fill="none" stroke="var(--gold)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
+        </button>
+        <button class="btn-icon" onclick="openDrawer()" style="padding:4px">
+          <svg width="19" height="19" fill="none" stroke="var(--gold)" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+      </div>
     </div>
   </div>
   <div class="list-body">
@@ -638,16 +650,11 @@ textarea.field-input{resize:vertical;min-height:74px}
     <div class="drawer-section-label">3 · Parametri</div>
     <div class="drawer-section-label" style="border-top:none;margin-top:0;padding-top:0;padding-bottom:2px;font-size:9px;letter-spacing:1px">☁ Sincronizzazione Cloud</div>
     <div class="sync-box">
-      <div style="font-size:11px;color:var(--text-faint);margin-bottom:9px;line-height:1.5">Collega il tuo database Upstash Redis per sincronizzare tra dispositivi. Lascia vuoto per lavorare solo in locale.</div>
-      <div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:4px">URL database Upstash</div>
-      <input id="sync-url-input" class="field-input" type="url" placeholder="https://xxx.upstash.io" style="font-size:12px;padding:8px 10px;margin-bottom:8px" autocomplete="off" autocorrect="off" spellcheck="false">
-      <div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:4px">Token REST Upstash</div>
-      <input id="sync-token-input" class="field-input" type="password" placeholder="AXxx..." style="font-size:12px;padding:8px 10px;margin-bottom:8px" autocomplete="off" autocorrect="off" spellcheck="false">
+      <div style="font-size:11px;color:var(--text-faint);margin-bottom:9px;line-height:1.5">Scegli una chiave per sincronizzare vini e movimenti con altri tuoi dispositivi o con chi condivide la stessa cantina. Lascia vuoto per lavorare solo in locale.</div>
       <div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:4px">Chiave condivisione</div>
-      <div style="font-size:11px;color:var(--text-faint);margin-bottom:4px;line-height:1.4">Chi usa la stessa chiave condivide lo stesso archivio.</div>
       <div class="sync-row-inner" style="margin-bottom:0">
         <input id="sync-key-input" class="field-input" type="text" placeholder="es. MiaCantina2024" style="flex:1;font-size:13px;padding:9px 11px" autocomplete="off" autocorrect="off" spellcheck="false">
-        <button onclick="saveSyncConfig()" style="background:var(--gold);border:none;border-radius:10px;color:#fff;padding:9px 14px;font-size:13px;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0">Salva</button>
+        <button onclick="saveSyncKey()" style="background:var(--gold);border:none;border-radius:10px;color:#fff;padding:9px 14px;font-size:13px;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0">Salva</button>
       </div>
       <div class="sync-status-row">
         <span id="sync-dot-drawer" class="sync-dot nokey"></span>
@@ -657,7 +664,7 @@ textarea.field-input{resize:vertical;min-height:74px}
         <svg width="13" height="13" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
         Sincronizza ora
       </button>
-      <div style="font-size:10px;color:var(--text-faint);margin-top:7px;line-height:1.5">ℹ URL e Token si trovano su <b>upstash.com</b> → il tuo database → REST API. Le foto restano locali.</div>
+      <div style="font-size:10px;color:var(--text-faint);margin-top:7px;line-height:1.5">ℹ Le foto restano locali (non sincronizzate per risparmio spazio).</div>
     </div>
     <div class="drawer-section-label" style="border-top:none;margin-top:0;padding-top:0;padding-bottom:2px;font-size:9px;letter-spacing:1px">Tema</div>
     <div class="theme-row" style="margin-bottom:6px">
@@ -687,7 +694,31 @@ textarea.field-input{resize:vertical;min-height:74px}
     </button>
 
   </div>
-  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label">v5.4</span></div>
+  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label" onclick="adminTap()" style="cursor:pointer;user-select:none">v5.6</span></div>
+</div>
+
+<!-- ADMIN OVERLAY (nascosto — 5 tap sul numero versione) -->
+<div id="admin-overlay" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:400;flex-direction:column">
+  <div class="manual-header">
+    <div style="font-family:'Playfair Display',serif;font-size:17px;color:var(--gold)">⚙ Pannello Amministratore</div>
+    <button onclick="closeAdminPanel()" style="color:var(--text-dim);font-size:22px;background:none;border:none;cursor:pointer">✕</button>
+  </div>
+  <div style="flex:1;overflow-y:auto;padding:16px 14px 80px">
+    <div style="font-size:11px;color:var(--text-faint);line-height:1.6;margin-bottom:14px;background:var(--surface2);border-radius:10px;padding:10px 12px">
+      Queste credenziali vengono usate da tutti gli utenti dell'app. Modificale solo se cambi database Upstash.
+    </div>
+    <div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:4px">URL Database Upstash</div>
+    <input id="admin-url-input" class="field-input" type="url" placeholder="https://xxx.upstash.io" style="margin-bottom:12px;font-size:13px" autocomplete="off" spellcheck="false">
+    <div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:4px">Token Read/Write Upstash</div>
+    <input id="admin-token-input" class="field-input" type="password" placeholder="Token lungo..." style="margin-bottom:12px;font-size:13px" autocomplete="off">
+    <div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:4px">PIN Admin (per proteggere questo pannello)</div>
+    <input id="admin-pin-input" class="field-input" type="password" placeholder="PIN (default: 1234)" maxlength="8" style="margin-bottom:16px;font-size:13px">
+    <button onclick="saveAdminConfig()" style="width:100%;background:var(--gold);border:none;border-radius:12px;color:#fff;padding:13px;font-size:15px;cursor:pointer;font-family:inherit;font-weight:600">Salva configurazione</button>
+    <button onclick="syncFull(true);closeAdminPanel()" style="width:100%;margin-top:10px;background:none;border:1px solid var(--border);border-radius:12px;color:var(--text-dim);padding:11px;font-size:13px;cursor:pointer;font-family:inherit">↻ Sincronizza ora</button>
+    <div style="margin-top:20px;font-size:10px;color:var(--text-faint);text-align:center">
+      Contatta lo sviluppatore: <a href="mailto:ivotaffarel@gmail.com" style="color:var(--gold)">ivotaffarel@gmail.com</a>
+    </div>
+  </div>
 </div>
 
 <!-- MANUAL OVERLAY -->
@@ -2253,7 +2284,7 @@ function openDrawer(){
   document.getElementById('drawer-overlay').classList.add('open');
   loadOCRKeyField();
   loadBackupFolderName();
-  loadSyncConfigFields();
+  loadSyncKeyField();
 }
 function closeDrawer(){document.getElementById('drawer').classList.remove('open');document.getElementById('drawer-overlay').classList.remove('open');}
 
@@ -2617,6 +2648,8 @@ if('serviceWorker'in navigator){
     await dbLoad();   /* IndexedDB + migrazione automatica */
     loadTheme();
     await loadSyncConfigInit(); /* carica config sync e avvia sync iniziale */
+    /* Polling ogni 3 minuti quando online */
+    setInterval(()=>{ if(_syncReady()&&navigator.onLine&&!_syncBusy) syncFull(false); }, 180000);
     document.getElementById('f-date').value=new Date().toISOString().split('T')[0];
     document.getElementById('m-date').value=new Date().toISOString().split('T')[0];
   } catch(e){
@@ -3019,99 +3052,77 @@ window.addEventListener('keydown',function(e){
 
 /* ══════════════════════════════════════════════════════════════════
    CLOUD SYNC — Upstash Redis (chiamata diretta dal browser)
-   Nessuna funzione serverless necessaria. Upstash supporta CORS.
-   Strategia:  last-write-wins per timestamp
-   Foto:       non sincronizzate (restano locali)
-   Flusso:
-     1. Al caricamento app → pull se server più recente, altrimenti push
-     2. Dopo ogni save/saveMoves → push con debounce 800ms
-     3. Evento 'online'  → syncFull automatico
-   Credenziali: URL + Token da upstash.com → salvati in IDB settings
-   Chiave:      libera scelta utente → namespace nel database
-══════════════════════════════════════════════════════════════════ */
+   ══════════════════════════════════════════════════════════════════
+
+   CONFIGURAZIONE AMMINISTRATORE — modifica questi tre valori:
+   ─────────────────────────────────────────────────────────────── */
+const _CFG_URL   = 'https://casual-bug-139455.upstash.io'; /* URL Upstash REST */
+const _CFG_TOKEN = 'gQAAAAAAAiC_AAIgcDFkZWNjNGI5ZjgwNjI0ZDgxODhlMWEwOWVhZWU5NDJkZQ'; /* Token Read/Write */
+const _CFG_PIN   = '1234'; /* PIN pannello admin (cambialo nel pannello stesso) */
+/* ─────────────────────────────────────────────────────────────── */
 
 const SYNC_KEY_IDB   = 'cantina_sync_key_v1';
 const SYNC_URL_IDB   = 'cantina_sync_url_v1';
 const SYNC_TOKEN_IDB = 'cantina_sync_token_v1';
+const SYNC_PIN_IDB   = 'cantina_sync_pin_v1';
 const SYNC_TS_WINES  = 'cantina_sync_ts_wines';
 const SYNC_TS_MOVES  = 'cantina_sync_ts_moves';
 
 let _syncKey    = null;
 let _syncUrl    = null;
 let _syncToken  = null;
-let _syncStatus = 'nokey'; /* nokey | syncing | ok | error | offline */
+let _syncStatus = 'nokey';
 let _lastSyncAt = null;
 let _syncBusy   = false;
 
 function _syncReady(){ return !!(_syncKey && _syncUrl && _syncToken); }
 
-/* ── Carica configurazione all'avvio (chiamata da init) ── */
+/* ── Carica configurazione all'avvio ── */
 async function loadSyncConfigInit(){
+  /* URL e Token: usa override admin (IDB) altrimenti i valori hardcoded */
+  _syncUrl   = (await dbSetting(SYNC_URL_IDB))   || _CFG_URL   || null;
+  _syncToken = (await dbSetting(SYNC_TOKEN_IDB)) || _CFG_TOKEN || null;
   _syncKey   = (await dbSetting(SYNC_KEY_IDB))   || null;
-  _syncUrl   = (await dbSetting(SYNC_URL_IDB))   || null;
-  _syncToken = (await dbSetting(SYNC_TOKEN_IDB)) || null;
   updateSyncDots();
   if(_syncReady() && navigator.onLine) await syncFull(false);
-  else if(_syncReady()) { _syncStatus='offline'; updateSyncDots(); }
+  else if(_syncReady()){ _syncStatus='offline'; updateSyncDots(); }
 }
 
-/* ── Popola i campi nel drawer ── */
-function loadSyncConfigFields(){
-  const u=document.getElementById('sync-url-input');
-  const t=document.getElementById('sync-token-input');
-  const k=document.getElementById('sync-key-input');
-  if(u) u.value=_syncUrl||'';
-  if(t) t.value=_syncToken||'';
-  if(k) k.value=_syncKey||'';
+/* ── Popola campo chiave nel drawer ── */
+function loadSyncKeyField(){
+  const inp=document.getElementById('sync-key-input');
+  if(inp) inp.value=_syncKey||'';
   updateSyncDots();
 }
 
-/* ── Salva configurazione dal drawer ── */
-async function saveSyncConfig(){
-  const url  =(document.getElementById('sync-url-input')?.value||'').trim().replace(/\/$/,'');
-  const token=(document.getElementById('sync-token-input')?.value||'').trim();
-  const key  =(document.getElementById('sync-key-input')?.value||'').trim();
-  const prev = _syncKey+'|'+_syncUrl+'|'+_syncToken;
-
-  _syncUrl   = url   || null;
-  _syncToken = token || null;
-  _syncKey   = key   || null;
-
-  await dbSetting(SYNC_URL_IDB,   _syncUrl   || '');
-  await dbSetting(SYNC_TOKEN_IDB, _syncToken || '');
-  await dbSetting(SYNC_KEY_IDB,   _syncKey   || '');
-
-  if(!_syncReady()){
-    _syncStatus='nokey'; updateSyncDots();
-    showToast('Sincronizzazione cloud disabilitata');
-    return;
-  }
-  const changed = (_syncKey+'|'+_syncUrl+'|'+_syncToken) !== prev;
-  if(changed){
-    showToast('Configurazione salvata — Sincronizzazione in corso…');
-    await syncFull(true);
-  } else {
-    showToast('Configurazione confermata');
-    updateSyncDots();
-  }
+/* ── Salva solo la chiave condivisione ── */
+async function saveSyncKey(){
+  const v=(document.getElementById('sync-key-input')?.value||'').trim();
+  const prev=_syncKey;
+  _syncKey=v||null;
+  await dbSetting(SYNC_KEY_IDB,_syncKey||'');
+  if(!_syncKey){ _syncStatus='nokey'; updateSyncDots(); showToast('Sincronizzazione disabilitata'); return; }
+  if(_syncKey!==prev){ showToast('Chiave salvata — Sincronizzazione in corso…'); await syncFull(true); }
+  else { showToast('Chiave confermata'); updateSyncDots(); }
 }
 
-/* ── Aggiorna i due pallini (header + drawer) ── */
+/* ── Aggiorna barra header + pallino drawer ── */
 function updateSyncDots(){
-  const dot1=document.getElementById('sync-dot');
-  const dot2=document.getElementById('sync-dot-drawer');
+  const bar =document.getElementById('sync-bar');       /* barra header */
+  const dot2=document.getElementById('sync-dot-drawer');/* pallino drawer */
   const txt =document.getElementById('sync-status-text');
-  const cls = _syncReady() ? _syncStatus : 'nokey';
-  [dot1,dot2].forEach(d=>{ if(d) d.className='sync-dot '+cls; });
+  const cls =_syncReady()?_syncStatus:'nokey';
+  if(bar)  bar.className ='sync-bar '+cls;
+  if(dot2) dot2.className='sync-dot '+cls;
   if(txt){
     const labels={
-      nokey:   'Non configurato — solo locale',
-      syncing: 'Sincronizzazione in corso…',
-      ok:      'Sincronizzato'+(_lastSyncAt?' · '+_fmtTime(_lastSyncAt):''),
-      error:   'Errore — verifica URL e Token Upstash',
-      offline: 'Offline — sincronizzerà appena disponibile'
+      nokey:'Non configurato — solo locale',
+      syncing:'Sincronizzazione in corso…',
+      ok:'Sincronizzato'+(_lastSyncAt?' · '+_fmtTime(_lastSyncAt):''),
+      error:'Errore sincronizzazione',
+      offline:'Offline — sincronizzerà appena disponibile'
     };
-    txt.textContent = labels[cls]||cls;
+    txt.textContent=labels[cls]||cls;
   }
 }
 
@@ -3119,10 +3130,7 @@ function _fmtTime(ts){
   return new Date(ts).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
 }
 
-/* ══ Upstash Redis REST — chiamate dirette dal browser ══
-   POST {url}           body:["CMD","arg1","arg2"]  → {result}
-   POST {url}/pipeline  body:[["CMD","k","v"],...]  → [{result},...] */
-
+/* ══ Upstash Redis REST — chiamate dirette dal browser ══ */
 async function _redisCmd(...args){
   const r=await fetch(_syncUrl,{
     method:'POST',
@@ -3140,40 +3148,38 @@ async function _redisPipe(cmds){
     body:JSON.stringify(cmds)
   });
   if(!r.ok){ const t=await r.text().catch(()=>r.status); throw new Error('Pipeline '+r.status+': '+t); }
-  return await r.json(); /* array di {result} */
+  return await r.json();
 }
 
-/* ── Push locale → Upstash (un singolo store) ── */
-async function cloudPushStore(store, data){
+/* ── Push locale → Upstash ── */
+async function cloudPushStore(store,data){
   if(!_syncReady()||!navigator.onLine) return false;
-  const payload = store==='wines' ? data.map(({foto,...r})=>r) : data;
+  const payload=store==='wines'?data.map(({foto,...r})=>r):data;
   const ts=Date.now();
   try{
-    const k=`cantina:${_syncKey}:${store}`;
-    const kt=`cantina:${_syncKey}:ts_${store}`;
     await _redisPipe([
-      ['SET', k,  JSON.stringify(payload)],
-      ['SET', kt, String(ts)]
+      ['SET',`cantina:${_syncKey}:${store}`,JSON.stringify(payload)],
+      ['SET',`cantina:${_syncKey}:ts_${store}`,String(ts)]
     ]);
-    await dbSetting(store==='wines'?SYNC_TS_WINES:SYNC_TS_MOVES, ts);
+    await dbSetting(store==='wines'?SYNC_TS_WINES:SYNC_TS_MOVES,ts);
     return true;
   }catch(e){ console.warn('[Sync] push:',e); return false; }
 }
 
-/* ── Pull Upstash → locale (un singolo store) ── */
+/* ── Pull Upstash → locale ── */
 async function cloudPullStore(store){
   if(!_syncReady()||!navigator.onLine) return null;
   try{
-    const k=`cantina:${_syncKey}:${store}`;
-    const kt=`cantina:${_syncKey}:ts_${store}`;
-    const res = await _redisPipe([['GET',k],['GET',kt]]);
-    const dataStr = res[0]?.result;
-    const tsStr   = res[1]?.result;
-    return { data: dataStr?JSON.parse(dataStr):[], ts: tsStr?parseInt(tsStr,10):0 };
+    const res=await _redisPipe([
+      ['GET',`cantina:${_syncKey}:${store}`],
+      ['GET',`cantina:${_syncKey}:ts_${store}`]
+    ]);
+    const dataStr=res[0]?.result, tsStr=res[1]?.result;
+    return{data:dataStr?JSON.parse(dataStr):[],ts:tsStr?parseInt(tsStr,10):0};
   }catch(e){ console.warn('[Sync] pull:',e); return null; }
 }
 
-/* ── Push rapido dopo ogni save locale (debounce 800ms) ── */
+/* ── Push rapido dopo save locale (debounce 800ms) ── */
 let _pushDebounceT=null;
 async function cloudPush(store){
   if(!_syncReady()) return;
@@ -3181,8 +3187,7 @@ async function cloudPush(store){
   _pushDebounceT=setTimeout(async()=>{
     if(!navigator.onLine){ _syncStatus='offline'; updateSyncDots(); return; }
     _syncStatus='syncing'; updateSyncDots();
-    const data=store==='wines'?wines:movements;
-    const ok=await cloudPushStore(store,data);
+    const ok=await cloudPushStore(store,store==='wines'?wines:movements);
     _syncStatus=ok?'ok':'error';
     if(ok) _lastSyncAt=Date.now();
     updateSyncDots();
@@ -3195,7 +3200,7 @@ async function syncFull(showFeedback=false){
   if(_syncBusy) return;
   if(!navigator.onLine){ _syncStatus='offline'; updateSyncDots(); if(showFeedback)showToast('Sei offline'); return; }
   _syncBusy=true; _syncStatus='syncing'; updateSyncDots();
-  let changed=false, allOk=true;
+  let changed=false,allOk=true;
   try{
     /* Vini */
     const localTsW=(await dbSetting(SYNC_TS_WINES))||0;
@@ -3204,10 +3209,8 @@ async function syncFull(showFeedback=false){
     else if(remoteW.ts>localTsW){
       const pm={}; wines.forEach(w=>{ if(w.foto) pm[w.id]=w.foto; });
       wines=remoteW.data.map(w=>({...w,foto:pm[w.id]||null}));
-      await dbPutAll('wines',wines);
-      await dbSetting(SYNC_TS_WINES,remoteW.ts);
-      changed=true;
-    } else { if(!await cloudPushStore('wines',wines)) allOk=false; }
+      await dbPutAll('wines',wines); await dbSetting(SYNC_TS_WINES,remoteW.ts); changed=true;
+    } else if(!await cloudPushStore('wines',wines)) allOk=false;
 
     /* Movimenti */
     const localTsM=(await dbSetting(SYNC_TS_MOVES))||0;
@@ -3215,10 +3218,8 @@ async function syncFull(showFeedback=false){
     if(!remoteM){ allOk=false; }
     else if(remoteM.ts>localTsM){
       movements=remoteM.data;
-      await dbPutAll('movements',movements);
-      await dbSetting(SYNC_TS_MOVES,remoteM.ts);
-      changed=true;
-    } else { if(!await cloudPushStore('movements',movements)) allOk=false; }
+      await dbPutAll('movements',movements); await dbSetting(SYNC_TS_MOVES,remoteM.ts); changed=true;
+    } else if(!await cloudPushStore('movements',movements)) allOk=false;
 
     _syncStatus=allOk?'ok':'error';
     if(allOk) _lastSyncAt=Date.now();
@@ -3226,24 +3227,71 @@ async function syncFull(showFeedback=false){
     else if(showFeedback&&allOk) showToast('Sincronizzato ✓');
   }catch(e){
     console.error('[Sync]',e); _syncStatus='error';
-    if(showFeedback) showToast('Errore sincronizzazione — verifica URL e Token',true);
+    if(showFeedback) showToast('Errore sincronizzazione',true);
   }finally{
     _syncBusy=false; updateSyncDots();
   }
 }
 
-/* ── Tap sul pallino → mostra info stato ── */
+/* ── Tap sul pallino → info stato ── */
 function showSyncInfo(){
-  const ready=_syncReady();
   const labels={
-    nokey:   'Sincronizzazione cloud non attiva.\n\nApri le impostazioni (⚙) e inserisci URL, Token Upstash e una chiave condivisione.',
-    syncing: 'Sincronizzazione in corso…',
-    ok:      '✓ Sincronizzato'+(_lastSyncAt?' alle '+_fmtTime(_lastSyncAt):'')+'\n\nChiave: '+(_syncKey||'—'),
-    error:   '⚠ Errore.\n\nVerifica URL e Token Upstash nelle impostazioni.',
-    offline: '📴 Offline.\n\nI dati si sincronizzeranno appena disponibile la rete.'
+    nokey:'Sincronizzazione cloud non attiva.\n\nApri le impostazioni (⚙) e inserisci una chiave condivisione.',
+    syncing:'Sincronizzazione in corso…',
+    ok:'✓ Sincronizzato'+(_lastSyncAt?' alle '+_fmtTime(_lastSyncAt):'')+'\n\nChiave: '+(_syncKey||'—'),
+    error:'⚠ Errore.\n\nVerifica la connessione o contatta l\'amministratore.',
+    offline:'📴 Offline.\n\nI dati si sincronizzeranno appena disponibile la rete.'
   };
-  const cls=ready?_syncStatus:'nokey';
-  showModal('Stato sincronizzazione',labels[cls]||cls,[{label:'OK',cls:'primary',action:closeModal}]);
+  showModal('Stato sincronizzazione',labels[_syncReady()?_syncStatus:'nokey']||'',
+    [{label:'OK',cls:'primary',action:closeModal}]);
+}
+
+/* ══ PANNELLO ADMIN (nascosto — 5 tap sul numero versione) ══ */
+let _tapCount=0,_tapTimer=null;
+async function adminTap(){
+  clearTimeout(_tapTimer);
+  _tapCount++;
+  if(_tapCount>=5){
+    _tapCount=0;
+    /* Chiedi PIN */
+    const pin=await dbSetting(SYNC_PIN_IDB)||_CFG_PIN;
+    const entered=prompt('PIN amministratore:');
+    if(entered===null) return;
+    if(entered!==pin){ showToast('PIN errato',true); return; }
+    openAdminPanel();
+  } else {
+    _tapTimer=setTimeout(()=>_tapCount=0,1500);
+  }
+}
+
+async function openAdminPanel(){
+  const url=await dbSetting(SYNC_URL_IDB)||_CFG_URL||'';
+  const token=await dbSetting(SYNC_TOKEN_IDB)||_CFG_TOKEN||'';
+  const pin=await dbSetting(SYNC_PIN_IDB)||_CFG_PIN||'';
+  document.getElementById('admin-url-input').value=url;
+  document.getElementById('admin-token-input').value=token;
+  document.getElementById('admin-pin-input').value=pin;
+  const el=document.getElementById('admin-overlay');
+  el.style.display='flex'; closeDrawer();
+}
+
+function closeAdminPanel(){
+  document.getElementById('admin-overlay').style.display='none';
+}
+
+async function saveAdminConfig(){
+  const url  =(document.getElementById('admin-url-input')?.value||'').trim().replace(/\/$/,'');
+  const token=(document.getElementById('admin-token-input')?.value||'').trim();
+  const pin  =(document.getElementById('admin-pin-input')?.value||'').trim()||_CFG_PIN;
+  /* Salva solo se diverso dai default (così i default rimangono fallback) */
+  await dbSetting(SYNC_URL_IDB,   url   !== _CFG_URL   ? url   : '');
+  await dbSetting(SYNC_TOKEN_IDB, token !== _CFG_TOKEN ? token : '');
+  await dbSetting(SYNC_PIN_IDB,   pin   !== _CFG_PIN   ? pin   : '');
+  _syncUrl   = url   || _CFG_URL   || null;
+  _syncToken = token || _CFG_TOKEN || null;
+  updateSyncDots();
+  showToast('Configurazione admin salvata ✓');
+  closeAdminPanel();
 }
 
 /* ── Listener connessione ── */
@@ -3253,6 +3301,7 @@ window.addEventListener('online',()=>{
 window.addEventListener('offline',()=>{
   if(_syncReady()){ _syncStatus='offline'; updateSyncDots(); }
 });
+
 
 
 </script>

@@ -349,17 +349,22 @@ textarea.field-input{resize:vertical;min-height:74px}
       <div id="header-assaggiati-label" style="display:none;font-size:11px;font-weight:700;color:#8B2050;letter-spacing:.8px;margin-top:1px">🥂 I vini assaggiati</div>
     </div>
     <div style="display:flex;align-items:center;gap:5px">
-      <button id="btn-toggle-assaggiati" class="btn-eye" onclick="toggleAssaggiatiView()" title="Mostra vini assaggiati" style="color:var(--text-dim)">
-        <svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
-      </button>
-      <img src="./icon512.png" class="header-logo" alt="cantina" onclick="openManual()" style="cursor:pointer">
-      <div style="display:flex;flex-direction:column;align-items:center;justify-content:space-between;align-self:stretch;padding:2px 0 6px;gap:0">
+      <!-- colonna sinistra: barra sync + occhio -->
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:space-between;align-self:stretch;padding:2px 0 6px">
         <div id="sync-bar" class="sync-bar nokey" title="Stato sincronizzazione" onclick="showSyncInfo()"></div>
-        <button class="btn-icon" onclick="syncFull(true)" title="Sincronizza ora" id="btn-sync-header" style="padding:4px">
-          <svg width="19" height="19" fill="none" stroke="var(--gold)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
+        <button id="btn-toggle-assaggiati" class="btn-eye" onclick="toggleAssaggiatiView()" title="Mostra vini assaggiati" style="color:var(--text-dim)">
+          <svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
         </button>
-        <button class="btn-icon" onclick="openDrawer()" style="padding:4px">
-          <svg width="19" height="19" fill="none" stroke="var(--gold)" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </div>
+      <!-- logo -->
+      <img src="./icon512.png" class="header-logo" alt="cantina" onclick="openManual()" style="cursor:pointer">
+      <!-- colonna destra: sync↻ + gear⚙ — più grandi e distanziati -->
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:space-evenly;align-self:stretch;padding:4px 0 8px;gap:0">
+        <button class="btn-icon" onclick="syncFull(true)" title="Sincronizza ora" id="btn-sync-header" style="padding:5px">
+          <svg width="23" height="23" fill="none" stroke="var(--gold)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
+        </button>
+        <button class="btn-icon" onclick="openDrawer()" style="padding:5px">
+          <svg width="23" height="23" fill="none" stroke="var(--gold)" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         </button>
       </div>
     </div>
@@ -649,6 +654,10 @@ textarea.field-input{resize:vertical;min-height:74px}
     <!-- 3. PARAMETRI -->
     <div class="drawer-section-label">3 · Parametri</div>
     <div class="drawer-section-label" style="border-top:none;margin-top:0;padding-top:0;padding-bottom:2px;font-size:9px;letter-spacing:1px">☁ Sincronizzazione Cloud</div>
+    <button class="drawer-btn gold" onclick="openAdminPanelWithPin();closeDrawer()">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg>
+      <div class="lbl">Parametri db<span class="sub">Configura database di sincronizzazione</span></div>
+    </button>
     <div class="sync-box">
       <div style="font-size:11px;color:var(--text-faint);margin-bottom:9px;line-height:1.5">Scegli una chiave per sincronizzare vini e movimenti con altri tuoi dispositivi o con chi condivide la stessa cantina. Lascia vuoto per lavorare solo in locale.</div>
       <div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:4px">Chiave condivisione</div>
@@ -694,10 +703,10 @@ textarea.field-input{resize:vertical;min-height:74px}
     </button>
 
   </div>
-  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label" onclick="adminTap()" style="cursor:pointer;user-select:none">v5.6</span></div>
+  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label" onclick="adminTap()" style="cursor:pointer;user-select:none">v5.7</span></div>
 </div>
 
-<!-- ADMIN OVERLAY (nascosto — 5 tap sul numero versione) -->
+<!-- ADMIN OVERLAY (accesso via bottone 'Parametri db' nelle impostazioni) -->
 <div id="admin-overlay" style="display:none;position:fixed;inset:0;background:var(--bg);z-index:400;flex-direction:column">
   <div class="manual-header">
     <div style="font-family:'Playfair Display',serif;font-size:17px;color:var(--gold)">⚙ Pannello Amministratore</div>
@@ -3127,7 +3136,7 @@ function updateSyncDots(){
 }
 
 function _fmtTime(ts){
-  return new Date(ts).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'});
+  return new Date(ts).toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
 }
 
 /* ══ Upstash Redis REST — chiamate dirette dal browser ══ */
@@ -3246,22 +3255,22 @@ function showSyncInfo(){
     [{label:'OK',cls:'primary',action:closeModal}]);
 }
 
-/* ══ PANNELLO ADMIN (nascosto — 5 tap sul numero versione) ══ */
+/* ── Apre pannello admin con richiesta PIN (chiamato dal bottone drawer) ── */
+async function openAdminPanelWithPin(){
+  const pin=await dbSetting(SYNC_PIN_IDB)||_CFG_PIN;
+  const entered=prompt('PIN amministratore:');
+  if(entered===null) return;
+  if(entered!==pin){ showToast('PIN errato',true); return; }
+  openAdminPanel();
+}
+
+/* ══ PANNELLO ADMIN — easter egg: 5 tap sul numero versione ══ */
 let _tapCount=0,_tapTimer=null;
 async function adminTap(){
   clearTimeout(_tapTimer);
   _tapCount++;
-  if(_tapCount>=5){
-    _tapCount=0;
-    /* Chiedi PIN */
-    const pin=await dbSetting(SYNC_PIN_IDB)||_CFG_PIN;
-    const entered=prompt('PIN amministratore:');
-    if(entered===null) return;
-    if(entered!==pin){ showToast('PIN errato',true); return; }
-    openAdminPanel();
-  } else {
-    _tapTimer=setTimeout(()=>_tapCount=0,1500);
-  }
+  if(_tapCount>=5){ _tapCount=0; openAdminPanelWithPin(); }
+  else _tapTimer=setTimeout(()=>_tapCount=0,1500);
 }
 
 async function openAdminPanel(){

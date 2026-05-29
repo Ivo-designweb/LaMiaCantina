@@ -258,6 +258,7 @@ textarea.field-input{resize:vertical;min-height:74px}
 .empty .icon{font-size:50px;margin-bottom:13px}
 .empty h3{font-size:17px;color:var(--text-dim);margin-bottom:7px;font-weight:normal}
 .empty p{font-size:13px}
+.empty-gif{width:180px;height:auto;margin:0 auto 16px;display:block}
 ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
 
 /* ── STAR RATING ── */
@@ -649,7 +650,7 @@ textarea.field-input{resize:vertical;min-height:74px}
     </button>
 
   </div>
-  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label">v5.1</span></div>
+  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label">v5.2</span></div>
 </div>
 
 <!-- MANUAL OVERLAY -->
@@ -1321,7 +1322,11 @@ function renderList(){
   }
   document.getElementById('search-bar').style.display=filtered.length>2||q?'flex':'none';
   const container=document.getElementById('wine-list');
-  if(filtered.length===0){container.innerHTML='<div class="empty"><div class="icon">'+ (_showAssaggiati?'🥂':'🍾')+'</div><h3>'+(q?'Nessun risultato':(_showAssaggiati?'Nessun vino assaggiato':'Cantina vuota'))+'</h3><p>'+(q?'Prova altra parola chiave':(_showAssaggiati?'Aggiungi vini con il flag "Assaggiato"':'Aggiungi il tuo primo vino'))+'</p></div>';return;}
+  if(filtered.length===0){
+    const _emptyTop=(!q&&!_showAssaggiati)?'<img src="./Vino.webp" class="empty-gif" alt="Cantina vuota">':'<div class="icon">'+(_showAssaggiati?'🥂':'🔍')+'</div>';
+    container.innerHTML='<div class="empty">'+_emptyTop+'<h3>'+(q?'Nessun risultato':(_showAssaggiati?'Nessun vino assaggiato':'Cantina vuota'))+'</h3><p>'+(q?'Prova altra parola chiave':(_showAssaggiati?'Aggiungi vini con il flag "Assaggiato"':'Aggiungi il tuo primo vino'))+'</p></div>';
+    return;
+  }
   container.innerHTML=filtered.map(w=>{
     const qty=parseInt(w.quantita)||0;
     const miniStars=starsHTML(w.rating,'mini');

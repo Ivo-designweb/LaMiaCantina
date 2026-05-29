@@ -4,12 +4,13 @@
    il refresh dell'app su tutti i dispositivi.
 ═══════════════════════════════════════════════════ */
 
-const CACHE_VERSION = 'cantina-v4.8';
+const CACHE_VERSION = 'cantina-v5.2';
 const ASSETS = [
   './index.html',
   './manifest.json',
-  './icon-192.png',
-  './icon-512.png',
+  './icon192.png',
+  './icon512.png',
+  './Vino.webp',
   'https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;800&family=Lora:ital,wght@0,400;0,600;1,400&display=swap'
 ];
 

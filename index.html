@@ -250,6 +250,8 @@ textarea.field-input{resize:vertical;min-height:74px}
 .sync-bar.error{background:var(--red2)}
 .sync-bar.offline{background:var(--gold-dim)}
 @keyframes sync-pulse{0%,100%{opacity:1;box-shadow:0 0 0 0 rgba(139,90,26,.4)}50%{opacity:.6;box-shadow:0 0 0 5px rgba(139,90,26,0)}}
+@keyframes sync-flash{0%,100%{opacity:1}30%{opacity:.1}60%{opacity:1}80%{opacity:.2}}
+.sync-bar.flash{animation:sync-flash .5s ease-in-out 3!important}
 .sync-box{background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:8px}
 .sync-row-inner{display:flex;gap:8px;margin-top:6px}
 .sync-status-row{display:flex;align-items:center;gap:7px;margin-top:7px;font-size:11px;color:var(--text-faint)}
@@ -704,7 +706,7 @@ textarea.field-input{resize:vertical;min-height:74px}
     </button>
 
   </div>
-  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label" onclick="adminTap()" style="cursor:pointer;user-select:none">v5.8</span></div>
+  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label" onclick="adminTap()" style="cursor:pointer;user-select:none">v5.9</span></div>
 </div>
 
 <!-- ADMIN OVERLAY (accesso via bottone 'Parametri db' nelle impostazioni) -->
@@ -3246,8 +3248,8 @@ async function syncFull(showFeedback=false){
 
     _syncStatus=allOk?'ok':'error';
     if(allOk) _lastSyncAt=Date.now();
-    if(changed){ renderList(); if(showFeedback) showToast('Dati aggiornati dal cloud ☁'); }
-    else if(showFeedback&&allOk) showToast('Sincronizzato ✓');
+    if(changed){ renderList(); if(showFeedback) showToast('☁ Aggiornamento ricevuto'); flashSyncBar(); }
+    else if(showFeedback&&allOk&&showFeedback!=='push') showToast('Sincronizzato ✓');
   }catch(e){
     console.error('[Sync]',e); _syncStatus='error';
     if(showFeedback) showToast('Errore sincronizzazione',true);
@@ -3282,7 +3284,7 @@ async function initAbly(){
     _ablyChannel=_ablyClient.channels.get(ch);
     _ablyChannel.subscribe('update', msg=>{
       if(msg.data?.deviceId===_deviceId) return; /* ignora eventi propri */
-      if(!_syncBusy) syncFull(false);
+      if(!_syncBusy) syncFull('push');
     });
     console.log('[Ably] iscritto a:',ch);
   }catch(e){ console.warn('[Ably] connessione fallita:',e); }
@@ -3343,6 +3345,14 @@ async function saveAdminConfig(){
   updateSyncDots();
   showToast('Configurazione admin salvata ✓');
   closeAdminPanel();
+}
+
+/* ── Fa lampeggiare la barra verde quando arriva un aggiornamento push ── */
+function flashSyncBar(){
+  const bar=document.getElementById('sync-bar');
+  if(!bar) return;
+  bar.classList.add('flash');
+  setTimeout(()=>bar.classList.remove('flash'), 1600);
 }
 
 /* ── Listener connessione ── */

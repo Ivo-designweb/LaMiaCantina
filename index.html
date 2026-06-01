@@ -703,7 +703,7 @@ textarea.field-input{resize:vertical;min-height:74px}
     </button>
 
   </div>
-  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label" onclick="adminTap()" style="cursor:pointer;user-select:none">v6.2</span></div>
+  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label" onclick="adminTap()" style="cursor:pointer;user-select:none">v6.3</span></div>
 </div>
 
 <!-- ADMIN OVERLAY (accesso via bottone 'Parametri db' nelle impostazioni) -->
@@ -3074,7 +3074,7 @@ window.addEventListener('keydown',function(e){
 const _CFG_URL   = 'https://casual-bug-139455.upstash.io'; /* URL Upstash REST */
 const _CFG_TOKEN = 'gQAAAAAAAiC_AAIgcDFkZWNjNGI5ZjgwNjI0ZDgxODhlMWEwOWVhZWU5NDJkZQ'; /* Token Read/Write */
 const _CFG_PIN   = '1234'; /* PIN pannello admin (cambialo nel pannello stesso) */
-const _CFG_ABLY  = ''; /* API Key Ably — imposta nel pannello admin o hardcoda qui */
+const _CFG_ABLY  = 'DuWjxQ.iTbOSQ:CIVkNTEvGOWhj2GTeEjzlkGlG08TmVOYrG3Ov_6Osds'; /* API Key Ably — push real-time */
 /* ─────────────────────────────────────────────────────────────── */
 
 const SYNC_KEY_IDB   = 'cantina_sync_key_v1';
@@ -3250,7 +3250,7 @@ async function syncFull(showFeedback=false){
 
     _syncStatus=allOk?'ok':'error';
     if(allOk) _lastSyncAt=Date.now();
-    if(changed){ renderList(); if(showFeedback) showToast('☁ Aggiornamento ricevuto'); flashSyncBar(); }
+    if(changed){ renderList(); if(showFeedback) showToast('☁ Aggiornamento ricevuto'); flashSyncBar(); playNotifSound(); }
     else if(showFeedback&&allOk&&showFeedback!=='push') showToast('Sincronizzato ✓');
   }catch(e){
     console.error('[Sync]',e); _syncStatus='error';
@@ -3397,6 +3397,24 @@ function flashSyncBar(){
   if(!bar) return;
   bar.classList.add('flash');
   setTimeout(()=>bar.classList.remove('flash'), 1600);
+}
+
+/* ── Suono di notifica via Web Audio API (nessun file esterno) ── */
+function playNotifSound(){
+  try{
+    const ctx=new (window.AudioContext||window.webkitAudioContext)();
+    [[880,0,0.01,0.18],[1100,0.18,0.01,0.22]].forEach(([freq,start,attack,end])=>{
+      const osc=ctx.createOscillator();
+      const gain=ctx.createGain();
+      osc.connect(gain); gain.connect(ctx.destination);
+      osc.type='sine'; osc.frequency.value=freq;
+      gain.gain.setValueAtTime(0, ctx.currentTime+start);
+      gain.gain.linearRampToValueAtTime(0.25, ctx.currentTime+start+attack);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime+end);
+      osc.start(ctx.currentTime+start);
+      osc.stop(ctx.currentTime+end);
+    });
+  }catch(e){ console.warn('[Sound]',e); }
 }
 
 /* ── Listener connessione ── */

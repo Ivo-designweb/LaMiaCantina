@@ -703,7 +703,7 @@ textarea.field-input{resize:vertical;min-height:74px}
     </button>
 
   </div>
-  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label" onclick="adminTap()" style="cursor:pointer;user-select:none">v6.1</span></div>
+  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label" onclick="adminTap()" style="cursor:pointer;user-select:none">v6.2</span></div>
 </div>
 
 <!-- ADMIN OVERLAY (accesso via bottone 'Parametri db' nelle impostazioni) -->
@@ -3074,7 +3074,7 @@ window.addEventListener('keydown',function(e){
 const _CFG_URL   = 'https://casual-bug-139455.upstash.io'; /* URL Upstash REST */
 const _CFG_TOKEN = 'gQAAAAAAAiC_AAIgcDFkZWNjNGI5ZjgwNjI0ZDgxODhlMWEwOWVhZWU5NDJkZQ'; /* Token Read/Write */
 const _CFG_PIN   = '1234'; /* PIN pannello admin (cambialo nel pannello stesso) */
-const _CFG_ABLY  = 'DuWjxQ.iTbOSQ:CIVkNTEvGOWhj2GTeEjzlkGlG08TmVOYrG3Ov_6Osds'; /* API Key Ably — imposta nel pannello admin o hardcoda qui */
+const _CFG_ABLY  = ''; /* API Key Ably — imposta nel pannello admin o hardcoda qui */
 /* ─────────────────────────────────────────────────────────────── */
 
 const SYNC_KEY_IDB   = 'cantina_sync_key_v1';
@@ -3188,7 +3188,6 @@ async function cloudPushStore(store,data){
       ['SET',`cantina:${_syncKey}:ts_${store}`,String(ts)]
     ]);
     await dbSetting(store==='wines'?SYNC_TS_WINES:SYNC_TS_MOVES,ts);
-    ablyPublish(store); /* notifica real-time gli altri dispositivi */
     return true;
   }catch(e){ console.warn('[Sync] push:',e); return false; }
 }
@@ -3215,6 +3214,7 @@ async function cloudPush(store){
     if(!navigator.onLine){ _syncStatus='offline'; updateSyncDots(); return; }
     _syncStatus='syncing'; updateSyncDots();
     const ok=await cloudPushStore(store,store==='wines'?wines:movements);
+    if(ok) ablyPublish(store); /* notifica altri dispositivi — solo su salvataggio utente */
     _syncStatus=ok?'ok':'error';
     if(ok) _lastSyncAt=Date.now();
     updateSyncDots();

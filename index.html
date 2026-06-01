@@ -706,7 +706,7 @@ textarea.field-input{resize:vertical;min-height:74px}
     </button>
 
   </div>
-  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label" onclick="adminTap()" style="cursor:pointer;user-select:none">v5.9</span></div>
+  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label" onclick="adminTap()" style="cursor:pointer;user-select:none">v6.0</span></div>
 </div>
 
 <!-- ADMIN OVERLAY (accesso via bottone 'Parametri db' nelle impostazioni) -->
@@ -725,7 +725,12 @@ textarea.field-input{resize:vertical;min-height:74px}
     <input id="admin-token-input" class="field-input" type="password" placeholder="Token lungo..." style="margin-bottom:12px;font-size:13px" autocomplete="off">
     <div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:4px">API Key Ably <span style="font-weight:normal;text-transform:none;letter-spacing:0">(push real-time)</span></div>
     <div style="font-size:11px;color:var(--text-faint);margin-bottom:5px;line-height:1.4">Crea account su <b>ably.com</b> → App → API Keys → copia la chiave Root.</div>
-    <input id="admin-ably-input" class="field-input" type="password" placeholder="xxxxx:yyyyyy" style="margin-bottom:12px;font-size:13px" autocomplete="off">
+    <input id="admin-ably-input" class="field-input" type="password" placeholder="xxxxx:yyyyyy" style="margin-bottom:8px;font-size:13px" autocomplete="off">
+    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;padding:7px 10px;background:var(--surface);border-radius:8px;border:1px solid var(--border)">
+      <span style="font-size:11px;color:var(--text-faint);flex-shrink:0">Stato Ably:</span>
+      <span id="ably-status" style="font-size:11px;color:var(--text-faint);flex:1">⬤ Inattivo</span>
+      <button onclick="initAbly()" style="font-size:11px;padding:3px 10px;background:none;border:1px solid var(--border);border-radius:6px;cursor:pointer;font-family:inherit;color:var(--text-dim);flex-shrink:0">↻ Testa</button>
+    </div>
     <div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:4px">PIN Admin</div>
     <input id="admin-pin-input" class="field-input" type="password" placeholder="PIN (default: 1234)" maxlength="8" style="margin-bottom:16px;font-size:13px">
     <button onclick="saveAdminConfig()" style="width:100%;background:var(--gold);border:none;border-radius:12px;color:#fff;padding:13px;font-size:15px;cursor:pointer;font-family:inherit;font-weight:600">Salva configurazione</button>
@@ -3277,17 +3282,56 @@ function showSyncInfo(){
    Quando un dispositivo salva, pubblica 'update' → gli altri chiamano syncFull(). */
 async function initAbly(){
   if(_ablyClient){ try{ _ablyClient.close(); }catch(e){} _ablyClient=null; _ablyChannel=null; }
+  _setAblyStatus('inattivo');
   if(!_ablyKey||!_syncKey) return;
+
+  /* Controlla che l'SDK sia caricato */
+  if(typeof Ably==='undefined'){
+    const msg='SDK non caricato (controlla la connessione internet)';
+    console.error('[Ably]',msg);
+    _setAblyStatus('errore: '+msg);
+    return;
+  }
+
   try{
     _ablyClient=new Ably.Realtime({key:_ablyKey, autoConnect:true});
+
+    /* Ascolta tutti i cambi di stato della connessione */
+    _ablyClient.connection.on(sc=>{
+      const s=sc.current;
+      console.log('[Ably] stato:',s, sc.reason?sc.reason.message:'');
+      _setAblyStatus(s, sc.reason?.message);
+    });
+
     const ch='cantina-'+_syncKey.replace(/[^a-zA-Z0-9_-]/g,'').slice(0,60);
     _ablyChannel=_ablyClient.channels.get(ch);
     _ablyChannel.subscribe('update', msg=>{
-      if(msg.data?.deviceId===_deviceId) return; /* ignora eventi propri */
+      if(msg.data?.deviceId===_deviceId) return;
       if(!_syncBusy) syncFull('push');
     });
-    console.log('[Ably] iscritto a:',ch);
-  }catch(e){ console.warn('[Ably] connessione fallita:',e); }
+    console.log('[Ably] iscritto a canale:',ch);
+  }catch(e){
+    console.error('[Ably] errore inizializzazione:',e);
+    _setAblyStatus('errore: '+e.message);
+  }
+}
+
+function _setAblyStatus(state, reason){
+  const el=document.getElementById('ably-status');
+  if(!el) return;
+  const map={
+    'inattivo':    {t:'⬤ Inattivo',          c:'var(--text-faint)'},
+    'initialized': {t:'⬤ Inizializzazione…',  c:'var(--text-faint)'},
+    'connecting':  {t:'⬤ Connessione…',        c:'var(--gold)'},
+    'connected':   {t:'⬤ Connesso ✓',          c:'var(--green)'},
+    'disconnected':{t:'⬤ Disconnesso',          c:'var(--gold-dim)'},
+    'suspended':   {t:'⬤ Sospeso (riprova…)',   c:'var(--gold-dim)'},
+    'failed':      {t:'⬤ Fallito ✗',            c:'var(--red2)'},
+    'closed':      {t:'⬤ Chiuso',               c:'var(--text-faint)'},
+  };
+  const s=map[state]||{t:'⬤ '+state, c:'var(--text-faint)'};
+  el.textContent=s.t+(reason?' — '+reason:'');
+  el.style.color=s.c;
 }
 
 async function ablyPublish(store){
@@ -3321,6 +3365,9 @@ async function openAdminPanel(){
   document.getElementById('admin-token-input').value=token;
   document.getElementById('admin-ably-input').value =ably;
   document.getElementById('admin-pin-input').value  =pin;
+  /* Mostra stato connessione Ably corrente */
+  const state=_ablyClient?.connection?.state||'inattivo';
+  _setAblyStatus(state);
   document.getElementById('admin-overlay').style.display='flex';
   closeDrawer();
 }

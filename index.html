@@ -333,6 +333,28 @@ textarea.field-input{resize:vertical;min-height:74px}
 .manual-header{background:var(--header-bg);border-bottom:1px solid var(--border);padding:13px 16px 11px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
 .manual-body{flex:1;overflow-y:auto;padding:0}
 .manual-body iframe{width:100%;height:100%;border:none;background:var(--bg)}
+/* ── DASHBOARD ── */
+.dash-body{flex:1;overflow-y:auto;padding:14px 13px max(90px,calc(70px + env(safe-area-inset-bottom)))}
+.dash-section-title{font-size:11px;font-weight:700;color:var(--text-faint);text-transform:uppercase;letter-spacing:1.5px;margin:18px 0 9px;padding-bottom:5px;border-bottom:1px solid var(--border)}
+.dash-section-title:first-child{margin-top:2px}
+.dash-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:9px;margin-bottom:4px}
+.dash-card{background:var(--card-bg);border:1px solid var(--border);border-radius:13px;padding:13px 10px;text-align:center;box-shadow:var(--shadow)}
+.dash-card-val{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--gold);line-height:1.1}
+.dash-card-lbl{font-size:11px;color:var(--text-faint);margin-top:4px;letter-spacing:.5px}
+.dash-bars{display:flex;flex-direction:column;gap:8px;margin-bottom:4px}
+.dash-bar-row{display:grid;grid-template-columns:90px 1fr 70px;align-items:center;gap:8px}
+.dash-bar-label{font-size:12px;color:var(--text-dim);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.dash-bar-track{height:8px;background:var(--surface2);border-radius:4px;overflow:hidden}
+.dash-bar-fill{height:100%;background:var(--red);border-radius:4px;transition:width .4s ease}
+.dash-bar-fill.gold{background:var(--gold)}
+.dash-bar-val{font-size:11px;color:var(--text-dim);text-align:right;white-space:nowrap}
+.dash-expire-row{background:var(--gold-bg);border:1px solid var(--gold-dim);border-radius:9px;padding:7px 11px;font-size:12px;color:var(--gold);margin-bottom:5px}
+.dash-expire-row.scaduto{background:var(--red-bg);border-color:var(--red);color:var(--red)}
+.dash-wine-row{display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--surface);border:1px solid var(--border);border-radius:9px;margin-bottom:5px;font-size:12px;color:var(--text-dim);cursor:pointer;gap:8px}
+.dash-wine-row:active{background:var(--surface2)}
+.dash-wine-row span:first-child{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dash-empty{text-align:center;padding:40px 20px;color:var(--text-faint)}
+.dash-empty .icon{font-size:42px;margin-bottom:10px}
 </style>
 <script src="https://cdn.ably.com/lib/ably.min-2.js"></script>
 </head>
@@ -349,20 +371,23 @@ textarea.field-input{resize:vertical;min-height:74px}
     <div>
       <div class="header-title">La Mia Cantina</div>
       <div id="header-sub" class="header-sub">0 vini</div>
-      <div id="header-assaggiati-label" style="display:none;font-size:11px;font-weight:700;color:#8B2050;letter-spacing:.8px;margin-top:1px">🥂 I vini assaggiati</div>
+      <div id="header-assaggiati-label" style="display:none;font-size:11px;font-weight:700;color:#8B2050;letter-spacing:.8px;margin-top:1px">🥂 Assaggiati / Wishlist</div>
     </div>
     <div style="display:flex;align-items:center;gap:5px">
       <!-- colonna sinistra: barra sync + occhio -->
       <div style="display:flex;flex-direction:column;align-items:center;justify-content:space-between;align-self:stretch;padding:2px 0 6px">
         <div id="sync-bar" class="sync-bar nokey" title="Stato sincronizzazione" onclick="showSyncInfo()"></div>
-        <button id="btn-toggle-assaggiati" class="btn-eye" onclick="toggleAssaggiatiView()" title="Mostra vini assaggiati" style="color:var(--text-dim)">
+        <button id="btn-toggle-assaggiati" class="btn-eye" onclick="toggleAssaggiatiView()" title="Mostra Assaggiati / Wishlist" style="color:var(--text-dim)">
           <svg width="26" height="26" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
         </button>
       </div>
       <!-- logo -->
       <img src="./icon512.png" class="header-logo" alt="cantina" onclick="openManual()" style="cursor:pointer">
-      <!-- colonna destra: gear⚙ centrato -->
-      <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;align-self:stretch;padding:4px 0 8px">
+      <!-- colonna destra: dashboard + gear -->
+      <div style="display:flex;flex-direction:column;align-items:center;justify-content:space-between;align-self:stretch;padding:4px 0 6px">
+        <button class="btn-icon" onclick="showDash()" title="Dashboard" style="padding:5px">
+          <svg width="21" height="21" fill="none" stroke="var(--gold)" stroke-width="1.8" viewBox="0 0 24 24"><rect x="3" y="12" width="4" height="9" rx="1"/><rect x="10" y="7" width="4" height="14" rx="1"/><rect x="17" y="3" width="4" height="18" rx="1"/></svg>
+        </button>
         <button class="btn-icon" onclick="openDrawer()" style="padding:5px">
           <svg width="23" height="23" fill="none" stroke="var(--gold)" stroke-width="1.8" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         </button>
@@ -386,6 +411,16 @@ textarea.field-input{resize:vertical;min-height:74px}
   <button class="fab" onclick="showAdd()">
     <svg width="22" height="22" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
   </button>
+</div>
+
+<!-- DASHBOARD -->
+<div id="view-dash" class="view">
+  <div class="header">
+    <button class="btn-back" onclick="goBack()"><svg width="19" height="19" fill="none" stroke="var(--gold)" stroke-width="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Indietro</button>
+    <div style="font-family:'Playfair Display',serif;font-size:15px;color:var(--gold)">Dashboard</div>
+    <div style="width:70px"></div>
+  </div>
+  <div class="dash-body" id="dash-body"></div>
 </div>
 
 <!-- ADD/EDIT WINE -->
@@ -430,13 +465,13 @@ textarea.field-input{resize:vertical;min-height:74px}
       </div>
     </div>
     <div class="field-group">
-      <label class="field-label">Vino Assaggiato (fuori cantina)</label>
+      <label class="field-label">Assaggiato / Wishlist</label>
       <div class="toggle-row">
         <button type="button" class="toggle-btn active" id="btn-ass-no" onclick="setAssaggiato(false)">🍾 In cantina</button>
-        <button type="button" class="toggle-btn" id="btn-ass-si" onclick="setAssaggiato(true)">🥂 Assaggiato</button>
+        <button type="button" class="toggle-btn" id="btn-ass-si" onclick="setAssaggiato(true)">🥂 Assaggiato / Wishlist</button>
       </div>
       <div id="ass-info" style="display:none;margin-top:8px;background:rgba(139,32,80,.08);border:1px solid rgba(139,32,80,.2);border-radius:9px;padding:8px 11px;font-size:12px;color:#8B2050;line-height:1.5">
-        ℹ I vini assaggiati non fanno parte della cantina. Non vengono registrati movimenti di carico/scarico.
+        ℹ I vini assaggiati/wishlist non fanno parte della cantina. Non vengono registrati movimenti di carico/scarico.
       </div>
     </div>
     <div class="field-group" id="bevuto-presso-group" style="display:none">
@@ -686,6 +721,15 @@ textarea.field-input{resize:vertical;min-height:74px}
       <input id="ocr-key-input" class="field-input" type="text" placeholder="es. K12345678 (opzionale)" style="font-size:13px;padding:9px 11px" oninput="saveOCRKey()">
       <div id="ocr-key-status" style="font-size:11px;color:var(--text-faint);margin-top:5px"></div>
     </div>
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-top:8px">
+      <div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:7px">🔔 Promemoria Scadenze</div>
+      <div style="font-size:11px;color:var(--text-faint);margin-bottom:7px;line-height:1.5">Notifica all'apertura dell'app se ci sono vini in scadenza entro i giorni indicati.</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <input id="scadenza-giorni-input" class="field-input" type="number" min="1" max="365" placeholder="60" style="font-size:13px;padding:9px 11px;width:80px">
+        <span style="font-size:13px;color:var(--text-dim)">giorni</span>
+        <button onclick="saveScadenzaGiorni()" style="background:var(--gold);border:none;border-radius:10px;color:#fff;padding:9px 14px;font-size:13px;cursor:pointer;font-family:inherit;white-space:nowrap;flex-shrink:0">Salva</button>
+      </div>
+    </div>
 
     <!-- 4. INFO -->
     <div class="drawer-section-label">4 · Info</div>
@@ -703,7 +747,7 @@ textarea.field-input{resize:vertical;min-height:74px}
     </button>
 
   </div>
-  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label" onclick="adminTap()" style="cursor:pointer;user-select:none">v6.3</span></div>
+  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label" onclick="adminTap()" style="cursor:pointer;user-select:none">v6.5</span></div>
 </div>
 
 <!-- ADMIN OVERLAY (accesso via bottone 'Parametri db' nelle impostazioni) -->
@@ -956,12 +1000,12 @@ async function compressPhoto(file){
   return new Promise(res=>{
     const img=new Image(),url=URL.createObjectURL(file);
     img.onload=()=>{
-      /* MAX 1400px lato lungo, qualità 0.88 — buona risoluzione per zoom */
-      const MAX=1400,r=Math.min(MAX/img.width,MAX/img.height);
+      /* MAX 1000px lato lungo, qualità 0.70 — ottimizzato per spazio */
+      const MAX=1000,r=Math.min(MAX/img.width,MAX/img.height);
       const w=r<1?Math.round(img.width*r):img.width,h=r<1?Math.round(img.height*r):img.height;
       const c=document.createElement('canvas');c.width=w;c.height=h;
       c.getContext('2d').drawImage(img,0,0,w,h);URL.revokeObjectURL(url);
-      res(c.toDataURL('image/jpeg',0.88));
+      res(c.toDataURL('image/jpeg',0.70));
     };
     img.onerror=()=>{URL.revokeObjectURL(url);res(null);};
     img.src=url;
@@ -1400,7 +1444,7 @@ function renderList(){
   const filtered=getFilteredWines();
   /* Header subtitle */
   if(_showAssaggiati){
-    document.getElementById('header-sub').textContent=filtered.length+' vini assaggiati';
+    document.getElementById('header-sub').textContent=filtered.length+' Assaggiati / Wishlist';
   }else{
     const cantina=wines.filter(w=>w.assaggiato!==true);
     const totBot=cantina.reduce((s,w)=>s+(parseInt(w.quantita)||0),0);
@@ -1411,7 +1455,7 @@ function renderList(){
   const container=document.getElementById('wine-list');
   if(filtered.length===0){
     const _emptyTop=(!q&&!_showAssaggiati)?'<img src="./Vino.webp" class="empty-gif" alt="Cantina vuota">':'<div class="icon">'+(_showAssaggiati?'🥂':'🔍')+'</div>';
-    container.innerHTML='<div class="empty">'+_emptyTop+'<h3>'+(q?'Nessun risultato':(_showAssaggiati?'Nessun vino assaggiato':'Cantina vuota'))+'</h3><p>'+(q?'Prova altra parola chiave':(_showAssaggiati?'Aggiungi vini con il flag "Assaggiato"':'Aggiungi il tuo primo vino'))+'</p></div>';
+    container.innerHTML='<div class="empty">'+_emptyTop+'<h3>'+(q?'Nessun risultato':(_showAssaggiati?'Nessun vino assaggiato / wishlist':'Cantina vuota'))+'</h3><p>'+(q?'Prova altra parola chiave':(_showAssaggiati?'Aggiungi vini con il flag "Assaggiato / Wishlist"':'Aggiungi il tuo primo vino'))+'</p></div>';
     return;
   }
   container.innerHTML=filtered.map(w=>{
@@ -1425,7 +1469,7 @@ function renderList(){
     if(w.assaggiato){
       /* Card assaggiato: no pulsante scarica, flash badge, bevuto presso */
       const bpRow=w.bevutoPresso?'<div class="card-pos">🥂 '+esc(w.bevutoPresso)+'</div>':'';
-      return '<div class="card" onclick="showDetail(\''+w.id+'\')">'+(w.foto?'<img class="card-img" src="'+w.foto+'" alt="">':'<div class="card-img-ph">'+wineGlassSVG(w.tipologia,'card')+'</div>')+'<div class="card-body"><div class="card-cantina">'+esc(w.cantina)+'</div><div class="card-name">'+esc(w.nome)+'</div><div class="card-meta">'+(w.anno?'<span>'+esc(w.anno)+'</span>':'')+(w.tipologia?'<span>'+esc(w.tipologia)+'</span>':'')+'</div>'+(miniStars?'<div style="margin-top:2px">'+miniStars+'</div>':'')+bpRow+'<div style="display:flex;gap:5px;margin-top:3px"><span class="flash-badge">🥂 Assaggiato</span></div></div></div>';
+      return '<div class="card" onclick="showDetail(\''+w.id+'\')">'+(w.foto?'<img class="card-img" src="'+w.foto+'" alt="">':'<div class="card-img-ph">'+wineGlassSVG(w.tipologia,'card')+'</div>')+'<div class="card-body"><div class="card-cantina">'+esc(w.cantina)+'</div><div class="card-name">'+esc(w.nome)+'</div><div class="card-meta">'+(w.anno?'<span>'+esc(w.anno)+'</span>':'')+(w.tipologia?'<span>'+esc(w.tipologia)+'</span>':'')+'</div>'+(miniStars?'<div style="margin-top:2px">'+miniStars+'</div>':'')+bpRow+'<div style="display:flex;gap:5px;margin-top:3px"><span class="flash-badge">🥂 Assaggiato / Wishlist</span></div></div></div>';
     }
     const locStr=(w.posizione||w.scaffale)?esc(w.posizione||'')+(w.posizione&&w.scaffale?' / ':'')+esc(w.scaffale||''):'';
     const rightPanel='<div class="card-right-panel">'+(locStr?'<div class="card-loc-label">'+locStr+'</div>':'')+(qty>0?'<button class="card-scarica" onclick="quickScarica(event,\''+w.id+'\')">- Scarica</button>':'')+'</div>';
@@ -1452,7 +1496,7 @@ function showDetail(id,fromSave=false){
   const starsCell=(w.rating&&w.rating>0)?'<div class="detail-cell full"><div class="detail-cell-label">Punteggio personale</div><div class="detail-cell-value" style="display:flex;align-items:center;gap:6px">'+starsHTML(w.rating,'full')+'<span style="font-size:14px;color:var(--text-dim)">'+parseFloat(w.rating).toFixed(1)+'/5</span></div></div>':'';
   document.getElementById('detail-body').innerHTML=hero+
     '<div class="detail-content">'+
-    (w.assaggiato?'<div class="assaggiato-banner"><div class="ab-icon">🥂</div><div class="ab-text"><div class="ab-title">Vino Assaggiato</div>'+(w.bevutoPresso?'<div class="ab-sub">Bevuto presso: '+esc(w.bevutoPresso)+'</div>':'<div class="ab-sub">Degustato fuori cantina</div>')+'</div></div>':'')+
+    (w.assaggiato?'<div class="assaggiato-banner"><div class="ab-icon">🥂</div><div class="ab-text"><div class="ab-title">Assaggiato / Wishlist</div>'+(w.bevutoPresso?'<div class="ab-sub">Bevuto presso: '+esc(w.bevutoPresso)+'</div>':'<div class="ab-sub">Degustato fuori cantina</div>')+'</div></div>':'')+
     '<div class="detail-cantina">'+esc(w.cantina)+'</div>'+
     '<div class="detail-name">'+esc(w.nome)+'</div>'+
     (w.assaggiato?'':
@@ -2665,6 +2709,7 @@ if('serviceWorker'in navigator){
     await dbLoad();   /* IndexedDB + migrazione automatica */
     loadTheme();
     await loadSyncConfigInit(); /* carica config sync, inizializza Ably e avvia sync iniziale */
+    await initScadenzaGiorni(); /* carica soglia scadenza */
     document.getElementById('f-date').value=new Date().toISOString().split('T')[0];
     document.getElementById('m-date').value=new Date().toISOString().split('T')[0];
   } catch(e){
@@ -2674,6 +2719,8 @@ if('serviceWorker'in navigator){
     document.getElementById('view-list').classList.add('active');
     renderList();
     WG.start(); /* avvia loop animazione bicchieri */
+    /* Verifica scadenze e mostra notifica se necessario */
+    setTimeout(()=>checkScadenzeNotify(),1500);
   }
 })();
 
@@ -3007,6 +3054,7 @@ function goBack(){
       if(_detailFrom==='position'){renderPosition();showView('position');}
       else if(_detailFrom==='zone'){renderZone();showView('zone');}
       else if(_detailFrom==='tipo'){renderTipo();showView('tipo');}
+      else if(_detailFrom==='dash'){renderDash();showView('dash');}
       else{showView('list');renderList();}
       break;
     case 'add':
@@ -3018,6 +3066,7 @@ function goBack(){
     case 'zone':
     case 'tipo':
     case 'moves':
+    case 'dash':
       showView('list');renderList();
       break;
     case 'movedit':
@@ -3389,6 +3438,119 @@ async function saveAdminConfig(){
   updateSyncDots();
   showToast('Configurazione admin salvata ✓');
   closeAdminPanel();
+}
+
+/* ══════════ DASHBOARD ══════════ */
+function showDash(){renderDash();showView('dash');}
+
+function renderDash(){
+  const cantina=wines.filter(w=>w.assaggiato!==true);
+  const totEt=cantina.length;
+  const totBot=cantina.reduce((s,w)=>s+(parseInt(w.quantita)||0),0);
+  const totVal=cantina.reduce((s,w)=>s+(parseFloat(w.prezzo)||0)*(parseInt(w.quantita)||0),0);
+
+  const thresh=parseInt(window._scadenzaGiorni||60);
+  const oggi=new Date();oggi.setHours(0,0,0,0);
+  const scaduti=cantina.filter(w=>{if(!w.datalimite)return false;const d=new Date(w.datalimite);return d<oggi;}).sort((a,b)=>new Date(a.datalimite)-new Date(b.datalimite));
+  const scadenti=cantina.filter(w=>{if(!w.datalimite)return false;const d=new Date(w.datalimite);const diff=(d-oggi)/864e5;return diff>=0&&diff<=thresh;}).sort((a,b)=>new Date(a.datalimite)-new Date(b.datalimite));
+
+  const byTipo={};
+  cantina.forEach(w=>{const t=(w.tipologia||'Senza tipologia').trim();if(!byTipo[t])byTipo[t]={et:0,bot:0};byTipo[t].et++;byTipo[t].bot+=parseInt(w.quantita)||0;});
+  const tipoSorted=Object.entries(byTipo).sort((a,b)=>b[1].bot-a[1].bot);
+  const maxBot2=Math.max(...tipoSorted.map(e=>e[1].bot),1);
+
+  const spesaAnno={};
+  movements.forEach(m=>{if(m.tipo!=='carico'||!m.prezzo)return;const y=(m.data||'').slice(0,4);if(!y||y.length!==4)return;spesaAnno[y]=(spesaAnno[y]||0)+(parseFloat(m.prezzo)||0);});
+  const spesaAnnoSorted=Object.entries(spesaAnno).sort((a,b)=>a[0].localeCompare(b[0]));
+  const maxSpesa=Math.max(...spesaAnnoSorted.map(e=>e[1]),1);
+
+  if(totEt===0){
+    document.getElementById('dash-body').innerHTML='<div class="dash-empty"><div class="icon">📊</div><h3>Cantina vuota</h3><p>Aggiungi vini per vedere le statistiche</p></div>';
+    return;
+  }
+
+  let h='';
+  /* Riepilogo */
+  h+='<div class="dash-section-title">📦 Riepilogo Cantina</div>';
+  h+='<div class="dash-cards">';
+  h+='<div class="dash-card"><div class="dash-card-val">'+totEt+'</div><div class="dash-card-lbl">Etichette</div></div>';
+  h+='<div class="dash-card"><div class="dash-card-val">'+totBot+'</div><div class="dash-card-lbl">Bottiglie</div></div>';
+  if(totVal>0)h+='<div class="dash-card"><div class="dash-card-val" style="font-size:16px">'+fmtEuro(totVal.toFixed(2))+'</div><div class="dash-card-lbl">Valore Stimato</div></div>';
+  h+='</div>';
+
+  /* Scadenze */
+  if(scaduti.length>0||scadenti.length>0){
+    h+='<div class="dash-section-title">⏰ Scadenze</div>';
+    if(scaduti.length>0){
+      h+='<div class="dash-expire-row scaduto">⚠ '+scaduti.length+' vino/i oltre la data limite</div>';
+      scaduti.forEach(w=>{h+='<div class="dash-wine-row" onclick="showDashDetail(\''+w.id+'\')"><span>'+esc(w.cantina)+' — '+esc(w.nome)+'</span><span style="color:var(--red)">'+fmtDate(w.datalimite)+'</span></div>';});
+    }
+    if(scadenti.length>0){
+      h+='<div class="dash-expire-row">🕐 '+scadenti.length+' vino/i in scadenza entro '+thresh+' giorni</div>';
+      scadenti.forEach(w=>{const diff=Math.ceil((new Date(w.datalimite)-oggi)/864e5);h+='<div class="dash-wine-row" onclick="showDashDetail(\''+w.id+'\')"><span>'+esc(w.cantina)+' — '+esc(w.nome)+'</span><span style="color:var(--gold)">'+fmtDate(w.datalimite)+' ('+diff+'gg)</span></div>';});
+    }
+  }
+
+  /* Per tipologia */
+  if(tipoSorted.length>0){
+    h+='<div class="dash-section-title">🍷 Bottiglie per Tipologia</div>';
+    h+='<div class="dash-bars">';
+    tipoSorted.forEach(([tipo,data])=>{
+      const pct=Math.round(data.bot/maxBot2*100);
+      h+='<div class="dash-bar-row"><div class="dash-bar-label">'+esc(tipo)+'</div><div class="dash-bar-track"><div class="dash-bar-fill" style="width:'+pct+'%"></div></div><div class="dash-bar-val">'+data.bot+' bot.</div></div>';
+    });
+    h+='</div>';
+  }
+
+  /* Spesa per anno */
+  if(spesaAnnoSorted.length>0){
+    h+='<div class="dash-section-title">💶 Spesa per Anno</div>';
+    h+='<div class="dash-bars">';
+    spesaAnnoSorted.forEach(([anno,spesa])=>{
+      const pct=Math.round(spesa/maxSpesa*100);
+      h+='<div class="dash-bar-row"><div class="dash-bar-label">'+esc(anno)+'</div><div class="dash-bar-track"><div class="dash-bar-fill gold" style="width:'+pct+'%"></div></div><div class="dash-bar-val">'+fmtEuro(spesa.toFixed(2))+'</div></div>';
+    });
+    h+='</div>';
+  }
+
+  document.getElementById('dash-body').innerHTML=h;
+}
+
+function showDashDetail(id){showDetail(id);_detailFrom='dash';}
+
+/* ══════════ NOTIFICHE SCADENZA ══════════ */
+const SCADENZA_GIORNI_KEY='cantina_scadenza_giorni';
+
+async function initScadenzaGiorni(){
+  const v=await dbSetting(SCADENZA_GIORNI_KEY);
+  window._scadenzaGiorni=v?parseInt(v):60;
+  const inp=document.getElementById('scadenza-giorni-input');
+  if(inp)inp.value=window._scadenzaGiorni;
+}
+
+function saveScadenzaGiorni(){
+  const v=parseInt(document.getElementById('scadenza-giorni-input')?.value)||60;
+  window._scadenzaGiorni=v;
+  dbSetting(SCADENZA_GIORNI_KEY,v);
+  showToast('Soglia scadenza: '+v+' giorni');
+}
+
+async function checkScadenzeNotify(){
+  if(!('Notification' in window))return;
+  const thresh=parseInt(window._scadenzaGiorni||60);
+  const oggi=new Date();oggi.setHours(0,0,0,0);
+  const cantina=wines.filter(w=>w.assaggiato!==true);
+  const scadenti=cantina.filter(w=>{if(!w.datalimite)return false;const d=new Date(w.datalimite);const diff=(d-oggi)/864e5;return diff>=0&&diff<=thresh;});
+  const scaduti=cantina.filter(w=>{if(!w.datalimite)return false;return new Date(w.datalimite)<oggi;});
+  const total=scadenti.length+scaduti.length;
+  if(total===0)return;
+  let perm=Notification.permission;
+  if(perm==='default')perm=await Notification.requestPermission();
+  if(perm!=='granted')return;
+  let msg='';
+  if(scaduti.length>0)msg+=scaduti.length+' vino/i oltre la data limite. ';
+  if(scadenti.length>0)msg+=scadenti.length+' vino/i in scadenza entro '+thresh+' giorni.';
+  try{new Notification('🍷 La Mia Cantina — Scadenze',{body:msg.trim(),icon:'./icon192.png'});}catch(e){console.warn('[Notify]',e);}
 }
 
 /* ── Fa lampeggiare la barra verde quando arriva un aggiornamento push ── */

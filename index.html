@@ -747,7 +747,7 @@ textarea.field-input{resize:vertical;min-height:74px}
     </button>
 
   </div>
-  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label" onclick="adminTap()" style="cursor:pointer;user-select:none">v6.5</span></div>
+  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label" onclick="adminTap()" style="cursor:pointer;user-select:none">v6.6</span></div>
 </div>
 
 <!-- ADMIN OVERLAY (accesso via bottone 'Parametri db' nelle impostazioni) -->
@@ -2783,19 +2783,21 @@ function renderTipo(){
   Object.keys(grouped).sort().forEach(tipo=>{
     const ws=grouped[tipo];
     const totBot=ws.reduce((s,w)=>s+(parseInt(w.quantita)||0),0);
-    html+='<div class="zone-section">';
+    html+='<div class="zone-section" data-tipo="'+esc(tipo)+'">';
     html+='<div class="zone-header">';
     html+='<div class="zone-title">'+esc(tipo)+'</div>';
     html+='<div class="zone-badge">'+ws.length+' et. · '+totBot+' bot.</div>';
     html+='</div>';
     html+=mkRows(ws);
+    html+='<div class="zone-dnd-hint">↓ Rilascia qui per spostare in questo tipo</div>';
     html+='</div>';
   });
   if(untyped.length>0){
-    html+='<div class="zone-section zone-unassigned">';
+    html+='<div class="zone-section zone-unassigned" data-tipo="">';
     html+='<div class="zone-header"><div class="zone-title">⚠ Senza tipologia ('+untyped.length+')</div>'
          +'<div class="zone-badge" style="background:var(--text-faint)">'+untyped.length+' et.</div></div>';
     html+=mkRows(untyped);
+    html+='<div class="zone-dnd-hint">↓ Rilascia qui (rimuove tipologia)</div>';
     html+='</div>';
   }
   container.innerHTML=html;
@@ -2922,8 +2924,9 @@ function renderZone(){
       .forEach(z=>z.classList.remove('dnd-over','zone-dnd-over'));
   }
 
-  function findZone(x,y,isZ){
-    const s=isZ?'.zone-section[data-nazione]'
+  function findZone(x,y,isZ,isT){
+    const s=isT?'.zone-section[data-tipo]'
+             :isZ?'.zone-section[data-nazione]'
                :'.pos-shelf[data-pos],.pos-unassigned[data-pos]';
     for(const z of document.querySelectorAll(s)){
       const r=z.getBoundingClientRect();
@@ -2942,9 +2945,10 @@ function renderZone(){
   function begin(el,x,y){
     const inPos=!!el.closest('#pos-body');
     const inZone=!!el.closest('#zone-body');
-    if(!inPos&&!inZone)return;
+    const inTipo=!!el.closest('#tipo-body');
+    if(!inPos&&!inZone&&!inTipo)return;
     const id=el.dataset.id;if(!id)return;
-    ds={el,id,x0:x,y0:y,active:false,ghost:null,isZone:inZone,
+    ds={el,id,x0:x,y0:y,active:false,ghost:null,isZone:inZone,isTipo:inTipo,
         timer:setTimeout(activate,HOLD)};
   }
 
@@ -2958,9 +2962,21 @@ function renderZone(){
       ds.ghost.style.left=(x-ds.ghost.offsetWidth/2)+'px';
       ds.ghost.style.top=(y-36)+'px';
     }
+    /* ── Auto-scroll verticale mentre si trascina verso il bordo ── */
+    const scrollBodyId=ds.isTipo?'tipo-body':ds.isZone?'zone-body':'pos-body';
+    const scrollEl=document.getElementById(scrollBodyId);
+    if(scrollEl){
+      const r=scrollEl.getBoundingClientRect();
+      const thr=80;
+      if(y>r.bottom-thr){
+        scrollEl.scrollTop+=Math.round((y-(r.bottom-thr))/thr*14)+3;
+      }else if(y<r.top+thr){
+        scrollEl.scrollTop-=Math.round(((r.top+thr)-y)/thr*14)+3;
+      }
+    }
     clearOv();
-    const zone=findZone(x,y,ds.isZone);
-    if(zone)zone.classList.add(ds.isZone?'zone-dnd-over':'dnd-over');
+    const zone=findZone(x,y,ds.isZone,ds.isTipo);
+    if(zone)zone.classList.add(ds.isZone||ds.isTipo?'zone-dnd-over':'dnd-over');
   }
 
   function finish(x,y){
@@ -2971,11 +2987,18 @@ function renderZone(){
     if(ds.ghost)ds.ghost.remove();
     ds.el.classList.remove('dnd-dragging');
     document.body.style.userSelect='';
-    const zone=findZone(x,y,ds.isZone);
+    const zone=findZone(x,y,ds.isZone,ds.isTipo);
     if(zone){
       const wine=wines.find(w=>w.id===ds.id);
       if(wine){
-        if(ds.isZone){
+        if(ds.isTipo){
+          const tipo=zone.dataset.tipo||'';
+          if(wine.tipologia!==tipo){
+            wine.tipologia=tipo;
+            save();renderTipo();
+            showToast('Tipo \u2192 '+(tipo||'\u2014'));
+          }
+        }else if(ds.isZone){
           const naz=zone.dataset.nazione||'',reg=zone.dataset.regione||'';
           if(wine.nazione!==naz||wine.regione!==reg){
             wine.nazione=naz;wine.regione=reg;

@@ -355,6 +355,54 @@ textarea.field-input{resize:vertical;min-height:74px}
 .dash-wine-row span:first-child{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .dash-empty{text-align:center;padding:40px 20px;color:var(--text-faint)}
 .dash-empty .icon{font-size:42px;margin-bottom:10px}
+
+/* ── CONSIGLI AI ── */
+.consigli-body{flex:1;overflow-y:auto;padding:16px 16px max(100px,calc(80px + env(safe-area-inset-bottom)))}
+.consigli-intro{background:var(--gold-bg);border:1px solid var(--gold-dim);border-radius:13px;padding:14px 16px;margin-bottom:18px;display:flex;align-items:flex-start;gap:11px}
+.consigli-intro-icon{font-size:26px;flex-shrink:0;margin-top:2px}
+.consigli-intro-text{flex:1}
+.consigli-intro-title{font-family:'Playfair Display',serif;font-size:15px;color:var(--gold);margin-bottom:4px}
+.consigli-intro-sub{font-size:12px;color:var(--text-dim);line-height:1.55}
+.consigli-input-area{background:var(--surface);border:1px solid var(--border);border-radius:13px;padding:14px;margin-bottom:14px}
+.consigli-input-label{font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:8px}
+.consigli-textarea{width:100%;background:var(--bg);border:1px solid var(--border);border-radius:10px;padding:11px 13px;color:var(--text);font-family:'Lora',serif;font-size:15px;outline:none;resize:none;min-height:80px;transition:border-color .2s}
+.consigli-textarea:focus{border-color:var(--gold-dim)}
+.consigli-textarea::placeholder{color:var(--text-faint)}
+.consigli-chips{display:flex;flex-wrap:wrap;gap:7px;margin-top:10px}
+.consigli-chip{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:5px 12px;font-size:12px;color:var(--text-dim);cursor:pointer;transition:all .15s;font-family:inherit}
+.consigli-chip:active,.consigli-chip.selected{background:var(--gold-bg);border-color:var(--gold-dim);color:var(--gold)}
+.btn-chiedi{width:100%;padding:14px;background:linear-gradient(135deg,var(--gold),var(--gold-dim));border:none;border-radius:12px;color:#FDF8F2;font-size:15px;font-family:'Playfair Display',serif;font-weight:700;letter-spacing:2px;text-transform:uppercase;cursor:pointer;margin-top:5px;transition:opacity .2s;display:flex;align-items:center;justify-content:center;gap:9px}
+.btn-chiedi:active{opacity:.85}
+.btn-chiedi:disabled{opacity:.5;cursor:not-allowed}
+.consigli-loading{text-align:center;padding:30px 20px;color:var(--text-dim);display:none}
+.consigli-loading.show{display:block}
+.consigli-spinner{font-size:32px;animation:spin 1.2s linear infinite;display:inline-block;margin-bottom:10px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.consigli-loading-text{font-size:13px;color:var(--text-faint);margin-top:6px;font-style:italic}
+.consigli-result{display:none;margin-top:6px}
+.consigli-result.show{display:block}
+.consigli-result-header{font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:10px;padding-bottom:7px;border-bottom:1px solid var(--border)}
+.consigli-wine-card{background:var(--card-bg);border:1px solid var(--gold-dim);border-radius:13px;overflow:hidden;margin-bottom:12px;box-shadow:var(--shadow)}
+.consigli-wine-top{background:linear-gradient(135deg,var(--gold-bg),transparent);padding:14px 15px 12px;border-bottom:1px solid var(--border)}
+.consigli-wine-rank{font-size:10px;color:var(--gold);text-transform:uppercase;letter-spacing:2px;margin-bottom:4px;font-weight:700}
+.consigli-wine-name{font-family:'Playfair Display',serif;font-size:19px;color:var(--text);line-height:1.2;margin-bottom:2px}
+.consigli-wine-cantina{font-size:12px;color:var(--gold);text-transform:uppercase;letter-spacing:1.5px}
+.consigli-wine-meta{display:flex;flex-wrap:wrap;gap:7px;margin-top:9px}
+.consigli-wine-tag{background:var(--surface2);border:1px solid var(--border);border-radius:20px;padding:3px 10px;font-size:11px;color:var(--text-dim)}
+.consigli-wine-body{padding:14px 15px}
+.consigli-section-lbl{font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:6px}
+.consigli-reason{font-size:14px;color:var(--text);line-height:1.65;font-style:italic}
+.consigli-pairing-type{display:inline-flex;align-items:center;gap:6px;background:var(--green-bg);border:1px solid var(--green);border-radius:9px;padding:7px 12px;font-size:13px;color:var(--green);margin-top:11px;font-weight:600}
+.consigli-alt-title{font-size:11px;color:var(--text-faint);text-transform:uppercase;letter-spacing:1.5px;margin:16px 0 9px;padding-top:14px;border-top:1px solid var(--border)}
+.consigli-alt-card{background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:11px 13px;margin-bottom:8px;cursor:pointer;transition:background .15s}
+.consigli-alt-card:active{background:var(--surface2)}
+.consigli-alt-name{font-family:'Playfair Display',serif;font-size:14px;color:var(--text);margin-bottom:3px}
+.consigli-alt-reason{font-size:12px;color:var(--text-dim);line-height:1.5}
+.consigli-empty{text-align:center;padding:30px 20px;color:var(--text-faint);display:none}
+.consigli-empty.show{display:block}
+.consigli-empty-icon{font-size:38px;margin-bottom:10px}
+.consigli-new-btn{width:100%;padding:11px;background:transparent;border:1px solid var(--border);border-radius:11px;color:var(--text-dim);font-size:13px;font-family:inherit;cursor:pointer;margin-top:12px;transition:background .15s}
+.consigli-new-btn:active{background:var(--surface2)}
 </style>
 <script src="https://cdn.ably.com/lib/ably.min-2.js"></script>
 </head>
@@ -407,6 +455,7 @@ textarea.field-input{resize:vertical;min-height:74px}
     <button class="btn-tool" onclick="showZone()">Vista per Zona</button>
     <button class="btn-tool" onclick="showPosition()">Vista Posizione</button>
     <button class="btn-tool" onclick="showMoves()">Movimenti</button>
+    <button class="btn-tool" onclick="showConsigli()" style="border-color:var(--gold-dim);color:var(--gold)">🍽 Consigli</button>
   </div>
   <button class="fab" onclick="showAdd()">
     <svg width="22" height="22" fill="none" stroke="white" stroke-width="2.5" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -747,7 +796,7 @@ textarea.field-input{resize:vertical;min-height:74px}
     </button>
 
   </div>
-  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label" onclick="adminTap()" style="cursor:pointer;user-select:none">v6.6</span></div>
+  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label" onclick="adminTap()" style="cursor:pointer;user-select:none">v6.7</span></div>
 </div>
 
 <!-- ADMIN OVERLAY (accesso via bottone 'Parametri db' nelle impostazioni) -->
@@ -820,6 +869,58 @@ textarea.field-input{resize:vertical;min-height:74px}
     <img id="zoom-img" src="" alt="">
   </div>
   <div class="zoom-overlay-hint">Pizzica per zoomare · Trascina per spostare</div>
+</div>
+
+<!-- CONSIGLI AI -->
+<div id="view-consigli" class="view">
+  <div class="header">
+    <button class="btn-back" onclick="goBack()"><svg width="19" height="19" fill="none" stroke="var(--gold)" stroke-width="2" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg>Indietro</button>
+    <div style="font-family:'Playfair Display',serif;font-size:15px;color:var(--gold)">🍽 Consigli Sommelier</div>
+    <div style="width:70px"></div>
+  </div>
+  <div class="consigli-body" id="consigli-body">
+    <div class="consigli-intro">
+      <div class="consigli-intro-icon">🤖</div>
+      <div class="consigli-intro-text">
+        <div class="consigli-intro-title">Sommelier AI</div>
+        <div class="consigli-intro-sub">Descrivi il piatto che stai preparando e l'AI ti suggerirà il vino più adatto tra quelli presenti nella tua cantina, spiegando il perché dell'abbinamento.</div>
+      </div>
+    </div>
+
+    <div class="consigli-input-area">
+      <div class="consigli-input-label">Descrivi il piatto o la pietanza</div>
+      <textarea id="consigli-piatto" class="consigli-textarea" placeholder="es. Risotto ai funghi porcini, tagliata di manzo con rucola, branzino al forno con erbe aromatiche..."></textarea>
+      <div class="consigli-chips">
+        <div class="consigli-chip" onclick="selectChip(this,'Bistecca alla fiorentina')">🥩 Bistecca</div>
+        <div class="consigli-chip" onclick="selectChip(this,'Pasta al ragù di carne')">🍝 Pasta ragù</div>
+        <div class="consigli-chip" onclick="selectChip(this,'Pesce arrosto al forno')">🐟 Pesce</div>
+        <div class="consigli-chip" onclick="selectChip(this,'Risotto ai funghi porcini')">🍄 Risotto funghi</div>
+        <div class="consigli-chip" onclick="selectChip(this,'Formaggi stagionati misti')">🧀 Formaggi</div>
+        <div class="consigli-chip" onclick="selectChip(this,'Pizza margherita')">🍕 Pizza</div>
+        <div class="consigli-chip" onclick="selectChip(this,'Dessert al cioccolato')">🍫 Dessert</div>
+        <div class="consigli-chip" onclick="selectChip(this,'Antipasto misto di salumi')">🥩 Salumi</div>
+      </div>
+    </div>
+
+    <button class="btn-chiedi" id="btn-chiedi" onclick="askConsigli()">
+      <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+      Chiedi al Sommelier AI
+    </button>
+
+    <div class="consigli-loading" id="consigli-loading">
+      <div class="consigli-spinner">🍷</div>
+      <div style="font-size:14px;color:var(--text-dim);margin-top:4px">Analisi della tua cantina…</div>
+      <div class="consigli-loading-text">Il sommelier sta scegliendo il vino perfetto</div>
+    </div>
+
+    <div class="consigli-empty" id="consigli-empty">
+      <div class="consigli-empty-icon">🏚</div>
+      <div style="font-size:14px;color:var(--text-dim);margin-bottom:6px">Cantina vuota</div>
+      <div style="font-size:12px">Aggiungi dei vini alla tua cantina per ricevere consigli di abbinamento.</div>
+    </div>
+
+    <div class="consigli-result" id="consigli-result"></div>
+  </div>
 </div>
 
 <div id="toast" class="toast"></div>
@@ -3090,6 +3191,7 @@ function goBack(){
     case 'tipo':
     case 'moves':
     case 'dash':
+    case 'consigli':
       showView('list');renderList();
       break;
     case 'movedit':
@@ -3574,6 +3676,179 @@ async function checkScadenzeNotify(){
   if(scaduti.length>0)msg+=scaduti.length+' vino/i oltre la data limite. ';
   if(scadenti.length>0)msg+=scadenti.length+' vino/i in scadenza entro '+thresh+' giorni.';
   try{new Notification('🍷 La Mia Cantina — Scadenze',{body:msg.trim(),icon:'./icon192.png'});}catch(e){console.warn('[Notify]',e);}
+}
+
+/* ══════════ CONSIGLI AI — SOMMELIER ══════════
+   Suggerisce il vino migliore dalla cantina
+   in base al piatto descritto dall'utente.
+   Usa l'API Anthropic (Claude) per l'analisi.
+══════════════════════════════════════════════ */
+
+function showConsigli(){
+  resetConsigliUI();
+  showView('consigli');
+}
+
+function resetConsigliUI(){
+  document.getElementById('consigli-piatto').value='';
+  document.getElementById('consigli-loading').classList.remove('show');
+  document.getElementById('consigli-result').classList.remove('show');
+  document.getElementById('consigli-result').innerHTML='';
+  document.getElementById('consigli-empty').classList.remove('show');
+  document.getElementById('btn-chiedi').disabled=false;
+  document.querySelectorAll('.consigli-chip').forEach(c=>c.classList.remove('selected'));
+}
+
+function selectChip(el,text){
+  document.querySelectorAll('.consigli-chip').forEach(c=>c.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('consigli-piatto').value=text;
+}
+
+async function askConsigli(){
+  const piatto=document.getElementById('consigli-piatto').value.trim();
+  if(!piatto){showToast('Descrivi prima il piatto',true);return;}
+
+  /* Filtra solo vini disponibili in cantina (non assaggiati, quantità > 0) */
+  const disponibili=wines.filter(w=>w.assaggiato!==true&&(w.quantita||0)>0);
+  if(disponibili.length===0){
+    document.getElementById('consigli-empty').classList.add('show');
+    return;
+  }
+
+  /* UI: loading */
+  document.getElementById('btn-chiedi').disabled=true;
+  document.getElementById('consigli-loading').classList.add('show');
+  document.getElementById('consigli-result').classList.remove('show');
+  document.getElementById('consigli-result').innerHTML='';
+  document.getElementById('consigli-empty').classList.remove('show');
+
+  /* Costruisci la lista vini per il prompt */
+  const wineList=disponibili.map((w,i)=>{
+    const parti=[];
+    if(w.cantina)parti.push('Cantina: '+w.cantina);
+    if(w.nome)parti.push('Nome: '+w.nome);
+    if(w.anno)parti.push('Annata: '+w.anno);
+    if(w.tipologia)parti.push('Tipo: '+w.tipologia);
+    if(w.vitigno)parti.push('Vitigno: '+w.vitigno);
+    if(w.nazione)parti.push('Nazione: '+w.nazione+(w.regione?' / '+w.regione:''));
+    if(w.gradi)parti.push('Gradi: '+w.gradi+'%');
+    if(w.rating&&w.rating>0)parti.push('Valutazione: '+w.rating+'/5');
+    if(w.note)parti.push('Note: '+w.note);
+    parti.push('Bottiglie disponibili: '+(w.quantita||0));
+    return (i+1)+'. '+parti.join(', ');
+  }).join('\n');
+
+  const systemPrompt=`Sei un sommelier esperto italiano. Il tuo compito è consigliare il vino più adatto tra quelli presenti nella cantina dell'utente, abbinandolo al piatto che descrive.
+
+Rispondi SOLO in formato JSON valido, senza testo aggiuntivo, markdown o backtick. La struttura deve essere esattamente questa:
+{
+  "principale": {
+    "indice": <numero intero 1-based dell'indice del vino nella lista>,
+    "nome": "<nome completo del vino>",
+    "cantina": "<nome cantina>",
+    "tipo_abbinamento": "<es. Abbinamento per concordanza / per contrasto / territoriale / classico>",
+    "motivazione": "<spiegazione dettagliata 2-4 frasi del perché questo vino si abbina perfettamente al piatto, con note sensoriali specifiche>"
+  },
+  "alternativi": [
+    {
+      "indice": <numero>,
+      "nome": "<nome>",
+      "cantina": "<cantina>",
+      "motivo_breve": "<1-2 frasi>"
+    }
+  ]
+}
+
+Se non ci sono vini davvero adatti, scegli comunque il migliore relativo disponibile. Gli "alternativi" devono essere al massimo 2 e diversi dal principale. Se la cantina ha meno di 2 vini adatti, la lista alternativi può essere vuota.`;
+
+  const userMsg=`Piatto: ${piatto}\n\nVini disponibili in cantina:\n${wineList}`;
+
+  try{
+    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        model:'claude-sonnet-4-20250514',
+        max_tokens:1000,
+        system:systemPrompt,
+        messages:[{role:'user',content:userMsg}]
+      })
+    });
+
+    if(!resp.ok)throw new Error('API error '+resp.status);
+    const data=await resp.json();
+    const rawText=data.content?.filter(b=>b.type==='text').map(b=>b.text).join('');
+    let parsed;
+    try{
+      /* Rimuovi eventuale wrapping markdown ```json ... ``` */
+      const clean=rawText.replace(/```json|```/g,'').trim();
+      parsed=JSON.parse(clean);
+    }catch(e){
+      throw new Error('Risposta AI non valida: '+rawText.substring(0,120));
+    }
+
+    renderConsigliResult(parsed,disponibili,piatto);
+  }catch(err){
+    console.error('[Consigli]',err);
+    showToast('Errore: '+err.message,true);
+  }finally{
+    document.getElementById('consigli-loading').classList.remove('show');
+    document.getElementById('btn-chiedi').disabled=false;
+  }
+}
+
+function renderConsigliResult(data,disponibili,piatto){
+  const principale=data.principale;
+  const alternativi=data.alternativi||[];
+  const wine=disponibili[principale.indice-1]||disponibili.find(w=>w.nome===principale.nome);
+
+  let h='<div class="consigli-result-header">🍽 Abbinamento per: <b>'+esc(piatto)+'</b></div>';
+
+  /* Card vino principale */
+  h+='<div class="consigli-wine-card">';
+  h+='<div class="consigli-wine-top">';
+  h+='<div class="consigli-wine-rank">⭐ Vino consigliato</div>';
+  h+='<div class="consigli-wine-name">'+esc(principale.nome)+'</div>';
+  h+='<div class="consigli-wine-cantina">'+esc(principale.cantina)+'</div>';
+  h+='<div class="consigli-wine-meta">';
+  if(wine){
+    if(wine.anno)h+='<span class="consigli-wine-tag">📅 '+esc(wine.anno)+'</span>';
+    if(wine.tipologia)h+='<span class="consigli-wine-tag">🍷 '+esc(wine.tipologia)+'</span>';
+    if(wine.nazione)h+='<span class="consigli-wine-tag">🌍 '+esc(wine.nazione)+'</span>';
+    if(wine.gradi)h+='<span class="consigli-wine-tag">🌡 '+esc(wine.gradi)+'°</span>';
+    if((wine.quantita||0)>0)h+='<span class="consigli-wine-tag" style="background:var(--green-bg);border-color:var(--green);color:var(--green)">🍾 '+wine.quantita+' in cantina</span>';
+  }
+  h+='</div></div>';
+
+  h+='<div class="consigli-wine-body">';
+  h+='<div class="consigli-section-lbl">Motivazione dell\'abbinamento</div>';
+  h+='<div class="consigli-reason">'+esc(principale.motivazione)+'</div>';
+  h+='<div class="consigli-pairing-type">🔗 '+esc(principale.tipo_abbinamento)+'</div>';
+  if(wine){
+    h+='<button class="btn-edit" style="margin-top:14px" onclick="showDashDetail(\''+wine.id+'\')"><svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg> Vedi dettaglio in cantina</button>';
+  }
+  h+='</div></div>';
+
+  /* Alternativi */
+  if(alternativi.length>0){
+    h+='<div class="consigli-alt-title">Altre opzioni dalla tua cantina</div>';
+    alternativi.forEach(alt=>{
+      const aw=disponibili[alt.indice-1]||disponibili.find(w=>w.nome===alt.nome);
+      h+='<div class="consigli-alt-card"'+(aw?` onclick="showDashDetail('${aw.id}')"`:'')+' >';
+      h+='<div class="consigli-alt-name">'+esc(alt.nome)+(aw&&aw.anno?' <span style="font-size:11px;color:var(--text-faint)">'+esc(aw.anno)+'</span>':'')+'</div>';
+      h+='<div style="font-size:10px;color:var(--gold-dim);margin-bottom:4px">'+esc(alt.cantina)+'</div>';
+      h+='<div class="consigli-alt-reason">'+esc(alt.motivo_breve)+'</div>';
+      h+='</div>';
+    });
+  }
+
+  h+='<button class="consigli-new-btn" onclick="resetConsigliUI()">🔄 Nuova ricerca</button>';
+
+  const resEl=document.getElementById('consigli-result');
+  resEl.innerHTML=h;
+  resEl.classList.add('show');
+  resEl.scrollIntoView({behavior:'smooth',block:'start'});
 }
 
 /* ── Fa lampeggiare la barra verde quando arriva un aggiornamento push ── */

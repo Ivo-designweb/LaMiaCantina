@@ -3765,7 +3765,7 @@ Se non ci sono vini davvero adatti, scegli comunque il migliore relativo disponi
   const userMsg=`Piatto: ${piatto}\n\nVini disponibili in cantina:\n${wineList}`;
 
   try{
-    const resp=await fetch('https://api.anthropic.com/v1/messages',{
+    const resp=await fetch('/api/consigli',{
       method:'POST',
       headers:{'Content-Type':'application/json'},
       body:JSON.stringify({

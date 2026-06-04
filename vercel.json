@@ -1,0 +1,10 @@
+{
+  "functions": {
+    "consigli.js": {
+      "runtime": "nodejs20.x"
+    }
+  },
+  "rewrites": [
+    { "source": "/api/consigli", "destination": "/consigli" }
+  ]
+}

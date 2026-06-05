@@ -3978,33 +3978,33 @@ async function askConsigli(){
     if(w.anno)parti.push(w.anno);
     if(w.cantina)parti.push('('+w.cantina+')');
     if(w.tipologia)parti.push(w.tipologia);
+    if(w.vitigno)parti.push(w.vitigno);
     if(w.nazione)parti.push(w.nazione+(w.regione?' / '+w.regione:''));
     parti.push(w.quantita+' bot');
     return (i+1)+'. '+parti.join(' - ');
   }).join('\n');
 
-  const systemPrompt=`Sei un sommelier esperto italiano. Il tuo compito è consigliare il vino più adatto tra quelli presenti nella cantina dell'utente, abbinandolo al piatto che descrive.
+  const systemPrompt=`Sei un sommelier esperto italiano. Consiglia il miglior vino per il piatto e max 1 alternativa. Rispondi SOLO in JSON, senza testo aggiuntivo.
 
-Rispondi SOLO in formato JSON valido, senza testo aggiuntivo, markdown o backtick. La struttura deve essere esattamente questa:
 {
   "principale": {
-    "indice": <numero intero 1-based dell'indice del vino nella lista>,
-    "nome": "<nome completo del vino>",
-    "cantina": "<nome cantina>",
-    "tipo_abbinamento": "<es. Abbinamento per concordanza / per contrasto / territoriale / classico>",
-    "motivazione": "<spiegazione dettagliata 2-4 frasi del perché questo vino si abbina perfettamente al piatto, con note sensoriali specifiche>"
+    "indice": <numero>,
+    "nome": "<nome vino>",
+    "cantina": "<cantina>",
+    "tipo_abbinamento": "<tipo abbinamento>",
+    "motivazione": "<max 2 frasi concise>"
   },
   "alternativi": [
     {
       "indice": <numero>,
       "nome": "<nome>",
       "cantina": "<cantina>",
-      "motivo_breve": "<1-2 frasi>"
+      "motivo_breve": "<1 frase>"
     }
   ]
 }
 
-Se non ci sono vini davvero adatti, scegli comunque il migliore relativo disponibile. Gli "alternativi" devono essere al massimo 2 e diversi dal principale. Se la cantina ha meno di 2 vini adatti, la lista alternativi può essere vuota.`;
+Mantieni risposte BREVI e CONCISE.`;
 
   const userMsg=`Piatto: ${piatto}\n\nVini disponibili in cantina:\n${wineList}`;
 
@@ -4014,7 +4014,7 @@ Se non ci sono vini davvero adatti, scegli comunque il migliore relativo disponi
     const endpoint=provider==='gemini'?'/api/gemini-consigli':'/api/consigli';
     
     /* Max tokens diversi per provider */
-    const maxTokens=provider==='gemini'?4000:1000;
+    const maxTokens=provider==='gemini'?8000:1000;
     
     const resp=await fetch(endpoint,{
       method:'POST',

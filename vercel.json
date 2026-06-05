@@ -2,6 +2,8 @@
   "version": 2,
   "builds": [
     { "src": "api/consigli.js", "use": "@vercel/node" },
+    { "src": "api/claude-consigli.js", "use": "@vercel/node" },
+    { "src": "api/gemini-consigli.js", "use": "@vercel/node" },
     { "src": "*.html",          "use": "@vercel/static" },
     { "src": "*.webp",          "use": "@vercel/static" },
     { "src": "*.png",           "use": "@vercel/static" },
@@ -10,6 +12,8 @@
   ],
   "routes": [
     { "src": "/api/consigli", "dest": "/api/consigli.js" },
+    { "src": "/api/claude-consigli", "dest": "/api/claude-consigli.js" },
+    { "src": "/api/gemini-consigli", "dest": "/api/gemini-consigli.js" },
     { "src": "/(.*)",         "dest": "/$1" }
   ]
 }

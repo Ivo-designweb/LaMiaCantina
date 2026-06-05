@@ -39,7 +39,9 @@ module.exports = async function handler(req, res) {
         ],
         generationConfig: {
           maxOutputTokens: max_tokens || 1000,
-          temperature: 0.7,
+          temperature: 0.1,  // Abbassato da 0.7 → 0.1 (risposte più deterministiche)
+          topP: 0.95,        // Aggiunti per stabilità
+          topK: 40,          // Aggiunti per stabilità
         },
       }),
     });
@@ -51,7 +53,18 @@ module.exports = async function handler(req, res) {
     }
 
     // Converti la risposta Gemini nel formato atteso dall'app (stesso di Claude)
-    const geminiText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    let geminiText = data?.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    
+    // Pulizia: estrai JSON se Gemini ha aggiunto testo prima/dopo
+    if (geminiText && !geminiText.trim().startsWith('{')) {
+      const jsonMatch = geminiText.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        geminiText = jsonMatch[0];
+      }
+    }
+    
+    // Rimuovi markdown backticks se presenti
+    geminiText = geminiText.replace(/```json\n?|\n?```/g, '').trim();
     
     // Crea una risposta nello stesso formato di Claude per uniformità
     const claudeFormatResponse = {

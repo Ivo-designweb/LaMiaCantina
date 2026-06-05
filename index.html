@@ -3682,6 +3682,105 @@ function renderDash(){
 
 function showDashDetail(id){showDetail(id);_detailFrom='dash';}
 
+/* ══════════ MODAL ERRORE DEBUG ══════════ */
+function showErrorModal(fullResponse){
+  const modal=document.createElement('div');
+  modal.style.cssText=`
+    position:fixed;top:0;left:0;right:0;bottom:0;
+    background:rgba(0,0,0,0.7);
+    display:flex;align-items:center;justify-content:center;
+    z-index:9999;
+    padding:20px;
+    font-family:'Lora',Georgia,serif;
+  `;
+  
+  const box=document.createElement('div');
+  box.style.cssText=`
+    background:var(--surface);
+    border:2px solid var(--gold);
+    border-radius:15px;
+    padding:20px;
+    max-width:90vw;
+    max-height:80vh;
+    overflow-y:auto;
+    color:var(--text);
+  `;
+  
+  box.innerHTML=`
+    <div style="margin-bottom:15px">
+      <h3 style="color:var(--gold);margin:0 0 10px 0;font-size:18px">🔴 Errore Parsing JSON</h3>
+      <p style="color:var(--text-dim);margin:0;font-size:12px">La risposta dell'AI non è JSON valido. Copia il testo sotto per inviarla allo sviluppatore.</p>
+    </div>
+    
+    <div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:15px;margin-bottom:15px;position:relative">
+      <div id="error-content" style="font-family:monospace;font-size:11px;white-space:pre-wrap;word-break:break-all;line-height:1.5;color:var(--text-dim);max-height:400px;overflow-y:auto"></div>
+      
+      <button id="copy-error-btn" style="
+        position:absolute;top:10px;right:10px;
+        background:var(--gold);
+        color:#000;
+        border:none;
+        padding:8px 12px;
+        border-radius:8px;
+        cursor:pointer;
+        font-size:11px;
+        font-weight:600;
+        transition:all 0.2s;
+      " onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+        📋 Copia Tutto
+      </button>
+    </div>
+    
+    <div style="display:flex;gap:10px">
+      <button onclick="this.closest('div').parentElement.parentElement.remove()" style="
+        flex:1;
+        background:var(--surface2);
+        border:1px solid var(--border);
+        color:var(--text);
+        padding:12px;
+        border-radius:8px;
+        cursor:pointer;
+        font-weight:600;
+      ">Chiudi</button>
+      
+      <button onclick="window.location.href='mailto:ivotaffarel@gmail.com?subject=Bug%20Consigli%20AI&body='+encodeURIComponent('Errore:\\n\\n'+document.getElementById('error-content').textContent)" style="
+        flex:1;
+        background:var(--gold);
+        border:none;
+        color:#000;
+        padding:12px;
+        border-radius:8px;
+        cursor:pointer;
+        font-weight:600;
+      ">📧 Invia a Sviluppatore</button>
+    </div>
+  `;
+  
+  modal.appendChild(box);
+  document.body.appendChild(modal);
+  
+  /* Popola il contenuto errore */
+  document.getElementById('error-content').textContent=fullResponse;
+  
+  /* Button copy */
+  document.getElementById('copy-error-btn').onclick=()=>{
+    const text=document.getElementById('error-content').textContent;
+    navigator.clipboard.writeText(text).then(()=>{
+      const btn=document.getElementById('copy-error-btn');
+      const orig=btn.textContent;
+      btn.textContent='✅ Copiato!';
+      setTimeout(()=>{btn.textContent=orig;},2000);
+    }).catch(e=>{
+      alert('Errore nel copy: '+e.message);
+    });
+  };
+  
+  /* Chiudi con click fuori */
+  modal.onclick=(e)=>{
+    if(e.target===modal)modal.remove();
+  };
+}
+
 /* ══════════ GRAFICO A TORTA TIPOLOGIE ══════════ */
 function renderTipoChart(tipoSorted){
   const canvas=document.getElementById('tipoChart');
@@ -3947,13 +4046,18 @@ Se non ci sono vini davvero adatti, scegli comunque il migliore relativo disponi
       
       parsed=JSON.parse(clean);
     }catch(e){
-      throw new Error('Risposta AI non valida: '+rawText.substring(0,120));
+      throw new Error('PARSE_ERROR|'+rawText);
     }
 
     renderConsigliResult(parsed,disponibili,piatto);
   }catch(err){
     console.error('[Consigli]',err);
-    showToast('Errore: '+err.message,true);
+    if(err.message.startsWith('PARSE_ERROR|')){
+      const fullResponse=err.message.substring(12);
+      showErrorModal(fullResponse);
+    }else{
+      showToast('Errore: '+err.message,true);
+    }
   }finally{
     document.getElementById('consigli-loading').classList.remove('show');
     document.getElementById('btn-chiedi').disabled=false;

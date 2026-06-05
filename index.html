@@ -3974,17 +3974,13 @@ async function askConsigli(){
   /* Costruisci la lista vini per il prompt */
   const wineList=disponibili.map((w,i)=>{
     const parti=[];
-    if(w.cantina)parti.push('Cantina: '+w.cantina);
-    if(w.nome)parti.push('Nome: '+w.nome);
-    if(w.anno)parti.push('Annata: '+w.anno);
-    if(w.tipologia)parti.push('Tipo: '+w.tipologia);
-    if(w.vitigno)parti.push('Vitigno: '+w.vitigno);
-    if(w.nazione)parti.push('Nazione: '+w.nazione+(w.regione?' / '+w.regione:''));
-    if(w.gradi)parti.push('Gradi: '+w.gradi+'%');
-    if(w.rating&&w.rating>0)parti.push('Valutazione: '+w.rating+'/5');
-    if(w.note)parti.push('Note: '+w.note);
-    parti.push('Bottiglie disponibili: '+(w.quantita||0));
-    return (i+1)+'. '+parti.join(', ');
+    if(w.nome)parti.push(w.nome);
+    if(w.anno)parti.push(w.anno);
+    if(w.cantina)parti.push('('+w.cantina+')');
+    if(w.tipologia)parti.push(w.tipologia);
+    if(w.nazione)parti.push(w.nazione+(w.regione?' / '+w.regione:''));
+    parti.push(w.quantita+' bot');
+    return (i+1)+'. '+parti.join(' - ');
   }).join('\n');
 
   const systemPrompt=`Sei un sommelier esperto italiano. Il tuo compito è consigliare il vino più adatto tra quelli presenti nella cantina dell'utente, abbinandolo al piatto che descrive.
@@ -4018,7 +4014,7 @@ Se non ci sono vini davvero adatti, scegli comunque il migliore relativo disponi
     const endpoint=provider==='gemini'?'/api/gemini-consigli':'/api/consigli';
     
     /* Max tokens diversi per provider */
-    const maxTokens=provider==='gemini'?2500:1000;
+    const maxTokens=provider==='gemini'?4000:1000;
     
     const resp=await fetch(endpoint,{
       method:'POST',

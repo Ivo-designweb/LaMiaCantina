@@ -38,10 +38,10 @@ module.exports = async function handler(req, res) {
           }
         ],
         generationConfig: {
-          maxOutputTokens: max_tokens || 1000,
-          temperature: 0.1,  // Abbassato da 0.7 → 0.1 (risposte più deterministiche)
-          topP: 0.95,        // Aggiunti per stabilità
-          topK: 40,          // Aggiunti per stabilità
+          maxOutputTokens: max_tokens || 2500,  // Aumentato da 1000 a 2500
+          temperature: 0.1,
+          topP: 0.95,
+          topK: 40,
         },
       }),
     });

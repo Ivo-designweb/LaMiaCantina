@@ -3935,7 +3935,16 @@ Se non ci sono vini davvero adatti, scegli comunque il migliore relativo disponi
     let parsed;
     try{
       /* Rimuovi eventuale wrapping markdown ```json ... ``` */
-      const clean=rawText.replace(/```json|```/g,'').trim();
+      let clean=rawText.replace(/```json|```/g,'').trim();
+      
+      /* Se Gemini ha aggiunto testo prima/dopo JSON, prova ad estrarre */
+      if(!clean.startsWith('{')){
+        const match=clean.match(/\{[\s\S]*\}/);
+        if(match){
+          clean=match[0];
+        }
+      }
+      
       parsed=JSON.parse(clean);
     }catch(e){
       throw new Error('Risposta AI non valida: '+rawText.substring(0,120));

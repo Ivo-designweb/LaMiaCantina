@@ -38,7 +38,7 @@ module.exports = async function handler(req, res) {
           }
         ],
         generationConfig: {
-          maxOutputTokens: max_tokens || 2500,  // Aumentato da 1000 a 2500
+          maxOutputTokens: max_tokens || 8000,  // 8000 tokens per risposte complete
           temperature: 0.1,
           topP: 0.95,
           topK: 40,

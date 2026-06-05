@@ -3984,27 +3984,28 @@ async function askConsigli(){
     return (i+1)+'. '+parti.join(' - ');
   }).join('\n');
 
-  const systemPrompt=`Sei un sommelier esperto italiano. Consiglia il miglior vino per il piatto e max 1 alternativa. Rispondi SOLO in JSON, senza testo aggiuntivo.
+  const systemPrompt=`Sei un sommelier esperto italiano. Il tuo compito è consigliare il vino più adatto tra quelli presenti nella cantina dell'utente, abbinandolo al piatto che descrive.
 
+Rispondi SOLO in formato JSON valido, senza testo aggiuntivo, markdown o backtick. La struttura deve essere esattamente questa:
 {
   "principale": {
-    "indice": <numero>,
-    "nome": "<nome vino>",
-    "cantina": "<cantina>",
-    "tipo_abbinamento": "<tipo abbinamento>",
-    "motivazione": "<max 2 frasi concise>"
+    "indice": <numero intero 1-based dell'indice del vino nella lista>,
+    "nome": "<nome completo del vino>",
+    "cantina": "<nome cantina>",
+    "tipo_abbinamento": "<es. Abbinamento per concordanza / per contrasto / territoriale / classico>",
+    "motivazione": "<spiegazione dettagliata 2-4 frasi del perché questo vino si abbina perfettamente al piatto, con note sensoriali specifiche>"
   },
   "alternativi": [
     {
       "indice": <numero>,
       "nome": "<nome>",
       "cantina": "<cantina>",
-      "motivo_breve": "<1 frase>"
+      "motivo_breve": "<1-2 frasi>"
     }
   ]
 }
 
-Mantieni risposte BREVI e CONCISE.`;
+Se non ci sono vini davvero adatti, scegli comunque il migliore relativo disponibile. Gli "alternativi" devono essere al massimo 2 e diversi dal principale. Se la cantina ha meno di 2 vini adatti, la lista alternativi può essere vuota.`;
 
   const userMsg=`Piatto: ${piatto}\n\nVini disponibili in cantina:\n${wineList}`;
 

@@ -11,13 +11,6 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  // Chiave segreta per proteggere l'endpoint (chiamata solo dal cron)
-  const cronSecret = process.env.CRON_SECRET;
-  const authHeader  = req.headers['x-cron-secret'];
-  if (cronSecret && authHeader !== cronSecret) {
-    return res.status(401).json({ error: 'Non autorizzato' });
-  }
-
   const RESEND_API_KEY = process.env.RESEND_API_KEY;
   if (!RESEND_API_KEY) {
     return res.status(500).json({ error: 'RESEND_API_KEY non configurata' });
@@ -27,6 +20,31 @@ module.exports = async function handler(req, res) {
   const UPSTASH_TOKEN = process.env.UPSTASH_TOKEN;
   if (!UPSTASH_URL || !UPSTASH_TOKEN) {
     return res.status(500).json({ error: 'Credenziali Upstash non configurate' });
+  }
+
+  // Autenticazione a due vie:
+  // 1) Cron job → header x-cron-secret deve corrispondere a CRON_SECRET
+  // 2) Chiamata diretta dall'app (test) → body contiene syncKey valida (verificata su Upstash)
+  const cronSecret  = process.env.CRON_SECRET;
+  const authHeader  = req.headers['x-cron-secret'];
+  const { syncKey: bodySyncKey } = req.body || {};
+  const isCron      = cronSecret && authHeader === cronSecret;
+  const isAppCall   = !!bodySyncKey; // verificato sotto dopo aver letto Upstash
+
+  if (!isCron && !isAppCall) {
+    return res.status(401).json({ error: 'Non autorizzato' });
+  }
+
+  // Se chiamata dall'app, verifica che la syncKey esista davvero su Upstash
+  if (!isCron && isAppCall) {
+    try {
+      const check = await redisCmd(UPSTASH_URL, UPSTASH_TOKEN, 'EXISTS', `cantina:${bodySyncKey}:wines`);
+      if (!check) {
+        return res.status(401).json({ error: 'Chiave di sincronizzazione non valida o nessun dato trovato' });
+      }
+    } catch (e) {
+      return res.status(500).json({ error: 'Verifica chiave fallita: ' + e.message });
+    }
   }
 
   // Body: { syncKey } oppure vuoto per processare tutte le chiavi attive

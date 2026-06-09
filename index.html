@@ -793,6 +793,48 @@ textarea.field-input{resize:vertical;min-height:74px}
       </div>
     </div>
 
+    <!-- EMAIL REMINDER -->
+    <div id="email-reminder-box" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-top:8px;display:none">
+      <div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:4px">✉️ Promemoria Email Automatico</div>
+      <div style="font-size:11px;color:var(--text-faint);margin-bottom:10px;line-height:1.5">Ricevi una mail quando ci sono vini in scadenza. Richiede chiave di sincronizzazione attiva.</div>
+
+      <!-- Toggle abilitato -->
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+        <span style="font-size:13px;color:var(--text-dim)">Attiva promemoria email</span>
+        <label style="position:relative;display:inline-block;width:42px;height:24px;cursor:pointer">
+          <input type="checkbox" id="email-reminder-enabled" style="opacity:0;width:0;height:0" onchange="onEmailReminderToggle()">
+          <span id="email-reminder-toggle-track" style="position:absolute;inset:0;background:var(--border);border-radius:12px;transition:background .25s"></span>
+          <span id="email-reminder-toggle-thumb" style="position:absolute;top:3px;left:3px;width:18px;height:18px;background:#fff;border-radius:50%;transition:left .25s;box-shadow:0 1px 4px rgba(0,0,0,.2)"></span>
+        </label>
+      </div>
+
+      <!-- Indirizzo email -->
+      <div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Indirizzo email destinatario</div>
+      <input id="email-reminder-address" class="field-input" type="email" placeholder="es. mario@email.com" style="font-size:13px;padding:9px 11px;margin-bottom:10px" autocomplete="email">
+
+      <!-- Ogni quanti giorni -->
+      <div style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:1px;margin-bottom:4px">Frequenza controllo</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+        <input id="email-reminder-days" class="field-input" type="number" min="1" max="365" placeholder="7" style="font-size:13px;padding:9px 11px;width:80px">
+        <span style="font-size:13px;color:var(--text-dim)">giorni tra un controllo e l'altro</span>
+      </div>
+
+      <!-- Info giorni scadenza -->
+      <div style="font-size:11px;color:var(--text-faint);margin-bottom:10px;line-height:1.5;background:var(--gold-bg);border-radius:7px;padding:7px 10px">
+        ℹ️ La soglia di scadenza usata è quella impostata sopra (<span id="email-reminder-thresh-label">60</span> giorni).
+      </div>
+
+      <!-- Stato ultimo invio -->
+      <div id="email-reminder-last-sent" style="font-size:11px;color:var(--text-faint);margin-bottom:10px"></div>
+
+      <!-- Bottone salva -->
+      <div style="display:flex;gap:8px">
+        <button onclick="saveEmailReminderConfig()" style="flex:1;background:var(--gold);border:none;border-radius:10px;color:#fff;padding:10px 14px;font-size:13px;cursor:pointer;font-family:inherit">Salva configurazione</button>
+        <button onclick="testEmailReminder()" id="btn-test-email" style="background:none;border:1px solid var(--border);border-radius:10px;color:var(--text-dim);padding:10px 12px;font-size:13px;cursor:pointer;font-family:inherit" title="Invia mail di test ora">Test</button>
+      </div>
+      <div id="email-reminder-status" style="font-size:11px;color:var(--text-faint);margin-top:6px;min-height:16px"></div>
+    </div>
+
     <!-- 4. INFO -->
     <div class="drawer-section-label">4 · Info</div>
     <button class="drawer-btn" onclick="showUpdateInfo();closeDrawer()">
@@ -809,7 +851,7 @@ textarea.field-input{resize:vertical;min-height:74px}
     </button>
 
   </div>
-  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label" onclick="adminTap()" style="cursor:pointer;user-select:none">v6.9</span></div>
+  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label" onclick="adminTap()" style="cursor:pointer;user-select:none">v7.0</span></div>
 </div>
 
 <!-- ADMIN OVERLAY (accesso via bottone 'Parametri db' nelle impostazioni) -->
@@ -2849,6 +2891,7 @@ if('serviceWorker'in navigator){
     loadAIProvider();  /* Carica il provider AI scelto (Claude o Gemini) */
     await loadSyncConfigInit(); /* carica config sync, inizializza Ably e avvia sync iniziale */
     await initScadenzaGiorni(); /* carica soglia scadenza */
+    await initEmailReminderConfig(); /* carica config promemoria email */
     document.getElementById('f-date').value=new Date().toISOString().split('T')[0];
     document.getElementById('m-date').value=new Date().toISOString().split('T')[0];
   } catch(e){
@@ -3336,11 +3379,12 @@ async function saveSyncKey(){
   const prev=_syncKey;
   _syncKey=v||null;
   await dbSetting(SYNC_KEY_IDB,_syncKey||'');
-  if(!_syncKey){ _syncStatus='nokey'; updateSyncDots(); showToast('Sincronizzazione disabilitata'); return; }
+  if(!_syncKey){ _syncStatus='nokey'; updateSyncDots(); updateEmailReminderVisibility(); showToast('Sincronizzazione disabilitata'); return; }
   if(_syncKey!==prev){
     await initAbly(); /* cambia canale Ably */
     showToast('Chiave salvata — Sincronizzazione in corso…');
     await syncFull(true);
+    await initEmailReminderConfig(); /* ricarica config email per la nuova chiave */
   } else { showToast('Chiave confermata'); updateSyncDots(); }
 }
 
@@ -3924,6 +3968,128 @@ async function checkScadenzeNotify(){
   if(scaduti.length>0)msg+=scaduti.length+' vino/i oltre la data limite. ';
   if(scadenti.length>0)msg+=scadenti.length+' vino/i in scadenza entro '+thresh+' giorni.';
   try{new Notification('🍷 La Mia Cantina — Scadenze',{body:msg.trim(),icon:'./icon192.png'});}catch(e){console.warn('[Notify]',e);}
+}
+
+/* ══════════ PROMEMORIA EMAIL SCADENZE ══════════ */
+
+const EMAIL_REMINDER_KEY = 'cantina:email_reminder_config'; // chiave locale IndexedDB
+
+/* Mostra/nasconde il box email reminder in base allo stato sync */
+function updateEmailReminderVisibility(){
+  const box = document.getElementById('email-reminder-box');
+  if(!box) return;
+  box.style.display = _syncReady() ? 'block' : 'none';
+}
+
+/* Carica la configurazione da Upstash e popola il form */
+async function initEmailReminderConfig(){
+  updateEmailReminderVisibility();
+  if(!_syncReady()) return;
+  try{
+    const res = await _redisCmd('GET', `cantina:${_syncKey}:email_config`);
+    if(!res) return;
+    const cfg = JSON.parse(res);
+    const chk = document.getElementById('email-reminder-enabled');
+    if(chk){ chk.checked = !!cfg.enabled; _updateToggleStyle(!!cfg.enabled); }
+    const addr = document.getElementById('email-reminder-address');
+    if(addr) addr.value = cfg.email || '';
+    const days = document.getElementById('email-reminder-days');
+    if(days) days.value = cfg.checkEveryDays || 7;
+    if(cfg.lastSentAt){
+      const d = new Date(cfg.lastSentAt);
+      const el = document.getElementById('email-reminder-last-sent');
+      if(el) el.textContent = 'Ultimo invio: ' + d.toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});
+    }
+  }catch(e){ console.warn('[EmailReminder] init:', e); }
+  // Aggiorna label giorni scadenza
+  const lbl = document.getElementById('email-reminder-thresh-label');
+  if(lbl) lbl.textContent = window._scadenzaGiorni || 60;
+}
+
+/* Aggiorna stile toggle visuale */
+function _updateToggleStyle(enabled){
+  const track = document.getElementById('email-reminder-toggle-track');
+  const thumb = document.getElementById('email-reminder-toggle-thumb');
+  if(track) track.style.background = enabled ? 'var(--green)' : 'var(--border)';
+  if(thumb) thumb.style.left = enabled ? '21px' : '3px';
+}
+
+function onEmailReminderToggle(){
+  const chk = document.getElementById('email-reminder-enabled');
+  _updateToggleStyle(chk?.checked);
+}
+
+/* Salva la configurazione su Upstash */
+async function saveEmailReminderConfig(){
+  if(!_syncReady()){ showToast('Attiva prima la sincronizzazione cloud'); return; }
+  const enabled  = document.getElementById('email-reminder-enabled')?.checked || false;
+  const email    = (document.getElementById('email-reminder-address')?.value || '').trim();
+  const days     = parseInt(document.getElementById('email-reminder-days')?.value) || 7;
+  const thresh   = parseInt(window._scadenzaGiorni) || 60;
+  if(enabled && !email){ showToast('Inserisci un indirizzo email'); return; }
+  if(enabled && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){ showToast('Indirizzo email non valido'); return; }
+  const statusEl = document.getElementById('email-reminder-status');
+  if(statusEl) statusEl.textContent = 'Salvataggio…';
+  try{
+    // Leggi eventuale lastSentAt esistente per non azzerarlo
+    let lastSentAt = null;
+    try{
+      const existing = await _redisCmd('GET', `cantina:${_syncKey}:email_config`);
+      if(existing){ const ex = JSON.parse(existing); lastSentAt = ex.lastSentAt || null; }
+    }catch(_){}
+    const cfg = { enabled, email, checkEveryDays: days, scadenzaGiorni: thresh, lastSentAt };
+    await _redisCmd('SET', `cantina:${_syncKey}:email_config`, JSON.stringify(cfg));
+    if(statusEl) statusEl.textContent = '✓ Configurazione salvata';
+    showToast('Promemoria email ' + (enabled ? 'attivato' : 'disattivato'));
+    setTimeout(()=>{ if(statusEl) statusEl.textContent = ''; }, 3000);
+  }catch(e){
+    if(statusEl) statusEl.textContent = '⚠ Errore: ' + e.message;
+    console.error('[EmailReminder] save:', e);
+  }
+}
+
+/* Invia una mail di test immediatamente (bypassa il check giorni) */
+async function testEmailReminder(){
+  if(!_syncReady()){ showToast('Attiva prima la sincronizzazione cloud'); return; }
+  const email = (document.getElementById('email-reminder-address')?.value || '').trim();
+  if(!email){ showToast('Inserisci prima un indirizzo email e salva'); return; }
+  const btn = document.getElementById('btn-test-email');
+  const statusEl = document.getElementById('email-reminder-status');
+  if(btn){ btn.disabled = true; btn.textContent = '…'; }
+  if(statusEl) statusEl.textContent = 'Invio mail di test…';
+  try{
+    // Salva prima la config aggiornata azzerando lastSentAt per forzare invio
+    const enabled  = document.getElementById('email-reminder-enabled')?.checked || false;
+    const days     = parseInt(document.getElementById('email-reminder-days')?.value) || 7;
+    const thresh   = parseInt(window._scadenzaGiorni) || 60;
+    const cfg = { enabled: true, email, checkEveryDays: days, scadenzaGiorni: thresh, lastSentAt: null };
+    await _redisCmd('SET', `cantina:${_syncKey}:email_config`, JSON.stringify(cfg));
+    // Chiama l'endpoint email-reminder per questa chiave
+    const res = await fetch('/api/email-reminder', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ syncKey: _syncKey })
+    });
+    const data = await res.json();
+    if(data.results && data.results[0]){
+      const r = data.results[0];
+      if(r.sent){
+        if(statusEl) statusEl.textContent = `✓ Mail inviata a ${r.to} (${r.scaduti} scaduti, ${r.scadenti} in scadenza)`;
+      } else if(r.skipped){
+        if(statusEl) statusEl.textContent = 'ℹ Nessun vino in scadenza trovato — mail non inviata';
+      } else {
+        if(statusEl) statusEl.textContent = '⚠ Errore invio: ' + (r.error || 'sconosciuto');
+      }
+    }
+    // Ripristina enabled originale
+    cfg.enabled = enabled;
+    await _redisCmd('SET', `cantina:${_syncKey}:email_config`, JSON.stringify(cfg));
+  }catch(e){
+    if(statusEl) statusEl.textContent = '⚠ Errore: ' + e.message;
+  }finally{
+    if(btn){ btn.disabled = false; btn.textContent = 'Test'; }
+    setTimeout(()=>{ if(statusEl) statusEl.textContent = ''; }, 5000);
+  }
 }
 
 /* ══════════ CONSIGLI AI — SOMMELIER ══════════

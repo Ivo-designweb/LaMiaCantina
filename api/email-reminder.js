@@ -183,7 +183,7 @@ async function processKey(syncKey, upstashUrl, upstashToken, resendApiKey) {
       'Content-Type':  'application/json'
     },
     body: JSON.stringify({
-      from:    'La Mia Cantina <noreply@lamiacantina.app>',
+      from:    'La Mia Cantina <onboarding@resend.dev>',
       to:      [config.email],
       subject: `🍷 La Mia Cantina — ${scaduti.length + scadenti.length} vino/i da controllare`,
       html,

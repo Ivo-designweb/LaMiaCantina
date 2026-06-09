@@ -832,7 +832,14 @@ textarea.field-input{resize:vertical;min-height:74px}
         <button onclick="saveEmailReminderConfig()" style="flex:1;background:var(--gold);border:none;border-radius:10px;color:#fff;padding:10px 14px;font-size:13px;cursor:pointer;font-family:inherit">Salva configurazione</button>
         <button onclick="testEmailReminder()" id="btn-test-email" style="background:none;border:1px solid var(--border);border-radius:10px;color:var(--text-dim);padding:10px 12px;font-size:13px;cursor:pointer;font-family:inherit" title="Invia mail di test ora">Test</button>
       </div>
-      <div id="email-reminder-status" style="font-size:11px;color:var(--text-faint);margin-top:6px;min-height:16px"></div>
+      <!-- BOX DEBUG TEST -->
+      <div id="email-reminder-debug" style="display:none;margin-top:10px;background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden">
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 10px;background:var(--surface2);border-bottom:1px solid var(--border)">
+          <span style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:1px">📋 Log diagnostico</span>
+          <button onclick="document.getElementById('email-reminder-debug').style.display='none'" style="background:none;border:none;color:var(--text-faint);font-size:14px;cursor:pointer;padding:0 2px;line-height:1">✕</button>
+        </div>
+        <div id="email-reminder-log" style="padding:10px;font-size:11px;font-family:monospace;color:var(--text-dim);line-height:1.7;white-space:pre-wrap;word-break:break-all;max-height:260px;overflow-y:auto"></div>
+      </div>
     </div>
 
     <!-- 4. INFO -->
@@ -851,7 +858,7 @@ textarea.field-input{resize:vertical;min-height:74px}
     </button>
 
   </div>
-  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label" onclick="adminTap()" style="cursor:pointer;user-select:none">v7.0</span></div>
+  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label" onclick="adminTap()" style="cursor:pointer;user-select:none">v7.1</span></div>
 </div>
 
 <!-- ADMIN OVERLAY (accesso via bottone 'Parametri db' nelle impostazioni) -->
@@ -4053,42 +4060,104 @@ async function testEmailReminder(){
   if(!_syncReady()){ showToast('Attiva prima la sincronizzazione cloud'); return; }
   const email = (document.getElementById('email-reminder-address')?.value || '').trim();
   if(!email){ showToast('Inserisci prima un indirizzo email e salva'); return; }
-  const btn = document.getElementById('btn-test-email');
-  const statusEl = document.getElementById('email-reminder-status');
+
+  const btn      = document.getElementById('btn-test-email');
+  const debugBox = document.getElementById('email-reminder-debug');
+  const logEl    = document.getElementById('email-reminder-log');
+
+  // Mostra il box debug e resetta il log
+  if(debugBox) debugBox.style.display = 'block';
+  const log = (icon, msg) => {
+    const ts = new Date().toLocaleTimeString('it-IT');
+    if(logEl) logEl.textContent += `[${ts}] ${icon} ${msg}\n`;
+    if(logEl) logEl.scrollTop = logEl.scrollHeight;
+  };
+  if(logEl) logEl.textContent = '';
+
   if(btn){ btn.disabled = true; btn.textContent = '…'; }
-  if(statusEl) statusEl.textContent = 'Invio mail di test…';
+
+  const enabled = document.getElementById('email-reminder-enabled')?.checked || false;
+  const days    = parseInt(document.getElementById('email-reminder-days')?.value) || 7;
+  const thresh  = parseInt(window._scadenzaGiorni) || 60;
+
   try{
-    // Salva prima la config aggiornata azzerando lastSentAt per forzare invio
-    const enabled  = document.getElementById('email-reminder-enabled')?.checked || false;
-    const days     = parseInt(document.getElementById('email-reminder-days')?.value) || 7;
-    const thresh   = parseInt(window._scadenzaGiorni) || 60;
+    // STEP 1 — verifica sync
+    log('🔑', `Chiave sync: ${_syncKey}`);
+    log('📡', `Upstash URL: ${_syncUrl ? _syncUrl.substring(0,40)+'…' : 'NON CONFIGURATO'}`);
+    log('🔒', `Token: ${_syncToken ? '***' + _syncToken.slice(-6) : 'NON CONFIGURATO'}`);
+
+    // STEP 2 — conta vini con datalimite
+    const oggi = new Date(); oggi.setHours(0,0,0,0);
+    const tuttiVini = wines || [];
+    const conData = tuttiVini.filter(w => w.datalimite && w.assaggiato !== true);
+    const scaduti  = conData.filter(w => new Date(w.datalimite) < oggi);
+    const scadenti = conData.filter(w => { const d=new Date(w.datalimite); const diff=(d-oggi)/86400000; return diff>=0&&diff<=thresh; });
+    log('🍷', `Vini totali in cantina: ${tuttiVini.length}`);
+    log('📅', `Vini con data limite: ${conData.length}`);
+    log('⚠️', `Già scaduti: ${scaduti.length}`);
+    log('🕐', `In scadenza entro ${thresh} gg: ${scadenti.length}`);
+    if(scaduti.length===0 && scadenti.length===0){
+      log('ℹ️', 'Nessun vino in scadenza — la mail NON verrà inviata dal cron');
+      log('💡', 'Aggiungi un vino con data limite imminente per testare l\'invio reale');
+    }
+
+    // STEP 3 — scrivi config su Upstash (lastSentAt=null per forzare invio)
+    log('💾', 'Scrittura email_config su Upstash…');
     const cfg = { enabled: true, email, checkEveryDays: days, scadenzaGiorni: thresh, lastSentAt: null };
     await _redisCmd('SET', `cantina:${_syncKey}:email_config`, JSON.stringify(cfg));
-    // Chiama l'endpoint email-reminder per questa chiave
+    log('✅', 'email_config scritta correttamente');
+
+    // STEP 4 — verifica che i vini siano su Upstash
+    log('🔍', 'Verifica vini su Upstash…');
+    const winesOnCloud = await _redisCmd('GET', `cantina:${_syncKey}:wines`);
+    if(!winesOnCloud){
+      log('⚠️', 'ATTENZIONE: nessun dato vini trovato su Upstash per questa chiave!');
+      log('💡', 'Sincronizza l\'app almeno una volta prima di usare il reminder email');
+    } else {
+      let parsed = []; try{ parsed=JSON.parse(winesOnCloud); }catch(_){}
+      log('✅', `Trovati ${parsed.length} vini su Upstash`);
+    }
+
+    // STEP 5 — chiama l'API
+    log('📤', 'Chiamata a /api/email-reminder…');
     const res = await fetch('/api/email-reminder', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ syncKey: _syncKey })
     });
-    const data = await res.json();
+    log('📥', `HTTP status risposta: ${res.status} ${res.statusText}`);
+    const rawText = await res.text();
+    log('📄', `Risposta grezza: ${rawText}`);
+
+    // STEP 6 — interpreta la risposta
+    let data = {};
+    try{ data = JSON.parse(rawText); }catch(e){ log('❌', 'Risposta non è JSON valido: '+e.message); }
+
     if(data.results && data.results[0]){
       const r = data.results[0];
       if(r.sent){
-        if(statusEl) statusEl.textContent = `✓ Mail inviata a ${r.to} (${r.scaduti} scaduti, ${r.scadenti} in scadenza)`;
+        log('🎉', `MAIL INVIATA con successo a ${r.to}`);
+        log('📊', `Scaduti: ${r.scaduti} | In scadenza: ${r.scadenti}`);
       } else if(r.skipped){
-        if(statusEl) statusEl.textContent = 'ℹ Nessun vino in scadenza trovato — mail non inviata';
+        log('⏭️', `Mail saltata — motivo: ${r.reason}`);
       } else {
-        if(statusEl) statusEl.textContent = '⚠ Errore invio: ' + (r.error || 'sconosciuto');
+        log('❌', `Errore invio: ${r.error || 'sconosciuto'}`);
       }
+    } else if(data.error){
+      log('❌', `Errore API: ${data.error}`);
     }
-    // Ripristina enabled originale
-    cfg.enabled = enabled;
-    await _redisCmd('SET', `cantina:${_syncKey}:email_config`, JSON.stringify(cfg));
+
   }catch(e){
-    if(statusEl) statusEl.textContent = '⚠ Errore: ' + e.message;
+    log('💥', `Eccezione JS: ${e.message}`);
+    console.error('[testEmailReminder]', e);
   }finally{
+    // Ripristina enabled originale
+    try{
+      const cfg2 = { enabled, email, checkEveryDays: days, scadenzaGiorni: thresh, lastSentAt: null };
+      await _redisCmd('SET', `cantina:${_syncKey}:email_config`, JSON.stringify(cfg2));
+      log('🔄', `Config ripristinata (enabled: ${enabled})`);
+    }catch(_){}
     if(btn){ btn.disabled = false; btn.textContent = 'Test'; }
-    setTimeout(()=>{ if(statusEl) statusEl.textContent = ''; }, 5000);
   }
 }
 

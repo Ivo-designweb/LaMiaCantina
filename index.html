@@ -872,7 +872,7 @@ textarea.field-input{resize:vertical;min-height:74px}
     </button>
 
   </div>
-  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label" onclick="adminTap()" style="cursor:pointer;user-select:none">v7.4</span></div>
+  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label" onclick="adminTap()" style="cursor:pointer;user-select:none">v7.5</span></div>
 </div>
 
 <!-- ADMIN OVERLAY (accesso via bottone 'Parametri db' nelle impostazioni) -->
@@ -4243,16 +4243,38 @@ async function testEmailReminder(){
         log('✅', 'Subscription push trovata su Upstash');
       }
       log('📤', `Test PUSH → /api/push-reminder`);
-      const res  = await fetch('/api/push-reminder', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({syncKey:_syncKey}) });
+      let res  = await fetch('/api/push-reminder', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({syncKey:_syncKey}) });
       log('📥', `HTTP ${res.status} ${res.statusText}`);
-      const raw  = await res.text();
+      let raw  = await res.text();
       log('📄', `Risposta: ${raw}`);
       try{
         const d = JSON.parse(raw);
         const r = d.results?.[0];
-        if(r?.sent)        log('🎉', `Push inviato (scaduti:${r.scaduti}, in scadenza:${r.scadenti})`);
-        else if(r?.skipped) log('⏭️', `Push saltato: ${r.reason}`);
-        else if(r?.error)   log('❌', `Errore push: ${r.error}`);
+        if(r?.sent){
+          log('🎉', `Push inviato (scaduti:${r.scaduti}, in scadenza:${r.scadenti})`);
+        } else if(r?.skipped && r.reason === 'subscription scaduta, rimossa'){
+          // Subscription invalidata dal browser — la ricreo e riprovo una volta
+          log('🔄', 'Subscription scaduta — ne creo una nuova e riprovo…');
+          const subOk = await _subscribePush();
+          if(!subOk){
+            log('❌', 'Impossibile creare una nuova subscription. Controlla i permessi notifiche.');
+          } else {
+            log('✅', 'Nuova subscription creata — secondo tentativo…');
+            const res2 = await fetch('/api/push-reminder', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({syncKey:_syncKey}) });
+            log('📥', `HTTP ${res2.status} ${res2.statusText}`);
+            const raw2 = await res2.text();
+            log('📄', `Risposta: ${raw2}`);
+            const d2 = JSON.parse(raw2);
+            const r2 = d2.results?.[0];
+            if(r2?.sent)        log('🎉', `Push inviato (scaduti:${r2.scaduti}, in scadenza:${r2.scadenti})`);
+            else if(r2?.skipped) log('⏭️', `Push saltato: ${r2.reason}`);
+            else if(r2?.error)   log('❌', `Errore push: ${r2.error}`);
+          }
+        } else if(r?.skipped){
+          log('⏭️', `Push saltato: ${r.reason}`);
+        } else if(r?.error){
+          log('❌', `Errore push: ${r.error}`);
+        }
       }catch(_){}
     }
 

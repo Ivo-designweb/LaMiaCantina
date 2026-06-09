@@ -4,7 +4,7 @@
    il refresh dell'app su tutti i dispositivi.
 ═══════════════════════════════════════════════════ */
 
-const CACHE_VERSION = 'cantina-v5.2';
+const CACHE_VERSION = 'cantina-v7.3';
 const ASSETS = [
   './index.html',
   './manifest.json',
@@ -67,4 +67,36 @@ self.addEventListener('fetch', event => {
 /* ── Message: force update from app ── */
 self.addEventListener('message', event => {
   if (event.data === 'SKIP_WAITING') self.skipWaiting();
+});
+
+/* ── Push: riceve notifica dal server e la mostra ── */
+self.addEventListener('push', event => {
+  let data = { title: '🍷 La Mia Cantina', body: 'Hai vini da controllare.' };
+  try { if (event.data) data = event.data.json(); } catch {}
+
+  event.waitUntil(
+    self.registration.showNotification(data.title, {
+      body:    data.body,
+      icon:    '/icon192.png',
+      badge:   '/icon192.png',
+      vibrate: [200, 100, 200],
+      data:    data.data || { url: '/' }
+    })
+  );
+});
+
+/* ── NotificationClick: apre l'app al tap sulla notifica ── */
+self.addEventListener('notificationclick', event => {
+  event.notification.close();
+  const url = event.notification.data?.url || '/';
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+      for (const client of list) {
+        if (client.url.includes(self.location.origin) && 'focus' in client) {
+          return client.focus();
+        }
+      }
+      if (clients.openWindow) return clients.openWindow(url);
+    })
+  );
 });

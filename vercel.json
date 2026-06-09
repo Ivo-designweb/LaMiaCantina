@@ -6,6 +6,8 @@
     { "src": "api/gemini-consigli.js", "use": "@vercel/node" },
     { "src": "api/email-reminder.js",  "use": "@vercel/node" },
     { "src": "api/cron-reminder.js",   "use": "@vercel/node" },
+    { "src": "api/push-subscribe.js",  "use": "@vercel/node" },
+    { "src": "api/push-reminder.js",   "use": "@vercel/node" },
     { "src": "*.html",                 "use": "@vercel/static" },
     { "src": "*.webp",                 "use": "@vercel/static" },
     { "src": "*.png",                  "use": "@vercel/static" },
@@ -18,6 +20,8 @@
     { "src": "/api/gemini-consigli", "dest": "/api/gemini-consigli.js" },
     { "src": "/api/email-reminder",  "dest": "/api/email-reminder.js" },
     { "src": "/api/cron-reminder",   "dest": "/api/cron-reminder.js" },
+    { "src": "/api/push-subscribe",  "dest": "/api/push-subscribe.js" },
+    { "src": "/api/push-reminder",   "dest": "/api/push-reminder.js" },
     { "src": "/(.*)",                "dest": "/$1" }
   ],
   "crons": [
@@ -27,4 +31,3 @@
     }
   ]
 }
-"web-push": "^3.6.7"

@@ -858,7 +858,7 @@ textarea.field-input{resize:vertical;min-height:74px}
     </button>
 
   </div>
-  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label" onclick="adminTap()" style="cursor:pointer;user-select:none">v7.1</span></div>
+  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label" onclick="adminTap()" style="cursor:pointer;user-select:none">v7.2</span></div>
 </div>
 
 <!-- ADMIN OVERLAY (accesso via bottone 'Parametri db' nelle impostazioni) -->
@@ -4119,6 +4119,7 @@ async function testEmailReminder(){
     }
 
     // STEP 5 — chiama l'API
+    log('🔐', `Autenticazione via syncKey (no CRON_SECRET necessario dal browser)`);
     log('📤', 'Chiamata a /api/email-reminder…');
     const res = await fetch('/api/email-reminder', {
       method: 'POST',

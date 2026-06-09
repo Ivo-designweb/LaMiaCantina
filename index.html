@@ -872,7 +872,7 @@ textarea.field-input{resize:vertical;min-height:74px}
     </button>
 
   </div>
-  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label" onclick="adminTap()" style="cursor:pointer;user-select:none">v7.3</span></div>
+  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label" onclick="adminTap()" style="cursor:pointer;user-select:none">v7.4</span></div>
 </div>
 
 <!-- ADMIN OVERLAY (accesso via bottone 'Parametri db' nelle impostazioni) -->
@@ -4227,6 +4227,21 @@ async function testEmailReminder(){
 
     // TEST PUSH
     if(pushOn){
+      // Verifica se la subscription esiste già su Upstash
+      log('🔍', 'Verifica subscription push su Upstash…');
+      const subOnCloud = await _redisCmd('GET', `cantina:${_syncKey}:push_subscription`);
+      if(!subOnCloud){
+        log('⚠️', 'Nessuna subscription trovata — richiedo permesso e mi iscrivo…');
+        const subOk = await _subscribePush();
+        if(!subOk){
+          log('❌', 'Impossibile ottenere la subscription push. Controlla i permessi notifiche del browser.');
+          if(btn){ btn.disabled = false; btn.textContent = 'Test'; }
+          return;
+        }
+        log('✅', 'Subscription push creata e salvata su Upstash');
+      } else {
+        log('✅', 'Subscription push trovata su Upstash');
+      }
       log('📤', `Test PUSH → /api/push-reminder`);
       const res  = await fetch('/api/push-reminder', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({syncKey:_syncKey}) });
       log('📥', `HTTP ${res.status} ${res.statusText}`);

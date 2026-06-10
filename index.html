@@ -846,7 +846,8 @@ textarea.field-input{resize:vertical;min-height:74px}
       </div>
       <button id="reminder-save-none" onclick="saveEmailReminderConfig()" style="display:none;width:100%;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text-dim);padding:10px 14px;font-size:13px;cursor:pointer;font-family:inherit;margin-top:4px">Salva (disattiva promemoria)</button>
 
-      <!-- BOX DEBUG TEST -->
+      <!-- FORZA CRON MANUALE -->
+      <button onclick="forceCronRun()" id="btn-force-cron" style="width:100%;background:none;border:1px solid var(--border);border-radius:10px;color:var(--text-faint);padding:9px 14px;font-size:12px;cursor:pointer;font-family:inherit;margin-top:6px">⚙️ Forza ciclo cron completo (debug)</button>
       <div id="email-reminder-debug" style="display:none;margin-top:10px;background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden">
         <div style="display:flex;align-items:center;justify-content:space-between;padding:7px 10px;background:var(--surface2);border-bottom:1px solid var(--border)">
           <span style="font-size:10px;color:var(--text-faint);text-transform:uppercase;letter-spacing:1px">📋 Log diagnostico</span>
@@ -872,7 +873,7 @@ textarea.field-input{resize:vertical;min-height:74px}
     </button>
 
   </div>
-  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label" onclick="adminTap()" style="cursor:pointer;user-select:none">v7.5</span></div>
+  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label" onclick="adminTap()" style="cursor:pointer;user-select:none">v7.6</span></div>
 </div>
 
 <!-- ADMIN OVERLAY (accesso via bottone 'Parametri db' nelle impostazioni) -->
@@ -4289,6 +4290,68 @@ async function testEmailReminder(){
       log('🔄', 'Config ripristinata');
     }catch(_){}
     if(btn){ btn.disabled = false; btn.textContent = 'Test'; }
+  }
+}
+
+/* Forza manualmente il ciclo cron completo (email + push per tutte le chiavi) */
+async function forceCronRun(){
+  const btn      = document.getElementById('btn-force-cron');
+  const debugBox = document.getElementById('email-reminder-debug');
+  const logEl    = document.getElementById('email-reminder-log');
+  if(debugBox) debugBox.style.display = 'block';
+  const log = (icon, msg) => {
+    const ts = new Date().toLocaleTimeString('it-IT');
+    if(logEl) logEl.textContent += `[${ts}] ${icon} ${msg}\n`;
+    if(logEl) logEl.scrollTop = logEl.scrollHeight;
+  };
+  if(logEl) logEl.textContent = '';
+  if(btn){ btn.disabled = true; btn.textContent = '⏳ Esecuzione…'; }
+
+  log('⚙️', 'Avvio ciclo cron manuale…');
+  log('ℹ️',  'Questo esegue email + push per TUTTE le chiavi attive (come farebbe il cron automatico)');
+  log('⚠️',  'Il controllo "giorni dall\'ultimo invio" è attivo — se hai già ricevuto un avviso di recente verrà saltato');
+
+  try{
+    const res = await fetch('/api/cron-reminder', {
+      method: 'GET',
+      headers: { 'x-cron-secret': '' } // il secret viene letto da Vercel env
+    });
+    log('📥', `HTTP ${res.status} ${res.statusText}`);
+    const raw = await res.text();
+    log('📄', `Risposta grezza: ${raw}`);
+    try{
+      const d = JSON.parse(raw);
+      if(d.error){ log('❌', `Errore: ${d.error}`); }
+      else {
+        log('🌐', `URL usato dal cron: ${d.baseUrl || '—'}`);
+        // Email
+        const em = d.email;
+        if(em?.error)      log('❌', `Email — errore: ${em.error}`);
+        else if(em?.results){
+          log('✉️', `Email — processate ${em.processed} chiavi`);
+          for(const r of em.results){
+            if(r.sent)        log('  🎉', `[${r.syncKey}] Mail inviata a ${r.to}`);
+            else if(r.skipped) log('  ⏭️', `[${r.syncKey}] Saltata: ${r.reason}`);
+            else if(r.error)   log('  ❌', `[${r.syncKey}] Errore: ${r.error}`);
+          }
+        }
+        // Push
+        const pu = d.push;
+        if(pu?.error)      log('❌', `Push — errore: ${pu.error}`);
+        else if(pu?.results){
+          log('📱', `Push — processate ${pu.processed} chiavi`);
+          for(const r of pu.results){
+            if(r.sent)        log('  🎉', `[${r.syncKey}] Push inviato`);
+            else if(r.skipped) log('  ⏭️', `[${r.syncKey}] Saltato: ${r.reason}`);
+            else if(r.error)   log('  ❌', `[${r.syncKey}] Errore: ${r.error}`);
+          }
+        }
+      }
+    }catch(e){ log('⚠️', 'Risposta non parsabile come JSON'); }
+  }catch(e){
+    log('💥', `Eccezione: ${e.message}`);
+  }finally{
+    if(btn){ btn.disabled = false; btn.textContent = '⚙️ Forza ciclo cron completo (debug)'; }
   }
 }
 

@@ -873,7 +873,7 @@ textarea.field-input{resize:vertical;min-height:74px}
     </button>
 
   </div>
-  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label" onclick="adminTap()" style="cursor:pointer;user-select:none">v7.6</span></div>
+  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label" onclick="adminTap()" style="cursor:pointer;user-select:none">v7.7</span></div>
 </div>
 
 <!-- ADMIN OVERLAY (accesso via bottone 'Parametri db' nelle impostazioni) -->
@@ -4312,9 +4312,9 @@ async function forceCronRun(){
   log('⚠️',  'Il controllo "giorni dall\'ultimo invio" è attivo — se hai già ricevuto un avviso di recente verrà saltato');
 
   try{
-    const res = await fetch('/api/cron-reminder', {
+    const res = await fetch(`/api/cron-reminder?syncKey=${encodeURIComponent(_syncKey)}`, {
       method: 'GET',
-      headers: { 'x-cron-secret': '' } // il secret viene letto da Vercel env
+      headers: {}
     });
     log('📥', `HTTP ${res.status} ${res.statusText}`);
     const raw = await res.text();

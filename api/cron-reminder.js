@@ -8,9 +8,36 @@ module.exports = async function handler(req, res) {
   const isVercelCron = req.headers['x-vercel-cron'] === '1';
   const cronSecret   = process.env.CRON_SECRET;
   const manualSecret = req.headers['x-cron-secret'];
+  const syncKey      = req.query.syncKey; // per trigger manuale dal browser
 
-  if (!isVercelCron && manualSecret !== cronSecret) {
+  // 1) Cron automatico Vercel
+  // 2) Chiamata con CRON_SECRET (opzionale)
+  // 3) Chiamata dal browser con syncKey valida su Upstash
+  const isCron        = isVercelCron;
+  const hasSecret     = cronSecret && manualSecret === cronSecret;
+  const hasSyncKey    = !!syncKey;
+
+  if (!isCron && !hasSecret && !hasSyncKey) {
     return res.status(401).json({ error: 'Non autorizzato' });
+  }
+
+  // Verifica syncKey su Upstash se presente
+  if (!isCron && !hasSecret && hasSyncKey) {
+    const UPSTASH_URL   = process.env.UPSTASH_URL;
+    const UPSTASH_TOKEN = process.env.UPSTASH_TOKEN;
+    if (UPSTASH_URL && UPSTASH_TOKEN) {
+      try {
+        const r = await fetch(UPSTASH_URL, {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + UPSTASH_TOKEN, 'Content-Type': 'application/json' },
+          body: JSON.stringify(['EXISTS', `cantina:${syncKey}:wines`])
+        });
+        const data = await r.json();
+        if (!data.result) return res.status(401).json({ error: 'Chiave sync non valida' });
+      } catch (e) {
+        return res.status(500).json({ error: 'Verifica chiave: ' + e.message });
+      }
+    }
   }
 
   // SITE_URL ha priorità, poi VERCEL_URL, poi fallback hardcoded

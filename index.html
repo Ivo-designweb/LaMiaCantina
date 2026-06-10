@@ -873,7 +873,7 @@ textarea.field-input{resize:vertical;min-height:74px}
     </button>
 
   </div>
-  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label" onclick="adminTap()" style="cursor:pointer;user-select:none">v7.7</span></div>
+  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label" onclick="adminTap()" style="cursor:pointer;user-select:none">v7.9</span></div>
 </div>
 
 <!-- ADMIN OVERLAY (accesso via bottone 'Parametri db' nelle impostazioni) -->
@@ -4076,6 +4076,20 @@ async function initEmailReminderConfig(){
       const el = document.getElementById('email-reminder-last-sent');
       if(el) el.textContent = 'Ultimo invio: ' + d.toLocaleDateString('it-IT',{day:'2-digit',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});
     }
+    // Se il cron ha segnato che la subscription push è scaduta, la rinnova silenziosamente
+    if(cfg.pushEnabled){
+      const needsRefresh = await _redisCmd('GET', `cantina:${_syncKey}:push_needs_refresh`);
+      if(needsRefresh){
+        console.log('[Push] subscription scaduta rilevata — rinnovo…');
+        const subOk = await _subscribePush();
+        if(subOk){
+          // Cancella il flag
+          await _redisCmd('DEL', `cantina:${_syncKey}:push_needs_refresh`);
+          console.log('[Push] subscription rinnovata con successo');
+          showToast('🔔 Subscription push rinnovata automaticamente');
+        }
+      }
+    }
   }catch(e){ console.warn('[Reminder] init:', e); }
   const lbl = document.getElementById('email-reminder-thresh-label');
   if(lbl) lbl.textContent = window._scadenzaGiorni || 60;
@@ -4230,6 +4244,20 @@ async function testEmailReminder(){
     if(pushOn){
       // Verifica se la subscription esiste già su Upstash
       log('🔍', 'Verifica subscription push su Upstash…');
+
+      // Controlla anche la subscription locale del browser
+      try{
+        const reg = await navigator.serviceWorker.ready;
+        const localSub = await reg.pushManager.getSubscription();
+        if(localSub){
+          const ep = localSub.toJSON().endpoint || '';
+          log('📱', 'Subscription locale endpoint: ' + ep.substring(0,70) + '…');
+          log('📅', 'Scadenza dichiarata: ' + (localSub.expirationTime ? new Date(localSub.expirationTime).toLocaleString('it-IT') : 'nessuna (gestita dal browser)'));
+        } else {
+          log('⚠️', 'Nessuna subscription locale nel browser — verrà creata');
+        }
+      }catch(e){ log('⚠️', 'Impossibile leggere subscription locale: '+e.message); }
+
       const subOnCloud = await _redisCmd('GET', `cantina:${_syncKey}:push_subscription`);
       if(!subOnCloud){
         log('⚠️', 'Nessuna subscription trovata — richiedo permesso e mi iscrivo…');
@@ -4241,7 +4269,25 @@ async function testEmailReminder(){
         }
         log('✅', 'Subscription push creata e salvata su Upstash');
       } else {
-        log('✅', 'Subscription push trovata su Upstash');
+        // Confronta endpoint locale con quello su Upstash
+        try{
+          const cloudJson = JSON.parse(subOnCloud);
+          const cloudEp = (cloudJson.endpoint || '').substring(0,70);
+          log('☁️', 'Subscription su Upstash endpoint: ' + cloudEp + '…');
+          const reg = await navigator.serviceWorker.ready;
+          const localSub = await reg.pushManager.getSubscription();
+          const localEp = localSub ? (localSub.toJSON().endpoint || '').substring(0,70) : null;
+          if(localEp && localEp !== cloudEp){
+            log('⚠️', 'ATTENZIONE: endpoint locale ≠ Upstash — aggiorno Upstash con quella locale…');
+            await _subscribePush();
+          } else if(!localEp){
+            log('⚠️', 'Nessuna subscription locale — aggiorno Upstash…');
+            await _subscribePush();
+          } else {
+            log('✅', 'Endpoint locale = Upstash ✓');
+          }
+        }catch(e){ log('⚠️', 'Confronto endpoint: '+e.message); }
+        log('✅', 'Subscription push verificata');
       }
       log('📤', `Test PUSH → /api/push-reminder`);
       let res  = await fetch('/api/push-reminder', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({syncKey:_syncKey}) });

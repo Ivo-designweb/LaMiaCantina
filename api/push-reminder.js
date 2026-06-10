@@ -128,9 +128,10 @@ module.exports = async function handler(req, res) {
       return { sent: true, scaduti: scaduti.length, scadenti: scadenti.length };
 
     } catch (e) {
-      // Se la subscription è scaduta (410), la elimina
+      // Se la subscription è scaduta (410), la elimina e segna che serve rinnovo
       if (e.statusCode === 410) {
         await redisCmd(upstashUrl, upstashToken, 'DEL', `cantina:${syncKey}:push_subscription`);
+        await redisCmd(upstashUrl, upstashToken, 'SET', `cantina:${syncKey}:push_needs_refresh`, '1');
         return { skipped: true, reason: 'subscription scaduta, rimossa' };
       }
       return { sent: false, error: e.message };

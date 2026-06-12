@@ -1,28 +1,23 @@
 // api/cron-reminder.js
 // Vercel Cron Job — gira ogni giorno alle 08:00 UTC (10:00 ora italiana)
-// Accetta anche GET con x-cron-secret per trigger manuale dal browser.
+// Autenticazione:
+//   - Vercel cron automatico: User-Agent vercel-cron/1.0
+//   - Trigger manuale dal browser: query param ?syncKey=xxx (verificato su Upstash)
 
 module.exports = async function handler(req, res) {
   if (req.method !== 'GET') return res.status(405).json({ error: 'Method not allowed' });
 
-  const isVercelCron = req.headers['x-vercel-cron'] === '1';
-  const cronSecret   = process.env.CRON_SECRET;
-  const manualSecret = req.headers['x-cron-secret'];
-  const syncKey      = req.query.syncKey; // per trigger manuale dal browser
+  const userAgent = req.headers['user-agent'] || '';
+  const isVercelCron = userAgent.includes('vercel-cron');
+  const syncKey = req.query.syncKey;
 
-  // 1) Cron automatico Vercel
-  // 2) Chiamata con CRON_SECRET (opzionale)
-  // 3) Chiamata dal browser con syncKey valida su Upstash
-  const isCron        = isVercelCron;
-  const hasSecret     = cronSecret && manualSecret === cronSecret;
-  const hasSyncKey    = !!syncKey;
-
-  if (!isCron && !hasSecret && !hasSyncKey) {
+  // Accetta: cron automatico Vercel OPPURE chiamata manuale con syncKey
+  if (!isVercelCron && !syncKey) {
     return res.status(401).json({ error: 'Non autorizzato' });
   }
 
-  // Verifica syncKey su Upstash se presente
-  if (!isCron && !hasSecret && hasSyncKey) {
+  // Verifica syncKey su Upstash se chiamata manuale
+  if (!isVercelCron && syncKey) {
     const UPSTASH_URL   = process.env.UPSTASH_URL;
     const UPSTASH_TOKEN = process.env.UPSTASH_TOKEN;
     if (UPSTASH_URL && UPSTASH_TOKEN) {
@@ -40,13 +35,14 @@ module.exports = async function handler(req, res) {
     }
   }
 
-  // SITE_URL ha priorità, poi VERCEL_URL, poi fallback hardcoded
-  const baseUrl = process.env.SITE_URL
-    || (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'https://lamiacantina.vercel.app');
+  // SITE_URL ha priorità, poi fallback hardcoded
+  const baseUrl = process.env.SITE_URL || 'https://lamiacantina.vercel.app';
 
+  // Le chiamate interne usano x-cron-secret per autenticarsi con email/push reminder
+  const internalSecret = process.env.CRON_SECRET || '';
   const headers = {
     'Content-Type':  'application/json',
-    'x-cron-secret': cronSecret || ''
+    'x-cron-secret': internalSecret
   };
 
   try {

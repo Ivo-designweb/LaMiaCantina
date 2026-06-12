@@ -38,11 +38,9 @@ module.exports = async function handler(req, res) {
   // SITE_URL ha priorità, poi fallback hardcoded
   const baseUrl = process.env.SITE_URL || 'https://lamiacantina.vercel.app';
 
-  // Le chiamate interne usano x-cron-secret per autenticarsi con email/push reminder
-  const internalSecret = process.env.CRON_SECRET || '';
+  // Le chiamate interne non richiedono autenticazione aggiuntiva
   const headers = {
-    'Content-Type':  'application/json',
-    'x-cron-secret': internalSecret
+    'Content-Type': 'application/json'
   };
 
   try {

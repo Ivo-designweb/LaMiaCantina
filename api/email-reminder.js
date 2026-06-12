@@ -22,25 +22,23 @@ module.exports = async function handler(req, res) {
     return res.status(500).json({ error: 'Credenziali Upstash non configurate' });
   }
 
-  // Autenticazione a due vie:
-  // 1) Cron job → header x-cron-secret deve corrispondere a CRON_SECRET
-  // 2) Chiamata diretta dall'app (test) → body contiene syncKey valida (verificata su Upstash)
-  const cronSecret  = process.env.CRON_SECRET;
-  const authHeader  = req.headers['x-cron-secret'];
+  // Autenticazione:
+  // 1) Chiamata dal cron interno (nessuna syncKey nel body) → sempre accettata
+  // 2) Chiamata dall'app (test) → body contiene syncKey valida verificata su Upstash
   const { syncKey: bodySyncKey } = req.body || {};
-  const isCron      = cronSecret && authHeader === cronSecret;
-  const isAppCall   = !!bodySyncKey; // verificato sotto dopo aver letto Upstash
+  const isInternalCall = !bodySyncKey; // chiamata dal cron senza syncKey
+  const isAppCall      = !!bodySyncKey;
 
-  if (!isCron && !isAppCall) {
+  if (!isInternalCall && !isAppCall) {
     return res.status(401).json({ error: 'Non autorizzato' });
   }
 
-  // Se chiamata dall'app, verifica che la syncKey esista davvero su Upstash
-  if (!isCron && isAppCall) {
+  // Se chiamata dall'app, verifica che la syncKey esista su Upstash
+  if (isAppCall) {
     try {
       const check = await redisCmd(UPSTASH_URL, UPSTASH_TOKEN, 'EXISTS', `cantina:${bodySyncKey}:wines`);
       if (!check) {
-        return res.status(401).json({ error: 'Chiave di sincronizzazione non valida o nessun dato trovato' });
+        return res.status(401).json({ error: 'Chiave di sincronizzazione non valida' });
       }
     } catch (e) {
       return res.status(500).json({ error: 'Verifica chiave fallita: ' + e.message });

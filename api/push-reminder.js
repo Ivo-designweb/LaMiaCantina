@@ -7,13 +7,9 @@ const webpush = require('web-push');
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const cronSecret = process.env.CRON_SECRET;
-  const authHeader = req.headers['x-cron-secret'];
   const { syncKey: bodySyncKey } = req.body || {};
-  const isCron    = cronSecret && authHeader === cronSecret;
-  const isAppCall = !!bodySyncKey;
-
-  if (!isCron && !isAppCall) return res.status(401).json({ error: 'Non autorizzato' });
+  const isInternalCall = !bodySyncKey; // chiamata dal cron senza syncKey
+  const isAppCall      = !!bodySyncKey;
 
   const UPSTASH_URL    = process.env.UPSTASH_URL;
   const UPSTASH_TOKEN  = process.env.UPSTASH_TOKEN;
@@ -27,7 +23,7 @@ module.exports = async function handler(req, res) {
   webpush.setVapidDetails(VAPID_EMAIL, VAPID_PUBLIC, VAPID_PRIVATE);
 
   // Verifica syncKey se chiamata dall'app
-  if (!isCron && isAppCall) {
+  if (isAppCall) {
     try {
       const check = await redisCmd(UPSTASH_URL, UPSTASH_TOKEN, 'EXISTS', `cantina:${bodySyncKey}:wines`);
       if (!check) return res.status(401).json({ error: 'Chiave non valida' });

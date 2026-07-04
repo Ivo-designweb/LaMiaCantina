@@ -873,7 +873,7 @@ textarea.field-input{resize:vertical;min-height:74px}
     </button>
 
   </div>
-  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label" onclick="adminTap()" style="cursor:pointer;user-select:none">v7.9</span></div>
+  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label" onclick="adminTap()" style="cursor:pointer;user-select:none">v8.0</span></div>
 </div>
 
 <!-- ADMIN OVERLAY (accesso via bottone 'Parametri db' nelle impostazioni) -->
@@ -1008,6 +1008,10 @@ const STORE_KEY='cantina_vini_v1';   /* mantenuto per compatibilità migrazione 
 const MOVE_KEY='cantina_movimenti_v1';
 const THEME_KEY='cantina_tema_v1';
 let wines=[],movements=[],currentPhotoB64=null,editingId=null,editingMoveId=null;
+/* Tombstone locali: {id, deletedAt} — tracciano le eliminazioni per farle
+   propagare correttamente durante il merge di sincronizzazione (v8.0) */
+const TOMB_WINES_IDB='cantina_tomb_wines_v1', TOMB_MOVES_IDB='cantina_tomb_moves_v1';
+let _tombWines=[], _tombMoves=[];
 let moveFilter='all',currentMoveTipo='carico',currentFormato='Bottiglia',toastTimer=null;
 let currentAssaggiato=false;
 let _showAssaggiati=false;
@@ -1124,7 +1128,39 @@ async function dbLoad(){
   await migrateFromLocalStorage();
   wines     = await dbGetAll('wines');
   movements = await dbGetAll('movements');
+  _tombWines = (await dbSetting(TOMB_WINES_IDB)) || [];
+  _tombMoves = (await dbSetting(TOMB_MOVES_IDB)) || [];
+  await migrateModifiedStamps();
   await loadTerritorio();
+}
+
+/* ── Migrazione one-shot: assegna _modified ai record creati prima della v8.0
+   (necessario per il merge per-record introdotto nel sistema di sync) ── */
+async function migrateModifiedStamps(){
+  let touched=false;
+  const now=Date.now();
+  wines.forEach(w=>{ if(!w._modified){ w._modified=now; touched=true; } });
+  movements.forEach(m=>{ if(!m._modified){ m._modified=now; touched=true; } });
+  if(touched){
+    await dbPutAll('wines', wines).catch(e=>console.error('[Cantina] migrazione _modified wines:',e));
+    await dbPutAll('movements', movements).catch(e=>console.error('[Cantina] migrazione _modified movements:',e));
+  }
+}
+
+/* ── Segna un record come eliminato (tombstone) cosi la cancellazione
+   si propaga agli altri dispositivi invece di essere "resuscitata" dal merge ── */
+async function markDeleted(store,id){
+  const now=Date.now();
+  if(store==='wines'){
+    _tombWines=_tombWines.filter(t=>t.id!==id);
+    _tombWines.push({id,deletedAt:now});
+    await dbSetting(TOMB_WINES_IDB,_tombWines);
+  } else {
+    _tombMoves=_tombMoves.filter(t=>t.id!==id);
+    _tombMoves.push({id,deletedAt:now});
+    await dbSetting(TOMB_MOVES_IDB,_tombMoves);
+  }
+  cloudPush(store);
 }
 
 /* ── Salvataggio (sostituisce le vecchie save() sincrone) ── */
@@ -1333,11 +1369,11 @@ function saveWine(){
   if(editingId){
     const oldW=wines.find(w=>w.id===editingId);
     const oldQty=oldW?.quantita||0;
-    wines=wines.map(w=>w.id===editingId?{...w,...fields}:w);
+    wines=wines.map(w=>w.id===editingId?{...w,...fields,_modified:Date.now()}:w);
     if(!assaggiato&&qty!==oldQty){const d=qty-oldQty;logMovement(editingId,fields.nome,fields.cantina,d>0?'carico':'scarico',Math.abs(d),fields.date,'','','Rettifica manuale');}
     save();showToast('Modifiche salvate');showDetail(editingId,true);
   }else{
-    const id=genId();wines.unshift({id,...fields});
+    const id=genId();wines.unshift({id,...fields,_modified:Date.now()});
     if(!assaggiato&&qty>0)logMovement(id,fields.nome,fields.cantina,'carico',qty,fields.date,fields.acquistato,fields.prezzo,'Carico iniziale');
     save();showToast(assaggiato?'Vino assaggiato aggiunto':'Vino aggiunto');showList();
   }
@@ -1737,7 +1773,7 @@ function changeQty(id,delta){
   const w=wines.find(x=>x.id===id);if(!w)return;
   if(w.assaggiato){showToast('Vino assaggiato: nessun movimento disponibile',true);return;}
   const newQty=Math.max(0,(parseInt(w.quantita)||0)+delta);
-  w.quantita=newQty;save();
+  w.quantita=newQty;w._modified=Date.now();save();
   const el=document.getElementById('dqty-'+id);
   if(el){el.textContent=newQty;el.className='qty-val'+(newQty===0?' zero':'');}
   logMovement(id,w.nome,w.cantina,delta>0?'carico':'scarico',Math.abs(delta),new Date().toISOString().split('T')[0],'','',delta>0?'Carico manuale':'Scarico manuale');
@@ -1754,7 +1790,7 @@ function quickScarica(event,id){
   showModal('Scarica 1 Bottiglia','<b style="color:var(--text)">'+esc(w.nome)+'</b><br>'+esc(w.cantina)+'<br>Disponibili: '+qty+' &rarr; '+(qty-1)+'<br><br><label style="font-size:11px;color:var(--text-dim);text-transform:uppercase">Note (opzionale)</label><br><input id="'+nid+'" class="field-input" type="text" placeholder="Occasione..." style="margin-top:6px;width:100%">',[
     {label:'Conferma Scarico',cls:'primary',action:()=>{
       const note=document.getElementById(nid)?.value?.trim()||'';
-      w.quantita=qty-1;save();
+      w.quantita=qty-1;w._modified=Date.now();save();
       logMovement(id,w.nome,w.cantina,'scarico',1,new Date().toISOString().split('T')[0],'','',note||'Scarico rapido');
       closeModal();renderList();showToast('Bottiglia scaricata');
     }},
@@ -1877,7 +1913,7 @@ function saveMove(){
   const selEl=document.getElementById('m-wine');
   const opt=selEl.options[selEl.selectedIndex];
   const qty=parseInt(document.getElementById('m-qty').value)||1;
-  const data={id:editingMoveId||genId(),wineId:selEl.value,wineNome:opt?.dataset.name||'',wineCantina:opt?.dataset.cantina||'',tipo:currentMoveTipo,data:document.getElementById('m-date').value,quantita:qty,negozio:currentMoveTipo==='carico'?document.getElementById('m-negozio').value.trim():'',prezzo:currentMoveTipo==='carico'?document.getElementById('m-prezzo').value.trim():'',note:document.getElementById('m-note').value.trim()};
+  const data={id:editingMoveId||genId(),wineId:selEl.value,wineNome:opt?.dataset.name||'',wineCantina:opt?.dataset.cantina||'',tipo:currentMoveTipo,data:document.getElementById('m-date').value,quantita:qty,negozio:currentMoveTipo==='carico'?document.getElementById('m-negozio').value.trim():'',prezzo:currentMoveTipo==='carico'?document.getElementById('m-prezzo').value.trim():'',note:document.getElementById('m-note').value.trim(),_modified:Date.now()};
   /* ── Update wine balance ── */
   const wine=wines.find(w=>w.id===data.wineId);
   if(wine){
@@ -1888,6 +1924,7 @@ function saveMove(){
     }
     const delta=data.tipo==='carico'?data.quantita:-data.quantita;
     wine.quantita=Math.max(0,(parseInt(wine.quantita)||0)+delta);
+    wine._modified=Date.now();
     save();
   }
   if(editingMoveId)movements=movements.map(m=>m.id===editingMoveId?data:m);
@@ -1901,9 +1938,10 @@ function deleteMove(){
   const m=movements.find(x=>x.id===editingMoveId);
   if(m){
     const wine=wines.find(w=>w.id===m.wineId);
-    if(wine){const rev=m.tipo==='carico'?-m.quantita:m.quantita;wine.quantita=Math.max(0,(parseInt(wine.quantita)||0)+rev);save();}
+    if(wine){const rev=m.tipo==='carico'?-m.quantita:m.quantita;wine.quantita=Math.max(0,(parseInt(wine.quantita)||0)+rev);wine._modified=Date.now();save();}
   }
   movements=movements.filter(m=>m.id!==editingMoveId);
+  markDeleted('movements',editingMoveId);
   saveMoves();showToast('Movimento eliminato');showMoves();editingMoveId=null;
 }
 
@@ -1912,7 +1950,7 @@ function ricostruisciSaldi(){
   showModal('Ricostruisci Saldi',
     'Questa operazione azzera le quantita di ogni vino e le ricalcola da zero applicando tutti i movimenti in ordine cronologico. Procedere?',
     [{label:'Ricostruisci',cls:'primary',action:()=>{
-      wines.forEach(w=>{w.quantita=0;});
+      wines.forEach(w=>{w.quantita=0;w._modified=Date.now();});
       const sorted=[...movements].sort((a,b)=>(a.data||'').localeCompare(b.data||''));
       sorted.forEach(m=>{
         const wine=wines.find(w=>w.id===m.wineId);
@@ -2185,12 +2223,12 @@ async function importFromFolder(){
             let addedW=0, addedM=0, addedImg=0;
             if(doWines){
               const ids=new Set(wines.map(w=>w.id));
-              const news=importedWines.filter(w=>!ids.has(w.id));
+              const news=importedWines.filter(w=>!ids.has(w.id)).map(w=>({...w,_modified:w._modified||Date.now()}));
               wines=[...news,...wines]; addedW=news.length;
             }
             if(doMoves){
               const mids=new Set(movements.map(m=>m.id));
-              const newm=importedMoves.filter(m=>!mids.has(m.id));
+              const newm=importedMoves.filter(m=>!mids.has(m.id)).map(m=>({...m,_modified:m._modified||Date.now()}));
               movements=[...newm,...movements]; addedM=newm.length;
             }
             if(doImgs){
@@ -2206,8 +2244,8 @@ async function importFromFolder(){
           }},
           {label:'Sostituisci selezione', cls:'secondary', action:()=>{
             let addedImg=0;
-            if(doWines){ wines=importedWines; }
-            if(doMoves){ movements=importedMoves; }
+            if(doWines){ wines=importedWines.map(w=>({...w,_modified:Date.now()})); }
+            if(doMoves){ movements=importedMoves.map(m=>({...m,_modified:Date.now()})); }
             if(doImgs){
               wines.forEach(w=>{ if(imageMap[w.id]){ w.foto=imageMap[w.id]; addedImg++; } });
             }
@@ -2452,7 +2490,7 @@ function deleteRegione(nazione, regione){
 function confirmDelete(id){
   const w=wines.find(x=>x.id===id);if(!w)return;
   showModal('Elimina vino','Eliminare "'+w.nome+'" di '+w.cantina+'?',[
-    {label:'Elimina',cls:'primary',action:()=>{wines=wines.filter(x=>x.id!==id);save();closeModal();showList();showToast('Vino eliminato');}},
+    {label:'Elimina',cls:'primary',action:()=>{wines=wines.filter(x=>x.id!==id);markDeleted('wines',id);save();closeModal();showList();showToast('Vino eliminato');}},
     {label:'Annulla',cls:'secondary',action:closeModal}
   ]);
 }
@@ -2478,11 +2516,11 @@ function importJSON(e){
       if(!imported.length){showToast('File vuoto',true);return;}
       showModal('Importa JSON','Trovati '+imported.length+' vini e '+importedMoves.length+' movimenti.',[
         {label:'Unisci - aggiungi nuovi',cls:'primary',action:()=>{
-          const ids=new Set(wines.map(w=>w.id));const news=imported.filter(w=>!ids.has(w.id));wines=[...news,...wines];
-          const mids=new Set(movements.map(m=>m.id));const newm=importedMoves.filter(m=>!mids.has(m.id));movements=[...newm,...movements];
+          const ids=new Set(wines.map(w=>w.id));const news=imported.filter(w=>!ids.has(w.id)).map(w=>({...w,_modified:w._modified||Date.now()}));wines=[...news,...wines];
+          const mids=new Set(movements.map(m=>m.id));const newm=importedMoves.filter(m=>!mids.has(m.id)).map(m=>({...m,_modified:m._modified||Date.now()}));movements=[...newm,...movements];
           save();saveMoves();renderList();closeModal();showToast('Aggiunti '+news.length+' vini');
         }},
-        {label:'Sostituisci tutto',cls:'secondary',action:()=>{wines=imported;movements=importedMoves;save();saveMoves();renderList();closeModal();showToast('Importati '+wines.length+' vini');}},
+        {label:'Sostituisci tutto',cls:'secondary',action:()=>{wines=imported.map(w=>({...w,_modified:Date.now()}));movements=importedMoves.map(m=>({...m,_modified:Date.now()}));save();saveMoves();renderList();closeModal();showToast('Importati '+wines.length+' vini');}},
         {label:'Annulla',cls:'secondary',action:closeModal}
       ]);
     }catch{showToast('File non valido',true);}
@@ -2532,8 +2570,8 @@ function importCSV(e){
       }
       if(!imported.length){showToast('Nessun vino trovato',true);return;}
       showModal('Importa CSV','Trovati '+imported.length+' vini.',[
-        {label:'Unisci',cls:'primary',action:()=>{const ids=new Set(wines.map(w=>w.id));const news=imported.filter(w=>!ids.has(w.id));wines=[...news,...wines];save();renderList();closeModal();showToast('Aggiunti '+news.length+' vini');}},
-        {label:'Sostituisci',cls:'secondary',action:()=>{wines=imported;save();renderList();closeModal();showToast('Importati '+wines.length+' vini');}},
+        {label:'Unisci',cls:'primary',action:()=>{const ids=new Set(wines.map(w=>w.id));const news=imported.filter(w=>!ids.has(w.id)).map(w=>({...w,_modified:Date.now()}));wines=[...news,...wines];save();renderList();closeModal();showToast('Aggiunti '+news.length+' vini');}},
+        {label:'Sostituisci',cls:'secondary',action:()=>{wines=imported.map(w=>({...w,_modified:Date.now()}));save();renderList();closeModal();showToast('Importati '+wines.length+' vini');}},
         {label:'Annulla',cls:'secondary',action:closeModal}
       ]);
     }catch(err){showToast('Errore CSV',true);console.error(err);}
@@ -3359,8 +3397,6 @@ const SYNC_URL_IDB   = 'cantina_sync_url_v1';
 const SYNC_TOKEN_IDB = 'cantina_sync_token_v1';
 const SYNC_PIN_IDB   = 'cantina_sync_pin_v1';
 const SYNC_ABLY_IDB  = 'cantina_sync_ably_v1';
-const SYNC_TS_WINES  = 'cantina_sync_ts_wines';
-const SYNC_TS_MOVES  = 'cantina_sync_ts_moves';
 
 let _syncKey    = null;
 let _syncUrl    = null;
@@ -3455,43 +3491,113 @@ async function _redisPipe(cmds){
   return await r.json();
 }
 
-/* ── Push locale → Upstash ── */
-async function cloudPushStore(store,data){
+/* ══════════════════════════════════════════════════════════════════
+   MERGE PER-RECORD (v8.0)
+   ──────────────────────────────────────────────────────────────────
+   Prima della v8.0 la sync confrontava UN timestamp per l'intero
+   array vini/movimenti: se il cloud risultava "più recente" nel suo
+   complesso, TUTTO l'array locale veniva sovrascritto — comprese le
+   schede aggiunte offline e mai ancora inviate. Bastava che un altro
+   dispositivo sincronizzasse nel frattempo per perdere quei dati.
+
+   Ora ogni record ha un proprio timestamp (_modified). Il merge:
+   1) unisce per id i record locali e remoti, tenendo per ciascun id
+      quello con _modified più alto (mai una sostituzione in blocco);
+   2) usa dei "tombstone" (id + data cancellazione) per far propagare
+      le eliminazioni, altrimenti un record cancellato su un device
+      ricomparirebbe perché ancora presente (non modificato) su un altro.
+   ══════════════════════════════════════════════════════════════════ */
+function _mergeTombstones(localTomb,remoteTomb){
+  const map=new Map();
+  [...localTomb,...remoteTomb].forEach(t=>{
+    const cur=map.get(t.id);
+    if(!cur||t.deletedAt>cur.deletedAt) map.set(t.id,t);
+  });
+  return Array.from(map.values());
+}
+function _mergeRecords(localArr,remoteArr,mergedTomb){
+  const map=new Map();
+  localArr.forEach(item=>map.set(item.id,item));
+  remoteArr.forEach(r=>{
+    const l=map.get(r.id);
+    if(!l||(r._modified||0)>(l._modified||0)) map.set(r.id,r);
+  });
+  mergedTomb.forEach(t=>{
+    const cur=map.get(t.id);
+    if(cur&&t.deletedAt>=(cur._modified||0)) map.delete(t.id);
+  });
+  return Array.from(map.values()).sort((a,b)=>(b._modified||0)-(a._modified||0));
+}
+
+/* ── Scrive lo stato locale corrente (già riconciliato) su Upstash ── */
+async function cloudPushRaw(store){
   if(!_syncReady()||!navigator.onLine) return false;
-  const payload=store==='wines'?data.map(({foto,...r})=>r):data;
-  const ts=Date.now();
+  const isWines=store==='wines';
+  const dataArr=isWines?wines:movements;
+  const tomb=isWines?_tombWines:_tombMoves;
+  const payload=isWines?dataArr.map(({foto,...r})=>r):dataArr;
   try{
     await _redisPipe([
       ['SET',`cantina:${_syncKey}:${store}`,JSON.stringify(payload)],
-      ['SET',`cantina:${_syncKey}:ts_${store}`,String(ts)]
+      ['SET',`cantina:${_syncKey}:tombstones_${store}`,JSON.stringify(tomb)]
     ]);
-    await dbSetting(store==='wines'?SYNC_TS_WINES:SYNC_TS_MOVES,ts);
     return true;
   }catch(e){ console.warn('[Sync] push:',e); return false; }
 }
 
-/* ── Pull Upstash → locale ── */
+/* ── Legge dati + tombstone da Upstash ── */
 async function cloudPullStore(store){
   if(!_syncReady()||!navigator.onLine) return null;
   try{
     const res=await _redisPipe([
       ['GET',`cantina:${_syncKey}:${store}`],
-      ['GET',`cantina:${_syncKey}:ts_${store}`]
+      ['GET',`cantina:${_syncKey}:tombstones_${store}`]
     ]);
-    const dataStr=res[0]?.result, tsStr=res[1]?.result;
-    return{data:dataStr?JSON.parse(dataStr):[],ts:tsStr?parseInt(tsStr,10):0};
+    const dataStr=res[0]?.result, tombStr=res[1]?.result;
+    return{data:dataStr?JSON.parse(dataStr):[],tomb:tombStr?JSON.parse(tombStr):[]};
   }catch(e){ console.warn('[Sync] pull:',e); return null; }
 }
 
-/* ── Push rapido dopo save locale (debounce 800ms) ── */
-let _pushDebounceT=null;
-async function cloudPush(store){
+/* ── Pull + merge + persistenza locale + push del risultato riconciliato ── */
+async function syncOneStore(store){
+  const isWines=store==='wines';
+  const localArr=isWines?wines:movements;
+  const localTomb=isWines?_tombWines:_tombMoves;
+
+  const remote=await cloudPullStore(store);
+  if(!remote) return{ok:false,changed:false};
+
+  const mergedTomb=_mergeTombstones(localTomb,remote.tomb);
+  let merged=_mergeRecords(localArr,remote.data,mergedTomb);
+
+  if(isWines){
+    /* Le foto non vengono mai inviate al cloud: le ripristiniamo dai dati locali */
+    const pm={}; localArr.forEach(w=>{ if(w.foto) pm[w.id]=w.foto; });
+    merged=merged.map(w=>({...w,foto:w.foto||pm[w.id]||null}));
+  }
+
+  const fingerprint=arr=>arr.map(x=>x.id+':'+(x._modified||0)).sort().join('|');
+  const changed=fingerprint(localArr)!==fingerprint(merged);
+
+  if(isWines){ wines=merged; _tombWines=mergedTomb; }
+  else{ movements=merged; _tombMoves=mergedTomb; }
+
+  await dbPutAll(store,merged);
+  await dbSetting(isWines?TOMB_WINES_IDB:TOMB_MOVES_IDB,mergedTomb);
+
+  const ok=await cloudPushRaw(store);
+  return{ok,changed};
+}
+
+/* ── Push rapido dopo save locale (debounce 800ms, indipendente per store) ── */
+const _pushDebounceT={};
+function cloudPush(store){
   if(!_syncReady()) return;
-  clearTimeout(_pushDebounceT);
-  _pushDebounceT=setTimeout(async()=>{
+  clearTimeout(_pushDebounceT[store]);
+  _pushDebounceT[store]=setTimeout(async()=>{
     if(!navigator.onLine){ _syncStatus='offline'; updateSyncDots(); return; }
     _syncStatus='syncing'; updateSyncDots();
-    const ok=await cloudPushStore(store,store==='wines'?wines:movements);
+    const ok=await cloudPushRaw(store);
     if(ok) ablyPublish(store); /* notifica altri dispositivi — solo su salvataggio utente */
     _syncStatus=ok?'ok':'error';
     if(ok) _lastSyncAt=Date.now();
@@ -3499,7 +3605,7 @@ async function cloudPush(store){
   },800);
 }
 
-/* ── Sincronizzazione completa ── */
+/* ── Sincronizzazione completa: merge per-record di vini e movimenti ── */
 async function syncFull(showFeedback=false){
   if(!_syncReady()){ updateSyncDots(); return; }
   if(_syncBusy) return;
@@ -3507,24 +3613,11 @@ async function syncFull(showFeedback=false){
   _syncBusy=true; _syncStatus='syncing'; updateSyncDots();
   let changed=false,allOk=true;
   try{
-    /* Vini */
-    const localTsW=(await dbSetting(SYNC_TS_WINES))||0;
-    const remoteW=await cloudPullStore('wines');
-    if(!remoteW){ allOk=false; }
-    else if(remoteW.ts>localTsW){
-      const pm={}; wines.forEach(w=>{ if(w.foto) pm[w.id]=w.foto; });
-      wines=remoteW.data.map(w=>({...w,foto:pm[w.id]||null}));
-      await dbPutAll('wines',wines); await dbSetting(SYNC_TS_WINES,remoteW.ts); changed=true;
-    } else if(!await cloudPushStore('wines',wines)) allOk=false;
+    const rW=await syncOneStore('wines');
+    allOk=allOk&&rW.ok; changed=changed||rW.changed;
 
-    /* Movimenti */
-    const localTsM=(await dbSetting(SYNC_TS_MOVES))||0;
-    const remoteM=await cloudPullStore('movements');
-    if(!remoteM){ allOk=false; }
-    else if(remoteM.ts>localTsM){
-      movements=remoteM.data;
-      await dbPutAll('movements',movements); await dbSetting(SYNC_TS_MOVES,remoteM.ts); changed=true;
-    } else if(!await cloudPushStore('movements',movements)) allOk=false;
+    const rM=await syncOneStore('movements');
+    allOk=allOk&&rM.ok; changed=changed||rM.changed;
 
     _syncStatus=allOk?'ok':'error';
     if(allOk) _lastSyncAt=Date.now();

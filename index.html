@@ -312,6 +312,13 @@ textarea.field-input{resize:vertical;min-height:74px}
 .btn-ocr:active{opacity:.75}
 .btn-ocr:disabled{opacity:.45;cursor:not-allowed}
 
+/* ── DUPLICATE WINE BUTTON ── */
+.btn-duplicate{width:100%;padding:11px;background:rgba(139,32,80,.08);border:1px solid rgba(139,32,80,.35);border-radius:11px;color:#8B2050;font-size:13px;font-weight:600;font-family:inherit;cursor:pointer;margin-bottom:14px;display:flex;align-items:center;justify-content:center;gap:8px;transition:opacity .2s}
+.btn-duplicate:active{opacity:.75}
+[data-theme="dark"] .btn-duplicate{background:rgba(198,90,140,.12);border-color:rgba(198,90,140,.45);color:#D97BA6}
+.duplicate-banner{display:none;margin-bottom:14px;background:rgba(139,32,80,.08);border:1px solid rgba(139,32,80,.25);border-radius:9px;padding:10px 12px;font-size:12.5px;color:#8B2050;line-height:1.5}
+[data-theme="dark"] .duplicate-banner{background:rgba(198,90,140,.12);border-color:rgba(198,90,140,.35);color:#D97BA6}
+
 /* ── PHOTO BUTTONS ROW ── */
 .photo-btn-row{display:flex;gap:8px;margin-top:8px}
 .photo-btn-row button,.photo-btn-row label{flex:1;padding:9px 6px;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text-dim);font-family:inherit;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:5px;transition:background .15s;text-align:center}
@@ -482,6 +489,13 @@ textarea.field-input{resize:vertical;min-height:74px}
     <div style="width:70px"></div>
   </div>
   <div class="form-body">
+    <button type="button" class="btn-duplicate" id="btn-duplicate-wine" style="display:none" onclick="duplicateWine()">
+      <svg width="15" height="15" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      Duplica Vino
+    </button>
+    <div class="duplicate-banner" id="duplicate-banner">
+      📋 Stai modificando una <strong>copia duplicata</strong>, non ancora salvata. Modifica i dati (es. posizione) e premi "Salva" per creare il nuovo record, oppure torna indietro per annullare senza salvare nulla.
+    </div>
     <div class="field-group">
       <label class="field-label">Foto Bottiglia</label>
       <div class="photo-drop" id="photo-drop-area" onclick="document.getElementById('photo-input').click()">
@@ -873,7 +887,7 @@ textarea.field-input{resize:vertical;min-height:74px}
     </button>
 
   </div>
-  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label" onclick="adminTap()" style="cursor:pointer;user-select:none">v8.0</span></div>
+  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label" onclick="adminTap()" style="cursor:pointer;user-select:none">v8.1</span></div>
 </div>
 
 <!-- ADMIN OVERLAY (accesso via bottone 'Parametri db' nelle impostazioni) -->
@@ -1007,7 +1021,7 @@ textarea.field-input{resize:vertical;min-height:74px}
 const STORE_KEY='cantina_vini_v1';   /* mantenuto per compatibilità migrazione */
 const MOVE_KEY='cantina_movimenti_v1';
 const THEME_KEY='cantina_tema_v1';
-let wines=[],movements=[],currentPhotoB64=null,editingId=null,editingMoveId=null;
+let wines=[],movements=[],currentPhotoB64=null,editingId=null,editingMoveId=null,duplicateSourceId=null;
 /* Tombstone locali: {id, deletedAt} — tracciano le eliminazioni per farle
    propagare correttamente durante il merge di sincronizzazione (v8.0) */
 const TOMB_WINES_IDB='cantina_tomb_wines_v1', TOMB_MOVES_IDB='cantina_tomb_moves_v1';
@@ -1319,9 +1333,7 @@ function toggleAssaggiatiView(){
   renderList();
 }
 
-function showAdd(wineId=null){
-  editingId=wineId;
-  const w=wineId?wines.find(x=>x.id===wineId):null;
+function fillWineForm(w){
   document.getElementById('f-cantina').value=w?.cantina||'';
   document.getElementById('f-nome').value=w?.nome||'';
   document.getElementById('f-anno').value=w?.anno||'';
@@ -1354,9 +1366,34 @@ function showAdd(wineId=null){
   document.getElementById('ocr-status').classList.remove('show');
   document.getElementById('ocr-result').classList.remove('show');
   document.getElementById('ocr-result').innerHTML='';
+}
+
+function showAdd(wineId=null){
+  editingId=wineId;
+  duplicateSourceId=null;
+  const w=wineId?wines.find(x=>x.id===wineId):null;
+  fillWineForm(w);
+  document.getElementById('duplicate-banner').style.display='none';
+  document.getElementById('btn-duplicate-wine').style.display=w?'flex':'none';
   document.getElementById('form-title').textContent=w?'Modifica Vino':'Nuovo Vino';
   document.getElementById('btn-save').textContent=w?'Salva Modifiche':'Aggiungi all\'Archivio';
   showView('add');
+}
+
+function duplicateWine(){
+  if(!editingId)return;
+  const src=wines.find(x=>x.id===editingId);
+  if(!src)return;
+  duplicateSourceId=editingId;
+  editingId=null;
+  const dup={...src,quantita:src.assaggiato===true?0:1};
+  fillWineForm(dup);
+  document.getElementById('btn-duplicate-wine').style.display='none';
+  document.getElementById('duplicate-banner').style.display='block';
+  document.getElementById('form-title').textContent='Vino Duplicato (copia)';
+  document.getElementById('btn-save').textContent='Salva Vino Duplicato';
+  showToast('Record duplicato: modifica i dati e salva');
+  document.querySelector('#view-add .form-body')?.scrollTo?.(0,0);
 }
 
 function saveWine(){
@@ -1378,6 +1415,7 @@ function saveWine(){
     save();showToast(assaggiato?'Vino assaggiato aggiunto':'Vino aggiunto');showList();
   }
   editingId=null;
+  duplicateSourceId=null;
 }
 
 function fmtDate(d){if(!d)return '';const[y,m,g]=d.split('-');return g+'/'+m+'/'+y;}
@@ -3323,8 +3361,10 @@ function goBack(){
       else{showView('list');renderList();}
       break;
     case 'add':
-      /* Se stavamo modificando un vino torna al dettaglio, altrimenti alla lista */
+      /* Se stavamo modificando un vino torna al dettaglio, se stavamo duplicando
+         torna al dettaglio dell'originale senza salvare la copia, altrimenti alla lista */
       if(editingId){showDetail(editingId,true);}
+      else if(duplicateSourceId){const _dsid=duplicateSourceId;duplicateSourceId=null;showDetail(_dsid,true);}
       else{showView('list');renderList();}
       break;
     case 'position':

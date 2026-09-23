@@ -36,7 +36,7 @@
   --cal-filter:invert(.5);
 }
 html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Lora',Georgia,serif;overflow:hidden;transition:background .3s,color .3s}
-body{display:flex;flex-direction:column;max-width:500px;margin:0 auto;height:100dvh}
+body{display:flex;flex-direction:column;max-width:500px;margin:0 auto;height:100vh;height:100dvh}
 .view{display:none;flex-direction:column;flex:1;overflow:hidden}
 .view.active{display:flex}
 .header{background:var(--header-bg);border-bottom:1px solid var(--border);padding:13px 16px 0;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;flex-shrink:0}
@@ -72,8 +72,8 @@ body{display:flex;flex-direction:column;max-width:500px;margin:0 auto;height:100
 .card-scarica:active{opacity:.75}
 .card-pos{font-size:10px;color:var(--text-faint);display:flex;align-items:center;gap:4px;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .card-pos svg{flex-shrink:0}
-.toolbar{display:flex;gap:5px;padding:0 13px max(13px,env(safe-area-inset-bottom)) 13px;padding-right:72px;flex-shrink:0}
-.btn-tool{flex:1;padding:8px 4px;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text-dim);font-family:inherit;font-size:10.5px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;transition:background .15s}
+.toolbar{display:flex;gap:5px;padding:0 13px max(22px,calc(16px + env(safe-area-inset-bottom))) 13px;padding-right:72px;flex-shrink:0;position:relative;z-index:10;background:var(--bg)}
+.btn-tool{flex:1;padding:12px 4px;background:var(--surface);border:1px solid var(--border);border-radius:10px;color:var(--text-dim);font-family:inherit;font-size:10.5px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:4px;transition:background .15s}
 .btn-tool:active,.btn-tool.active{background:var(--surface2)}
 .btn-tool.active{border-color:var(--gold);color:var(--gold)}
 .fab{position:fixed;bottom:max(22px,calc(16px + env(safe-area-inset-bottom)));right:calc(50% - 228px);width:54px;height:54px;border-radius:50%;background:linear-gradient(135deg,var(--red),var(--red2));border:none;color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:var(--shadow-fab);cursor:pointer;z-index:40;transition:transform .15s}
@@ -427,7 +427,7 @@ textarea.field-input{resize:vertical;min-height:74px}
 <div id="view-list" class="view active">
   <div class="header">
     <div>
-      <div class="header-title">La Mia Cantina<span class="header-ver" id="header-version-label">v. 8.4</span></div>
+      <div class="header-title">La Mia Cantina<span class="header-ver" id="header-version-label">v. 8.5</span></div>
       <div id="header-sub" class="header-sub">0 vini</div>
       <div id="header-assaggiati-label" style="display:none;font-size:11px;font-weight:700;color:#8B2050;letter-spacing:.8px;margin-top:1px">🥂 Assaggiati / Wishlist</div>
     </div>
@@ -888,7 +888,7 @@ textarea.field-input{resize:vertical;min-height:74px}
     </button>
 
   </div>
-  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label" onclick="adminTap()" style="cursor:pointer;user-select:none">v8.4</span></div>
+  <div class="drawer-version"><span>La Mia Cantina</span><span id="app-version-label" onclick="adminTap()" style="cursor:pointer;user-select:none">v8.5</span></div>
 </div>
 
 <!-- ADMIN OVERLAY (accesso via bottone 'Parametri db' nelle impostazioni) -->
